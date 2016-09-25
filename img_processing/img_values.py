@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
+from PIL import Image
 
 def unitise(arr):
     out_arr = (arr - np.mean(arr))/np.std(arr)
@@ -46,6 +47,14 @@ def pad_img(img,IMG_HEIGHT,IMG_WIDTH,IN_HEIGHT,IN_WIDTH):
                  mode='constant',constant_values=0)
     return img
 
+def rescale_and_save(bit_depth,img,filename):
+        temp_img = img.copy()
+        rescaled = (bit_depth / temp_img.max() * (temp_img - temp_img.min())).astype(np.uint8)
+        im = Image.fromarray(rescaled)
+        im.save(filename + ".tiff")
+        # im.save(filename)
+        return
+
 IMG_HEIGHT = 193
 IMG_WIDTH = 192
 num_labels = 2
@@ -62,7 +71,7 @@ fig = plt.figure()
 
 
 targets = 5
-thresholds = 5
+max_thresh = 5
 
 # for n in range(filedata['filename'].shape[0]):
 for n in range(targets):
@@ -75,16 +84,21 @@ for n in range(targets):
     img = unitise(img)
     oneD = img.reshape(IMG_HEIGHT * IMG_WIDTH)
     
-    for i in range(1, thresholds + 1):
+    for i in range(1, max_thresh + 1):
         title_text = fname
         
         temp_img = clamp(oneD,i).reshape(IMG_HEIGHT,IMG_WIDTH)
-        plt.subplot(targets,thresholds,n*targets + i)
-        imgplot = plt.imshow(temp_img,cmap='gray',interpolation='none')
+        plt.subplot(targets,max_thresh,n*targets + i)
+        imgplot = plt.imshow(temp_img,interpolation='none')
     
         title_text += " clamped below " + str(i)
         plt.title(title_text)
-        plt.show()
+        
+        if(i == max_thresh or i == 3):
+           rescale_and_save(255.0, temp_img, "thresholds/" + fname[:-4] +str(i) ) 
+            
+        
+plt.show()
 
 
 plt.suptitle('Target chips with values below a certain threshold set to zero')

@@ -50,7 +50,7 @@ The MSTAR dataset was suggested for this study by A. Mishra. It provides a gener
 \section{Classification}
 
 
-\subsection{Nearest-Neighbour Classification}
+\subsection{Nearest-Neighbour Classification}\label{lit:nn}
 \subsubsection{Description}
 The nearest neighbour classifier operates as follows:
 When given an input, the classifier compares this input to the training data set, and finds the one that is closest to the input. For example, if men and women were to be classified by their heights, a given input would be classified as either male or female based on the data point in the training data with the height closest to that of the input. This can be expanded to multiple features/dimensions by taking the Euclidean distance between the input and each instance in the training data set. For images, this amounts to comparing, pixel by pixel, each pixel value, and finding the L2 distance between them. Note that there is no need to apply the square root to the distance; it is a monotonic operation, so it will not affect the ordering of the values, and will introduce additional computational complexity. The equation for calculating the L2 distance is:
@@ -109,3 +109,7 @@ One of the key issues with back-propagation is its computational complexity. Wit
 
 \subsubsection{Relevance}
 Back-propagation is a popular and successful technique, well-suited to neural networks with only a few layers. With enough time, it can help to optimise much larger networks, and potentially improve classification accuracy by a large margin. It alleviates the concern of trying to find the perfect network from the offset; it allows any network to be tuned to be better than it currently is.
+
+\section{Dimensionality Reduction}
+\subsection{PCA}\label{lit:PCA}
+
