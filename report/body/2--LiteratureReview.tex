@@ -47,6 +47,9 @@ The MSTAR dataset has been referenced in multiple publications, and is a popular
 \subsection{Relevance}
 The MSTAR dataset was suggested for this study by A. Mishra. It provides a generic SAR image chip dataset on which any classification methods can conceivably be run, with minimal setup and hassle. The number of files available is enough to test any classifier sufficiently .
 
+\subsection{Separability Index}\label{lit:SI}
+Thornton's Separability Index (SI) is used as a metric to show how separable the data is into its different classes, i.e. the confidence level with which distinct classes can be identified with no overlap. Perfectly separable data would have an SI of 1, or 100%.
+
 \section{Classification}
 
 
@@ -109,6 +112,10 @@ One of the key issues with back-propagation is its computational complexity. Wit
 
 \subsubsection{Relevance}
 Back-propagation is a popular and successful technique, well-suited to neural networks with only a few layers. With enough time, it can help to optimise much larger networks, and potentially improve classification accuracy by a large margin. It alleviates the concern of trying to find the perfect network from the offset; it allows any network to be tuned to be better than it currently is.
+
+\section{Performance Evaluation}
+\subsection{Cross Validation}\label{lit:loocv}
+
 
 \section{Dimensionality Reduction}
 \subsection{PCA}\label{lit:PCA}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2016.8.12)  25 SEP 2016 22:17
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2016.8.12)  26 SEP 2016 02:20
 entering extended mode
 **./main.tex
 (main.tex
@@ -877,7 +877,7 @@ LaTeX Info: Redefining \nameref on input line 11.
 \openout4 = `main.out'.
 
  (frontmatter/Cover.tex
-<figures/logo.pdf, id=209, 115.1502pt x 116.8365pt>
+<figures/logo.pdf, id=217, 115.1502pt x 116.8365pt>
 File: figures/logo.pdf Graphic file (type pdf)
  <use figures/logo.pdf>
 Package pdftex.def Info: figures/logo.pdf used on input line 6.
@@ -895,15 +895,15 @@ l.19 \newpage
 (frontmatter/Acknowledgments.tex [3]) (frontmatter/Abstract.tex [4]) (main.toc
 [5
 
-])
+] [6])
 \tf@toc=\write5
 \openout5 = `main.toc'.
 
- [6] (main.lof)
+ [7] (main.lof)
 \tf@lof=\write6
 \openout6 = `main.lof'.
 
- [7
+ [8
 
 ] (main.lot)
 \tf@lot=\write7
@@ -917,7 +917,7 @@ l.19 \newpage
 Writing nomenclature file main.nlo
 )
 No file main.nls.
-[8
+[9
 
 ] (body/1--Introduction.tex
 Chapter 1.
@@ -939,36 +939,36 @@ hetic
  []
 
 [3] [4] [5]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 78.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 81.
  ("C:\Program Files\MiKTeX 2.9\tex\latex\base\omscmr.fd"
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 78.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 81.
  [6]
-Underfull \hbox (badness 1708) in paragraph at lines 95--96
+Underfull \hbox (badness 1708) in paragraph at lines 98--99
 \OT1/cmr/m/n/12 an ex-am-ple of a deep neu-ral net-work with a fairly straight-
 for-ward
  []
 
-[7]) (body/3--Methodology.tex [8]
+[7] [8]) (body/3--Methodology.tex [9]
 Chapter 3.
 
 Underfull \hbox (badness 10000) in paragraph at lines 3--4
 
  []
 
-[9
+[10
 
-]) (body/4--Design.tex [10] [11]
+]) (body/4--Design.tex [11] [12]
 Chapter 4.
-<figures/vee_diagram.png, id=385, 731.31935pt x 441.14813pt>
+<figures/vee_diagram.png, id=403, 731.31935pt x 441.14813pt>
 File: figures/vee_diagram.png Graphic file (type png)
 
 <use figures/vee_diagram.png>
 Package pdftex.def Info: figures/vee_diagram.png used on input line 8.
 (pdftex.def)             Requested size: 365.65878pt x 220.57352pt.
- [12
+ [13
 
  <./figures/vee_diagram.png>]
 Underfull \hbox (badness 2452) in paragraph at lines 23--24
@@ -976,25 +976,30 @@ Underfull \hbox (badness 2452) in paragraph at lines 23--24
 lain-ing the
  []
 
-[13] [14] <figures/nearest-neighbour.pdf, id=403, 611.28375pt x 654.445pt>
+[14] [15] <figures/nearest-neighbour.pdf, id=422, 611.28375pt x 654.445pt>
 File: figures/nearest-neighbour.pdf Graphic file (type pdf)
 
 <use figures/nearest-neighbour.pdf>
 Package pdftex.def Info: figures/nearest-neighbour.pdf used on input line 58.
 (pdftex.def)             Requested size: 390.0pt x 417.5352pt.
-) (body/5--Results.tex [15] [16 <./figures/nearest-neighbour.pdf>] [17]
+ [16] [17 <./figures/nearest-neighbour.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 101--102
+
+ []
+
+[18] [19]) (body/5--Results.tex [20]
 Chapter 5.
-) (body/6--Conclusion.tex [18
+) (body/6--Conclusion.tex [21
 
 ]
 Chapter 6.
-) (main.bbl [19
+) (main.bbl [22
 
 ]
 Missing character: There is no â in font cmr12!
 Missing character: There is no € in font cmr12!
 Missing character: There is no “ in font cmr12!
-) (body/7--Appendices.tex [20
+) (body/7--Appendices.tex [23
 
 ]
 Appendix A.
@@ -1004,26 +1009,26 @@ Underfull \hbox (badness 1019) in paragraph at lines 11--12
 ith the
  []
 
-[21
+[24
 
-]) [22]
+]) [25]
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 36.
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 36.
  (main.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 36.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 36.
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: D82D236F3B79EC600DE1C4E8114F546A;3583.
+(rerunfilecheck)             Checksum: 15A7C67E7FEA3E624B8E889465F352B0;3738.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 36.
  ) 
 Here is how much of TeX's memory you used:
- 27576 strings out of 493335
- 652967 string characters out of 3139260
- 832126 words of memory out of 3000000
- 30489 multiletter control sequences out of 15000+200000
+ 27588 strings out of 493335
+ 653094 string characters out of 3139260
+ 832125 words of memory out of 3000000
+ 30493 multiletter control sequences out of 15000+200000
  10836 words of font info for 38 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 64i,12n,96p,912b,609s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 64i,12n,96p,1007b,609s stack positions out of 5000i,500n,10000p,200000b,50000s
  <C:\Users\roans\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\jknappen\ec\dpi600\
 tcrm1200.pk><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12.
 pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:
@@ -1032,9 +1037,9 @@ pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:
 KTeX 2.9/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Program Files/MiKTeX 2.9/f
 onts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/typ
 e1/public/amsfonts/cm/cmti12.pfb>
-Output written on main.pdf (31 pages, 796737 bytes).
+Output written on main.pdf (35 pages, 804180 bytes).
 PDF statistics:
- 501 PDF objects out of 1000 (max. 8388607)
- 108 named destinations out of 1000 (max. 500000)
- 436 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 534 PDF objects out of 1000 (max. 8388607)
+ 116 named destinations out of 1000 (max. 500000)
+ 452 words of extra memory for PDF output out of 10000 (max. 10000000)
 

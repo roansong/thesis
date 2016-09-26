@@ -95,8 +95,33 @@ The software present in this study has been made \href{http://github.com/roanson
 
 \section{Integration and Recomposition}
 \subsection{Software Development and Implementation}
-\subsection{System Testing}
+\subsubsection{Algorithm Testing}
+For each classifier, their effectiveness on the MSTAR dataset must be tested and catalogued, beginning with the Nearest Neighbour implementation. Doing the Nearest Neighbour classification first establishes a benchmark against which further methods can be tested. The na{\"i}ve nature of the Nearest Neighbour classifier means that it is not optimised for any particular dataset. It shows the efficacy of a generic algorithm applied to the MSTAR dataset.
+
+For the effectiveness of any algorithm to be tested, correct and incorrect outputs must be defined. The MSTAR dataset includes target labels in a header section of each file, but since the operations are conducted on files with their header and phase data stripped away it merely adds computational complexity to find the corresponding header for each file and then parse it to extract data about each target. To simplify classification, a variant of a one-hot vector denoting the classes is attached to each target.The vector consists of a series of numbers, equal in length to the number of classes in the dataset. A '1' denotes that the instance is a member of the class corresponding to that entry in the vector, and the rest of the numbers are -1, showing that the instance is not in those classes. A file is created listing all of the filenames to be tested during the run of the algorithm. An example file with ten entries and two classes would look as follows:\\
+
+\begin{center}
+\begin{tabular}{c}
+HB03333.003.tiff 1 -1 \\
+HB03334.003.tiff 1 -1 \\
+HB03335.003.tiff 1 -1 \\
+HB03337.003.tiff 1 -1 \\
+HB03338.003.tiff 1 -1 \\
+HB14931.025.tiff -1 1 \\
+HB14932.025.tiff -1 1 \\
+HB14933.025.tiff -1 1 \\
+HB14934.025.tiff -1 1 \\
+HB14935.025.tiff -1 1 \\
+
+
+\end{tabular}
+\end{center}
+
+\subsubsection{Testing During Development}
+The simplest way to find a classifier's efficacy is to test it on a wide variety of classes and on as many test instances as possible. To provide interim results, during the iterative phase of classifier development, only a subset of the dataset's images are used. This compromises the final accuracy of the classifier (it may perform differently on the full dataset), but bring with it the ability to test and train classifiers more quickly, due to the lower computational overheads. During the development this testing method allows for simple decisions regarding the direction of classifier implementation or optimisation to be made. In process of verifying the classifiers, the full dataset must be used to give an accurate picture of the classifier's performance and real-world implementation. 
+
 \subsection{Subsystem Verification}
+The chosen method for verifying a classifier's efficacy once it is considered to be sufficiently optimised is simple; The classifier is tested on the dataset with a number of test instances; if time allows, leave-one-out cross-correlation (LOOCV) covered in section~\ref{lit:loocv} will be used. This entails removing one instance from the dataset, training the classifier on the remaining points, and using the removed instance as a test case. Once this has been done, the instance is replaced, another is taken, and the process is repeated until every instance in the dataset has been tested. The system's performance is based on the number of correct classifications made during the process, and also gives a good estimate of the Separability Index of the data (section~\ref{lit:SI}. 
 \subsection{System Verification and Deployment}
 \subsection{System Validation}
 \subsection{Operations and Maintenance}
