@@ -29,6 +29,7 @@ def normalise(A):
     return (A - A.mean(axis=0))/(A.std(axis=0))
 
 def softmax(h):
+    h = np.array(h)
     if(len(h.shape) == 2):
         return np.array([np.exp(x)/np.sum(np.exp(x), axis=0) for x in h])
     elif(len(h.shape) == 1):
@@ -63,8 +64,7 @@ elm_X = np.array([[1,7],
 elm_X = normalise(elm_X)
 
 
-
-num_classes = 2
+num_possible_classes = 5
 
 
 # seek to minimize ||Xw - t||^2 (i.e. find least-squares solution)
@@ -74,20 +74,34 @@ num_classes = 2
 # i.e. (1/n)*||Xw - t||^2 + lam*||w||^2
 # big lambda = small w but more innaccurate
 
-num_images = 2
 
-output_size = num_classes
-img_x = img_y = 20
-input_size = 1+img_x*img_y
-X = np.zeros((num_images,img_x*img_y))
-X = np.insert(X,0,1,axis=1)
-hidden_sizes = [10,10]
 
-layers_tuple = [input_size,output_size]
-[layers_tuple.insert(-1,a) for a in hidden_sizes]
-layers_tuple = tuple(layers_tuple)
 
-activation_functions = {'tanh':np.tanh,'sign':np.sign,'none':lambda x:x}
+def pad_img(img,IMG_HEIGHT,IMG_WIDTH,IN_HEIGHT,IN_WIDTH):    
+    vpad = np.abs((IMG_HEIGHT - IN_HEIGHT)/2)
+    if not (np.floor(vpad) ==  vpad):
+        tpad = np.floor(vpad)
+        bpad = (vpad + 1)
+    else:
+        tpad = vpad
+        bpad = vpad    
+    hpad = np.abs((IMG_WIDTH - IN_WIDTH)/2)
+    if not (np.floor(hpad) == hpad):
+        lpad = np.floor(hpad)
+        rpad = (hpad + 1)
+    else:
+        lpad = hpad
+        rpad = hpad        
+    tpad = (int)(tpad)
+    bpad = (int)(bpad)
+    lpad = (int)(lpad)
+    rpad = (int)(rpad)
+    npad = ((tpad,bpad),(lpad,rpad))
+    if(IN_HEIGHT > IMG_HEIGHT and IN_WIDTH > IMG_WIDTH):
+        img = img[lpad: (IN_WIDTH - rpad), tpad: (IN_HEIGHT - bpad)]
+    else:
+        img = np.pad(img, pad_width=npad, mode='constant',constant_values=0)
+    return img
 
 class Node():
     
@@ -115,6 +129,9 @@ class Layer():
         self.nodes = nodes
         self.act_str = activation
         self.activation = activation_functions[activation]
+        
+        
+            
 
     @classmethod
     def fromarr(cls,arr,act='tanh'):
@@ -136,8 +153,13 @@ class Layer():
     def outputs(self):
         return [a.out_val for a in self.nodes]
         
+    def softmax(self):
+        return softmax([a.in_val for a in self.nodes])
+        
     def __str__(self):
         return '-'.join(map(str,self.nodes))
+
+
         
 class Multilayer_Perceptron():
     input_size  = 0
@@ -145,6 +167,7 @@ class Multilayer_Perceptron():
     weights = []
     shape = ()
     layers = []
+
     
     def __init__(self,shape):
         self.input_size  = shape[0]
@@ -152,6 +175,7 @@ class Multilayer_Perceptron():
         self.weights = [np.random.uniform(-1,1,a).transpose() for a in zip(shape[1:],shape)]
         self.shape = shape
         self.init_layers()
+
         
     def init_layers(self):
         input_l = True
@@ -174,7 +198,7 @@ class Multilayer_Perceptron():
         self.layers[0] = Layer.fromarr(input_arr,act='none')
         
     def fprop(self):
-        print("Forward propagating")
+
         
         
         new_layers = [self.layers[0]]
@@ -184,9 +208,9 @@ class Multilayer_Perceptron():
             temp = Layer.fromarr(np.dot(np.array(new_layers[i].outputs()),self.weights[i]) ,act='tanh')
             new_layers.append(temp)
         
-        new_layers.append(Layer.fromarr(np.dot(np.array(new_layers[-2].outputs()),self.weights[-1]),act='sign'))
+        new_layers.append(Layer.fromarr(np.dot(np.array(new_layers[-2].outputs()),self.weights[-1]),act='tanh'))
         self.layers = [Layer.copy(u) for u in new_layers]
-        print("Complete")
+
         
     def __str__(self):
         h_depth = 1
@@ -198,6 +222,26 @@ class Multilayer_Perceptron():
         # out_str += '\n'.join(map(str,self.layers))
         return out_str
 
+
+
+        
+num_classes = 2
+num_images = 60
+
+output_size = num_classes
+img_x = img_y = 20
+input_size = 1+img_x*img_y
+X = np.zeros((num_images,img_x*img_y))
+X = np.insert(X,0,1,axis=1)
+hidden_sizes = [10,10]
+
+layers_tuple = [input_size,output_size]
+[layers_tuple.insert(-1,a) for a in hidden_sizes]
+layers_tuple = tuple(layers_tuple)
+
+activation_functions = {'tanh':np.tanh,'sign':np.sign,'none':lambda x:x,'soft':softmax}
+
+
 main = Multilayer_Perceptron(layers_tuple)
 in_arr = np.ones((input_size))
 main.load_input(in_arr)
@@ -205,16 +249,65 @@ main.fprop()
 
 
 
+# dt = np.dtype([('filename','|S16'),('labels',np.int32,(num_labels,))])
+
+dt = np.dtype([('filename','|S16'),('labels',np.int32,(num_classes,))])
+infile = 'filenames5.txt'
+filedata = np.loadtxt(infile,dtype=dt)
+filenames = [a.decode('UTF-8') for a in filedata['filename']]
+filenames.sort(key=lambda x:x[-7:])
+suffixes = {}
+
+for f in filenames:
+    suffixes[f[-7:]] = suffixes.get(f[-7:], 0) + 1
+
+images=[]
+
+i = 0
+for key in suffixes.keys():
+    target_temp = num_possible_classes*[0]
+    target_temp[i] = 1
+    temp = ([a for a in filenames if a[-7:] == key],target_temp)
+    images.append(temp)
+    i+=1
+
+def get_images(file_list,w,h):
+    infile = 'filenames5.txt'
+    folder = 'tiffs5/'
+    abspath = 'C:/Users/Roan Song/Desktop/thesis/'
+    
+    img_arr = np.zeros((len(file_list),h*w))
+    i = 0
+    for fname in file_list:
+        img = mpimg.imread(abspath + folder + fname)
+        IN_HEIGHT = img.shape[0]
+        IN_WIDTH = img.shape[1]
+        
+        img = pad_img(img,h,w,IN_HEIGHT,IN_WIDTH)
+        oneD = img.reshape(h * w)
+        oneD = normalise(oneD)
+        img_arr[i] = oneD   
+        i+=1 
+    return img_arr
+    
+num = int(num_images/num_classes)
+# selected_imgs = [(images[a][0][:num],[images[a][1] for x in range(num)]) for a in range(num_classes)]
+
+selected_imgs = np.concatenate(np.array([images[a][0][:num] for a in range(num_classes)]))
+
+img_arr = get_images(selected_imgs,img_x,img_y)
+img_arr = np.insert(img_arr,0,1,axis=1)
+
+# 
+# t = []
+# t.append(np.tile(target,(suffixes[key],1)))
+# t = np.concatenate(t)
 
 
-
-
-
-
-
-
-
-
+for img in img_arr:
+    main.load_input(img)
+    main.fprop()
+    print("[%7s %7s] | [%7s %7s]" %(("%.4f" % main.layers[-1].softmax()[0]),("%.4f" % main.layers[-1].softmax()[1]),("%.4f" % main.layers[-1].outputs()[0]),("%.4f" % main.layers[-1].outputs()[0])  ) )
 
 
 
