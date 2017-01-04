@@ -1,0 +1,44 @@
+Number of images: 70
+Number of classes: 5
+Image size: 40x40
+Iterations: 1165
+Layer 1 size: 20
+Layer 2 size: 10
+Neuron bias: 0.1
+Back-propagation depth: 1 layer
+Result: 30/70
+error_min: 92 @ 1000
+error_max: 146 @ 3 
+Learning rate: rand.uniform(0,1)
+
+
+Number of images: 70
+Number of classes: 5
+Image size: 40x40
+Iterations: 1000
+Layer 1 size: 20
+Layer 2 size: 20
+Neuron bias: 0.1
+Back-propagation depth: 1 layer
+Learning rate: rand.uniform(0,1)
+Results: 34/70
+error_min: 78 @ 1000
+error_max: 145 @ 2
+
+
+
+Number of images: 70
+Number of classes: 5
+Image size: 40x40
+Iterations: 3644
+Layer 1 size: 50
+Layer 2 size: 50
+Neuron bias: 0.0
+Back-propagation depth: 2 layers
+Learning rate: rand.uniform(0,0.25)
+Result: 22/70
+Best: 36/70 @ 10
+error_max: 18/70 329.59038 @ 1017
+error_min: 30/70 127.74767 @ 31
+
+

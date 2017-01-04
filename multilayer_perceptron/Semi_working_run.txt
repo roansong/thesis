@@ -1,0 +1,32 @@
+Number of images: 70
+Image size: 40x40
+Iterations: 400
+Back-propagation depth: 1 layer
+Learning rate: 0.75
+Epoch 0: 28/70 correct.
+Epoch 1: 25/70 correct.
+Epoch 2: 25/70 correct.
+Epoch 3: 29/70 correct.
+Epoch 4: 27/70 correct.
+Epoch 5: 28/70 correct.
+Epoch 6: 30/70 correct.
+Epoch 7: 29/70 correct.
+Epoch 8: 29/70 correct.
+Epoch 9: 31/70 correct.
+Epoch 10: 30/70 correct.
+Epoch 11: 31/70 correct.
+Epoch 12: 32/70 correct.
+Epoch 13: 33/70 correct.
+Epoch 14: 33/70 correct.
+Epoch 15: 33/70 correct.
+Epoch 16: 33/70 correct.
+Epoch 17: 33/70 correct.
+Epoch 18: 33/70 correct.
+Epoch 19: 33/70 correct.
+Sum of errors progression:
+[ 115.58483439  114.26342133  106.20283584  102.19154655  113.25486085
+  105.99120257  100.72947748  103.97189284  100.86663268  102.1629565
+  103.0708134   105.42132011  102.39234102   95.84145778   94.05729997
+   94.04622405   94.04230808   94.03980931   94.03788201   94.03628464]
+Done!
+Time elapsed: 2233.8439204031406
