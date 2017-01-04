@@ -3,7 +3,7 @@
 The steps necessary to implement the NN on the MSTAR dataset are as follows:\\
 
 \begin{itemize}
-\item Convert the raw + header MSTAR files into .tiff images
+\item Convert the raw data + header MSTAR files into .tiff images
 \item figure out how to read and display these images in matlab
 \item write a pixel-by-pixel comparison method
 \item test the method by comparing one image to itself and others
@@ -16,7 +16,7 @@ The steps necessary to implement the NN on the MSTAR dataset are as follows:\\
 \paragraph{}
 After testing the Nearest Neighbour algorithm on a set of single-target data, it is necessary to see how well the algorithm performs when other targets are added to the mix. A subset of 10 images of each target is selected, and added to the testing pool.
 
-A system needs to be made that automates the rotation of images and testing, in order to test the Leave-One-Out cross-verification accuracy.
+A system needs to be made that automates the rotation of images and testing, in order to test the Leave-One-Out Cross-Validation accuracy.
 
 After rescaling the images, predictive accuracy dropped to just 6/70. This is because scaling the images without accounting for the effects of their size leads to smaller images having a much smaller cumulative distance. Weighting the distance result by the number of pixels in an image rectified this immediately, bringing the predictive accuracy up to 56/70!
 
@@ -25,7 +25,7 @@ After rescaling the images, predictive accuracy dropped to just 6/70. This is be
 \section{Data Processing}
 The first step is to get to grips with the data - processing the data set in a way that makes sense to use, and allows different classification methods to be implemented easily on it.
 
-The MSTAR dataset contains eight different targets. The dataset is sorted by depression angle, and by 'scene'. All of the targets have data corresponding to a 15\degree ~depression angle. Some targets have additional angles available, but the 15\degree ~set is the one that will be used. 
+The MSTAR dataset contains eight different targets. The dataset is sorted by depression angle, and by 'scene'. All of the targets have data corresponding to a 15\degree~depression angle. Some targets have additional angles available, but the 15\degree~set is the one that will be used. 
 
 For supervised learning, we want to have each target in the dataset labelled with corresponding information, most notably its class. This is often done using a one-hot array (i.e. [1 0 0], [0 1 0] for 1 and 2, respectively) relating to each target. The MSTAR dataset stores the information of each target in a header section of each file. This is inconvenient when reading in image files directly, so I will most likely process the data and create the identifying arrays from the header data. Since I will have defined the format in a way that is convenient for me to use, it will make my life a lot easier.
 

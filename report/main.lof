@@ -2,8 +2,14 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Vee Diagram}}{13}{figure.4.1}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Nearest Neighbour Classification Flow Diagram}}{17}{figure.4.2}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Vee Diagram}}{15}{figure.4.1}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Nearest Neighbour Classification Flow Diagram}}{19}{figure.4.2}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces A Neuron in the Network}}{22}{figure.4.3}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces The Internal Workings of a Neuron}}{22}{figure.4.4}
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Multilayer Perceptron Overview}}{23}{figure.4.5}
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Multilayer Perceptron Input Layer}}{24}{figure.4.6}
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Average Cost Over Time}}{29}{figure.5.1}
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Actual Cost Within an Iteration}}{30}{figure.5.2}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
