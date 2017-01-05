@@ -34,7 +34,8 @@ def softmax(h):
         return np.array([np.exp(x)/np.sum(np.exp(x), axis=0) for x in h])
     elif(len(h.shape) == 1):
         return np.exp(h)/np.sum(np.exp(h),axis=0)
-
+    else:
+        return h
 
 class ELM():
     A = []
@@ -119,10 +120,10 @@ class Node():
     
     activate = np.tanh
     act_str = ""
-    in_val = 0
-    out_val = 0
+    in_val = T.scalar('in_val')
+    out_val = T.scalar('out_val')
     
-    def __init__(self,in_val=0,activation=np.tanh):
+    def __init__(self,in_val=0,activation=T.tanh):
         
         self.in_val = in_val
         self.activate = activation
@@ -133,35 +134,51 @@ class Node():
         return str(self.out_val)
         
 class Layer():
+    inputs = []
+    outputs = []
     nodes = []
-    activation = np.tanh
+    activation = []
     act_str = ""
     
-    def __init__(self,nodes,activation='none'):
-        self.nodes = nodes
+    
+    def __init__(self,node_inputs,activation='none'):
+        self.inputs = node_inputs
         self.act_str = activation
         self.activation = activation_functions[activation]
+        
+        self.outputs = self.activation(self.inputs)
+        if(self.act_str == 'soft'):
+            self.outputs = self.outputs[0]
+        self.nodes = [self.inputs,self.outputs]
+        
 
 
     @classmethod
     def fromarr(cls,arr,act='tanh'):
-        nodes = [Node(in_val=a,activation=activation_functions[act]) for a in arr]
-        return cls(nodes,act)
+        
+        # nodes = [Node(in_val=a,activation=activation_functions[act]) for a in arr]
+        return cls(arr,act)
         
     @classmethod
     def fromsize(cls,size,act='tanh'):
-        nodes = [Node(activation=activation_functions[act]) for a in range(size)]
-        return cls(nodes,act)
+        # nodes = [Node(activation=activation_functions[act]) for a in range(size)]
+        arr = np.array([0 for a in range(size)])
+        return cls(arr,act)
     
     @classmethod
     def copy(cls,a):
         
-        temp = [Node(in_val=i,activation=a.activation) for i in a.outputs()]
+        temp = [Node(in_val=i,activation=a.activation) for i in a.output()]
 
         return cls(temp,activation=a.act_str)
     
-    def outputs(self):
-        return [a.out_val for a in self.nodes]
+    def in_vals(self):
+        return none(self.nodes)
+    
+    def output(self):
+        
+        
+        return self.outputs
         
     def softmax(self):
         return softmax([a.in_val for a in self.nodes])
@@ -177,7 +194,7 @@ class Multilayer_Perceptron():
     weights = []
     shape = ()
     layers = []
-
+    test_layer = []
     
     def __init__(self,shape):
         self.input_size  = shape[0]
@@ -198,31 +215,47 @@ class Multilayer_Perceptron():
                 self.layers.append(Layer.fromsize(i)) 
         self.layers[-1] = Layer.fromsize(self.shape[-1],act='sign')    
         
-    def print_layer(self,layer):
+    def print_layer(self,num):
+        layer = self.layers[num]
         out_str = ""
-        for node in range(self.shape[layer]):
-            out_str += "%.4f | %.4f %s\n" % (self.layers[layer].nodes[node].in_val,self.layers[layer].nodes[node].out_val,self.layers[layer].act_str)
+        for node in range(self.shape[num]):
+            out_str += "%8s | %8s %s\n" % ("%.4f" % (layer.inputs[node]),"%.4f" % layer.outputs[node],layer.act_str)
         print(out_str)
 
     def load_input(self,input_arr):
         self.layers[0] = Layer.fromarr(input_arr,act='none')
         
+
     def fprop(self):
-
-        
-        
         new_layers = [self.layers[0]]
-       
-        for i in range(len(self.layers)-2):
-            
-            temp = Layer.fromarr(np.dot(np.array(new_layers[i].outputs()),self.weights[i]) ,act='tanh')
-            new_layers.append(temp)
+        o = T.dvector('o')
+        w = T.dmatrix('w')
+        act = 'tanh'
         
-        new_layers.append(Layer.fromarr(np.dot(np.array(new_layers[-2].outputs()),self.weights[-1]),act='tanh'))
-        self.layers = [Layer.copy(u) for u in new_layers]
+        l = T.dot(o,w)
+        u = theano.function([o,w],l)
+        
+        temp = u(self.layers[0].outputs,self.weights[0])
+        
+        temp_l = Layer(temp,act)
+        
+        new_layers.append(temp_l)
+        
+        
+        for i in range(1,len(self.layers)-2):
+            temp = u(np.array(temp),self.weights[1])
+            temp_l = Layer(temp,act)
+            new_layers.append(temp_l)
+            
 
-    # def confusion_matrix() 
-    
+        act = 'soft'
+        temp = u(np.array(temp),self.weights[-1])
+        temp_l = Layer(temp,act)
+        new_layers.append(temp_l)
+        
+        
+        self.layers = new_layers
+
         
     def __str__(self):
         h_depth = 1
@@ -251,13 +284,19 @@ layers_tuple = [input_size,output_size]
 [layers_tuple.insert(-1,a) for a in hidden_sizes]
 layers_tuple = tuple(layers_tuple)
 
-activation_functions = {'tanh':np.tanh,'sign':np.sign,'none':lambda x:x,'soft':softmax}
+x = T.dvector('x')
 
 
-main = Multilayer_Perceptron(layers_tuple)
-in_arr = np.ones((input_size))
-main.load_input(in_arr)
-main.fprop()
+tanh = theano.function([x],T.tanh(x))
+sign = theano.function([x],T.sgn(x))
+none = theano.function([x],x)
+soft = theano.function([x],T.nnet.nnet.softmax(x))
+
+activation_functions = {'tanh':tanh,'sign':sign,'none':none,'soft':soft}
+
+
+
+
 
 
 
@@ -314,12 +353,16 @@ def print_outputs(main,img_arr):
     for img in img_arr:
         main.load_input(img)
         main.fprop()
-        print("[%7s %7s] | [%7s %7s]" %(("%.4f" % main.layers[-1].softmax()[0]),("%.4f" % main.layers[-1].softmax()[1]),("%.4f" % main.layers[-1].outputs()[0]),("%.4f" % main.layers[-1].outputs()[1])  ) )
+        print("[%7s %7s] | [%7s %7s]" %(("%.4f" % main.layers[-1].softmax()[0]),("%.4f" % main.layers[-1].softmax()[1]),("%.4f" % main.layers[-1].output()[0]),("%.4f" % main.layers[-1].output()[1])  ) )
 
 
+main = Multilayer_Perceptron(layers_tuple)
+in_arr = np.ones((input_size))
+main.load_input(in_arr)
 
+# main.load_input(img_arr[0])
 
-
+# main.fprop()
 
 
 
