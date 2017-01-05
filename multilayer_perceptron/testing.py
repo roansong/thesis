@@ -137,17 +137,20 @@ class Layer():
     inputs = []
     outputs = []
     nodes = []
-    activation = T.tanh
+    activation = []
     act_str = ""
-    x = T.dvector('x')
-    show = theano.function([x],x)
+    
     
     def __init__(self,node_inputs,activation='none'):
         self.inputs = node_inputs
         self.act_str = activation
         self.activation = activation_functions[activation]
+        
         self.outputs = self.activation(self.inputs)
+        if(self.act_str == 'soft'):
+            self.outputs = self.outputs[0]
         self.nodes = [self.inputs,self.outputs]
+        
 
 
     @classmethod
@@ -216,7 +219,7 @@ class Multilayer_Perceptron():
         layer = self.layers[num]
         out_str = ""
         for node in range(self.shape[num]):
-            out_str += "%.4f | %.4f %s\n" % (layer.in_vals()[node],layer.output()[node],layer.act_str)
+            out_str += "%8s | %8s %s\n" % ("%.4f" % (layer.inputs[node]),"%.4f" % layer.outputs[node],layer.act_str)
         print(out_str)
 
     def load_input(self,input_arr):
@@ -233,23 +236,23 @@ class Multilayer_Perceptron():
         u = theano.function([o,w],l)
         
         temp = u(self.layers[0].outputs,self.weights[0])
-        print(type(temp))
+        
         temp_l = Layer(temp,act)
-        print(type(temp_l.inputs))
+        
         new_layers.append(temp_l)
-        print(temp)
+        
         
         for i in range(1,len(self.layers)-2):
             temp = u(np.array(temp),self.weights[1])
             temp_l = Layer(temp,act)
             new_layers.append(temp_l)
-            print(temp)
+            
 
-        act = 'sign'
+        act = 'soft'
         temp = u(np.array(temp),self.weights[-1])
         temp_l = Layer(temp,act)
         new_layers.append(temp_l)
-        print(temp)
+        
         
         self.layers = new_layers
 
@@ -284,10 +287,10 @@ layers_tuple = tuple(layers_tuple)
 x = T.dvector('x')
 
 
-tanh = T.tanh
-sign = T.sgn
+tanh = theano.function([x],T.tanh(x))
+sign = theano.function([x],T.sgn(x))
 none = theano.function([x],x)
-soft = T.nnet.nnet.softmax
+soft = theano.function([x],T.nnet.nnet.softmax(x))
 
 activation_functions = {'tanh':tanh,'sign':sign,'none':none,'soft':soft}
 
