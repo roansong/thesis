@@ -199,7 +199,7 @@ class Multilayer_Perceptron():
     def __init__(self,shape):
         self.input_size  = shape[0]
         self.output_size = shape[-1]
-        self.weights = [np.random.uniform(-1,1,a).transpose() for a in zip(shape[1:],shape)]
+        self.weights = [theano.shared(np.random.uniform(-1,1,a).transpose()) for a in zip(shape[1:],shape)]
         self.shape = shape
         self.init_layers()
 
@@ -235,7 +235,7 @@ class Multilayer_Perceptron():
         l = T.dot(o,w)
         u = theano.function([o,w],l)
         
-        temp = u(self.layers[0].outputs,self.weights[0])
+        temp = u(self.layers[0].outputs,self.weights[0].get_value())
         
         temp_l = Layer(temp,act)
         
@@ -243,13 +243,13 @@ class Multilayer_Perceptron():
         
         
         for i in range(1,len(self.layers)-2):
-            temp = u(np.array(temp),self.weights[1])
+            temp = u(np.array(temp),self.weights[1].get_value())
             temp_l = Layer(temp,act)
             new_layers.append(temp_l)
             
 
         act = 'soft'
-        temp = u(np.array(temp),self.weights[-1])
+        temp = u(np.array(temp),self.weights[-1].get_value())
         temp_l = Layer(temp,act)
         new_layers.append(temp_l)
         
