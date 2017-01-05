@@ -226,7 +226,7 @@ class Multilayer_Perceptron():
         self.layers[0] = Layer.fromarr(input_arr,act='none')
         
 
-    def fprop(self):
+    def fprop(self,r = False):
         new_layers = [self.layers[0]]
         o = T.dvector('o')
         w = T.dmatrix('w')
@@ -248,7 +248,7 @@ class Multilayer_Perceptron():
             new_layers.append(temp_l)
             
 
-        act = 'soft'
+        act = 'sigm'
         temp = u(np.array(temp),self.weights[-1])
         temp_l = Layer(temp,act)
         new_layers.append(temp_l)
@@ -256,6 +256,8 @@ class Multilayer_Perceptron():
         
         self.layers = new_layers
 
+        if(r):
+            return main.layers[-1].outputs
         
     def __str__(self):
         h_depth = 1
@@ -270,7 +272,7 @@ class Multilayer_Perceptron():
 
 
         
-num_classes = 2
+num_classes = 5
 num_images = 60
 
 output_size = num_classes
@@ -291,11 +293,17 @@ tanh = theano.function([x],T.tanh(x))
 sign = theano.function([x],T.sgn(x))
 none = theano.function([x],x)
 soft = theano.function([x],T.nnet.nnet.softmax(x))
+sigm = theano.function([x],T.nnet.nnet.sigmoid(x))
 
-activation_functions = {'tanh':tanh,'sign':sign,'none':none,'soft':soft}
+activation_functions = {'tanh':tanh,'sign':sign,'none':none,'soft':soft,'sigm':sigm}
 
 
-
+def one_hot(index,size):
+    lst = [0]*size
+    lst[index] = 1
+    return lst
+    
+    
 
 
 
@@ -312,11 +320,16 @@ suffixes = {}
 for f in filenames:
     suffixes[f[-7:]] = suffixes.get(f[-7:], 0) + 1
 
+ind = 0
+for i in suffixes:    
+    suffixes[i] = {"count":suffixes[i],"label":one_hot(ind,num_classes)}
+    ind += 1
+
 images=[]
 
 i = 0
 for key in suffixes.keys():
-    target_temp = num_possible_classes*[0]
+    target_temp = num_classes*[0]
     target_temp[i] = 1
     temp = ([a for a in filenames if a[-7:] == key],target_temp)
     images.append(temp)
@@ -356,10 +369,38 @@ def print_outputs(main,img_arr):
         print("[%7s %7s] | [%7s %7s]" %(("%.4f" % main.layers[-1].softmax()[0]),("%.4f" % main.layers[-1].softmax()[1]),("%.4f" % main.layers[-1].output()[0]),("%.4f" % main.layers[-1].output()[1])  ) )
 
 
+def float_str(arr,precision,brace):
+    out_str = brace[0]+" "
+    out_str += ("%%.%df, " % (precision)) * len(arr)
+    out_str = out_str[:-2] % tuple(arr)
+    out_str += " "+brace[1]
+    return out_str
+
+
+correct = 0
+
+
 main = Multilayer_Perceptron(layers_tuple)
 in_arr = np.ones((input_size))
-main.load_input(in_arr)
 
+
+for n in range(num_images):
+
+    main.load_input(img_arr[n])
+    results = main.fprop(1)
+    
+    img_class = selected_imgs[n][-7:]
+    target = suffixes[img_class]['label']
+    correct_class = np.argmax(suffixes[img_class]['label'])
+    
+    if(results.argmax() == correct_class):
+        correct +=1
+
+    
+    
+
+    print(float_str(softmax(results),2,"[]") + " | " + str(target))
+print(correct)
 # main.load_input(img_arr[0])
 
 # main.fprop()
