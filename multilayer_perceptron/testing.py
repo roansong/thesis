@@ -35,6 +35,33 @@ def softmax(h):
     elif(len(h.shape) == 1):
         return np.exp(h)/np.sum(np.exp(h),axis=0)
 
+
+class ELM():
+    A = []
+    R = []
+    t = []
+    w = []
+    X = []
+    
+    elm_class_one =  np.array([[1,5],[1,6],[1,5.5]])
+    elm_class_two =  np.array([[9,2],[8,2],[7.5,2]])
+    elm_class_one_T= np.tile(np.array([1,0]),(len(elm_class_one),1))
+    elm_class_two_T= np.tile(np.array([0,1]),(len(elm_class_two),1))
+    
+    elm_A = np.concatenate((elm_class_one,elm_class_two),axis=0)
+    elm_A = normalise(elm_A)
+    elm_A = np.insert(elm_A,0,1,axis=1)
+    elm_T = np.concatenate((elm_class_one_T,elm_class_two_T),axis=0)
+    elm_X = np.array([[1,7],[2,8],[2,9],[10,1],[8,2],[9,1]])
+    elm_X = normalise(elm_X)
+    def __init__(self,A,t,X,lam=0.01):
+        self.A = np.insert(normalise(A),0,1,axis=1)
+        self.X = normalise(X)
+        self.t = t
+        self.R =  np.random.uniform(-1,1,(self.A.shape[1],t.shape[1]))
+        self.w = np.dot(pinv(np.tanh(np.dot(self.A,self.R)),lam),t)
+        self.h = np.dot(self.X,self.w)
+
 def ELM(B,T,X,lam=0.001):
     A = np.insert(B,0,1,axis=1)
     R =  np.random.uniform(-1,1,(A.shape[1],T.shape[1]))
@@ -44,24 +71,9 @@ def ELM(B,T,X,lam=0.001):
     h = np.dot(X,w)
     return (X,softmax(h),np.argmax(h,axis=1))
 
-elm_class_one =  np.array([[1,5],[1,6],[1,5.5]])
-elm_class_two =  np.array([[9,2],[8,2],[7.5,2]])
-elm_class_one_T= np.tile(np.array([1,0]),(len(elm_class_one),1))
-elm_class_two_T= np.tile(np.array([0,1]),(len(elm_class_two),1))
 
-elm_A = np.concatenate((elm_class_one,elm_class_two),axis=0)
-elm_A = normalise(elm_A)
-elm_A = np.insert(elm_A,0,1,axis=1)
-elm_T = np.concatenate((elm_class_one_T,elm_class_two_T),axis=0)
 
-elm_X = np.array([[1,7],
-              [2,8],
-              [2,9],
-              [10,1],
-              [8,2],
-              [9,1]
-              ])
-elm_X = normalise(elm_X)
+
 
 
 num_possible_classes = 5
@@ -129,9 +141,7 @@ class Layer():
         self.nodes = nodes
         self.act_str = activation
         self.activation = activation_functions[activation]
-        
-        
-            
+
 
     @classmethod
     def fromarr(cls,arr,act='tanh'):
@@ -211,6 +221,8 @@ class Multilayer_Perceptron():
         new_layers.append(Layer.fromarr(np.dot(np.array(new_layers[-2].outputs()),self.weights[-1]),act='tanh'))
         self.layers = [Layer.copy(u) for u in new_layers]
 
+    # def confusion_matrix() 
+    
         
     def __str__(self):
         h_depth = 1
@@ -298,16 +310,12 @@ selected_imgs = np.concatenate(np.array([images[a][0][:num] for a in range(num_c
 img_arr = get_images(selected_imgs,img_x,img_y)
 img_arr = np.insert(img_arr,0,1,axis=1)
 
-# 
-# t = []
-# t.append(np.tile(target,(suffixes[key],1)))
-# t = np.concatenate(t)
+def print_outputs(main,img_arr):
+    for img in img_arr:
+        main.load_input(img)
+        main.fprop()
+        print("[%7s %7s] | [%7s %7s]" %(("%.4f" % main.layers[-1].softmax()[0]),("%.4f" % main.layers[-1].softmax()[1]),("%.4f" % main.layers[-1].outputs()[0]),("%.4f" % main.layers[-1].outputs()[1])  ) )
 
-
-for img in img_arr:
-    main.load_input(img)
-    main.fprop()
-    print("[%7s %7s] | [%7s %7s]" %(("%.4f" % main.layers[-1].softmax()[0]),("%.4f" % main.layers[-1].softmax()[1]),("%.4f" % main.layers[-1].outputs()[0]),("%.4f" % main.layers[-1].outputs()[0])  ) )
 
 
 
