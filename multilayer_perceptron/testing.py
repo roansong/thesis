@@ -74,7 +74,9 @@ def ELM(B,T,X,lam=0.001):
 
 
 
-
+def grad_desc(cost, theta):
+    
+    return theta - (learning_rate*(1) * T.grad(cost, wrt=theta))
 
 
 num_possible_classes = 5
@@ -141,7 +143,10 @@ class Layer():
     act_str = ""
     
     
-    def __init__(self,node_inputs,activation='none'):
+    
+    def __init__(self,node_inputs,activation='none',bias = 0.0):
+        
+        self.bias = 0.0
         self.inputs = node_inputs
         self.act_str = activation
         self.activation = activation_functions[activation]
@@ -189,20 +194,22 @@ class Layer():
 
         
 class Multilayer_Perceptron():
-    input_size  = 0
-    output_size = 0
-    weights = []
-    shape = ()
-    layers = []
     test_layer = []
+    
     
     def __init__(self,shape):
         self.input_size  = shape[0]
         self.output_size = shape[-1]
-        self.weights = [np.random.uniform(-1,1,a).transpose() for a in zip(shape[1:],shape)]
+        
+        weights =  [theano.shared(value=np.random.uniform(-1,1,a).transpose()) for a in zip(shape[1:],shape)]
+        self.weights = weights
         self.shape = shape
+        
         self.init_layers()
 
+        
+        
+        
         
     def init_layers(self):
         input_l = True
@@ -213,7 +220,7 @@ class Multilayer_Perceptron():
                 input_l = False
             else:
                 self.layers.append(Layer.fromsize(i)) 
-        self.layers[-1] = Layer.fromsize(self.shape[-1],act='sign')    
+  
         
     def print_layer(self,num):
         layer = self.layers[num]
@@ -222,11 +229,13 @@ class Multilayer_Perceptron():
             out_str += "%8s | %8s %s\n" % ("%.4f" % (layer.inputs[node]),"%.4f" % layer.outputs[node],layer.act_str)
         print(out_str)
 
-    def load_input(self,input_arr):
+    def load(self,input_arr,target_arr):
         self.layers[0] = Layer.fromarr(input_arr,act='none')
+        self.inputs = np.array(input_arr)
+        self.target = np.array(target_arr)
         
 
-    def fprop(self,r = False):
+    def fprop(self,r = False,loss=True):
         new_layers = [self.layers[0]]
         o = T.dvector('o')
         w = T.dmatrix('w')
@@ -235,7 +244,7 @@ class Multilayer_Perceptron():
         l = T.dot(o,w)
         u = theano.function([o,w],l)
         
-        temp = u(self.layers[0].outputs,self.weights[0])
+        temp = u(self.layers[0].outputs,self.weights[0].get_value())
         
         temp_l = Layer(temp,act)
         
@@ -243,21 +252,85 @@ class Multilayer_Perceptron():
         
         
         for i in range(1,len(self.layers)-2):
-            temp = u(np.array(temp),self.weights[1])
+            temp = u(np.array(temp),self.weights[1].get_value())
             temp_l = Layer(temp,act)
             new_layers.append(temp_l)
             
 
         act = 'sigm'
-        temp = u(np.array(temp),self.weights[-1])
+        temp = u(np.array(temp),self.weights[-1].get_value())
         temp_l = Layer(temp,act)
         new_layers.append(temp_l)
         
         
         self.layers = new_layers
 
+        if(loss):
+            self.x = np.array(self.layers[-1].outputs)
+            x = self.x
+            y = self.target
+            self.cross_entropy_loss = T.nnet.nnet.categorical_crossentropy(x,y)
+            self.L1 = abs(x).sum()
+            self.L2 = (x**2).sum()
+            self.cst = self.L1 + self.L2 + self.cross_entropy_loss
+            
+            
+
         if(r):
             return main.layers[-1].outputs
+    
+    def fprop2(self,r = False,loss=True):
+        new_layers = [self.layers[0]]
+        o = T.dvector('o')
+        w = T.dmatrix('w')
+        act = 'tanh'
+        
+        
+       
+        
+        temp = T.dot(self.layers[0].outputs,self.weights[0].get_value())
+        
+        temp_l = Layer(temp,act)
+        
+        new_layers.append(temp_l)
+        
+        
+        for i in range(1,len(self.layers)-2):
+            temp = T.dot(np.array(temp),self.weights[1].get_value())
+            temp_l = Layer(temp,act)
+            new_layers.append(temp_l)
+            
+
+        act = 'tanh'
+        temp = T.dot(np.array(temp),self.weights[-1].get_value())
+        temp_l = Layer(temp,act)
+        new_layers.append(temp_l)
+        
+        
+        self.layers = new_layers
+
+        if(loss):
+            self.x = np.array(self.layers[-1].outputs)
+            x = self.x
+            y = self.target
+            self.cross_entropy_loss = T.nnet.nnet.categorical_crossentropy(x,y)
+            self.L1 = abs(x).sum()
+            self.L2 = (x**2).sum()
+            self.cst = self.L1 + self.L2 + self.cross_entropy_loss
+            
+            
+
+        if(r):
+            return main.layers[-1].outputs
+    
+    
+    def log_regression(self):
+        
+        
+        
+        return T.nnet.softmax(T.dot(self.layers[-2].inputs, self.weights[-1]))
+    def cost(self):
+        return self.cst
         
     def __str__(self):
         h_depth = 1
@@ -287,7 +360,7 @@ layers_tuple = [input_size,output_size]
 layers_tuple = tuple(layers_tuple)
 
 x = T.dvector('x')
-
+y = T.dvector('y')
 
 tanh = theano.function([x],T.tanh(x))
 sign = theano.function([x],T.sgn(x))
@@ -380,18 +453,24 @@ def float_str(arr,precision,brace):
 correct = 0
 
 
+loss_results = []
+
 main = Multilayer_Perceptron(layers_tuple)
 in_arr = np.ones((input_size))
 
 
 for n in range(num_images):
 
-    main.load_input(img_arr[n])
-    results = main.fprop(1)
-    
     img_class = selected_imgs[n][-7:]
     target = suffixes[img_class]['label']
+    
+    main.load(img_arr[n],target)
+    results = main.fprop2(1)
+    
+    
     correct_class = np.argmax(suffixes[img_class]['label'])
+    
+    loss_results.append((main.cost(),target))
     
     if(results.argmax() == correct_class):
         correct +=1
@@ -401,6 +480,11 @@ for n in range(num_images):
 
     print(float_str(softmax(results),2,"[]") + " | " + str(target))
 print(correct)
+
+# update_weights = theano.function([],updates=[
+#                                 (main.weights[-1],main.weights[-1]*0.01 - T.grad(cst,wrt=main.weights[-1])
+# ])
+
 # main.load_input(img_arr[0])
 
 # main.fprop()
