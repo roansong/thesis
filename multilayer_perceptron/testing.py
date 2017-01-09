@@ -118,28 +118,12 @@ def pad_img(img,IMG_HEIGHT,IMG_WIDTH,IN_HEIGHT,IN_WIDTH):
         img = np.pad(img, pad_width=npad, mode='constant',constant_values=0)
     return img
 
-class Node():
-    
-    activate = np.tanh
-    act_str = ""
-    in_val = T.scalar('in_val')
-    out_val = T.scalar('out_val')
-    
-    def __init__(self,in_val=0,activation=T.tanh):
-        
-        self.in_val = in_val
-        self.activate = activation
-        
-        self.out_val = self.activate(in_val)
 
-    def __str__(self):
-        return str(self.out_val)
         
 class Layer():
     inputs = []
     outputs = []
     nodes = []
-    activation = []
     act_str = ""
     
     
@@ -150,24 +134,22 @@ class Layer():
         self.inputs = node_inputs
         self.act_str = activation
         self.activation = activation_functions[activation]
+        if(activation == 'none'):
+            self.outputs = self.inputs
+        else:
+            self.outputs = self.activation(self.inputs)
         
-        self.outputs = self.activation(self.inputs)
-        if(self.act_str == 'soft'):
-            self.outputs = self.outputs[0]
         self.nodes = [self.inputs,self.outputs]
         
 
 
     @classmethod
     def fromarr(cls,arr,act='tanh'):
-        
-        # nodes = [Node(in_val=a,activation=activation_functions[act]) for a in arr]
         return cls(arr,act)
         
     @classmethod
     def fromsize(cls,size,act='tanh'):
-        # nodes = [Node(activation=activation_functions[act]) for a in range(size)]
-        arr = np.array([0 for a in range(size)])
+        arr = T.dvector('arr')
         return cls(arr,act)
     
     @classmethod
@@ -206,6 +188,7 @@ class Multilayer_Perceptron():
         self.shape = shape
         
         self.init_layers()
+        self.inputs = theano.shared(np.zeros((self.shape[0])))
 
         
         
@@ -214,9 +197,10 @@ class Multilayer_Perceptron():
     def init_layers(self):
         input_l = True
         self.layers = []
+        
         for i in self.shape:
             if(input_l):
-                self.layers.append(Layer.fromsize(i,act='none')) 
+                self.layers.append(Layer.fromsize(i,act='tanh')) 
                 input_l = False
             else:
                 self.layers.append(Layer.fromsize(i)) 
@@ -231,7 +215,7 @@ class Multilayer_Perceptron():
 
     def load(self,input_arr,target_arr):
         self.layers[0] = Layer.fromarr(input_arr,act='none')
-        self.inputs = np.array(input_arr)
+        self.inputs.set_value(np.array(input_arr))
         self.target = np.array(target_arr)
         
 
@@ -288,7 +272,7 @@ class Multilayer_Perceptron():
         
        
         
-        temp = T.dot(self.layers[0].outputs,self.weights[0].get_value())
+        temp = np.dot(self.inputs.get_value(),self.weights[0].get_value())
         
         temp_l = Layer(temp,act)
         
@@ -296,13 +280,13 @@ class Multilayer_Perceptron():
         
         
         for i in range(1,len(self.layers)-2):
-            temp = T.dot(np.array(temp),self.weights[1].get_value())
+            temp = np.dot(np.array(temp),self.weights[1].get_value())
             temp_l = Layer(temp,act)
             new_layers.append(temp_l)
             
 
         act = 'tanh'
-        temp = T.dot(np.array(temp),self.weights[-1].get_value())
+        temp = np.dot(np.array(temp),self.weights[-1].get_value())
         temp_l = Layer(temp,act)
         new_layers.append(temp_l)
         
@@ -310,9 +294,10 @@ class Multilayer_Perceptron():
         self.layers = new_layers
 
         if(loss):
-            self.x = np.array(self.layers[-1].outputs)
+            self.x = self.layers[-1].outputs
             x = self.x
             y = self.target
+            self.y = y
             self.cross_entropy_loss = T.nnet.nnet.categorical_crossentropy(x,y)
             self.L1 = abs(x).sum()
             self.L2 = (x**2).sum()
@@ -369,7 +354,7 @@ soft = theano.function([x],T.nnet.nnet.softmax(x))
 sigm = theano.function([x],T.nnet.nnet.sigmoid(x))
 
 activation_functions = {'tanh':tanh,'sign':sign,'none':none,'soft':soft,'sigm':sigm}
-
+activation_functions = {'tanh':T.tanh,'sign':T.sgn,'none':none,'soft':T.nnet.nnet.softmax,'sigm':T.nnet.nnet.sigmoid}
 
 def one_hot(index,size):
     lst = [0]*size
@@ -478,7 +463,7 @@ for n in range(num_images):
     
     
 
-    print(float_str(softmax(results),2,"[]") + " | " + str(target))
+    # print(float_str(softmax(results),2,"[]") + " | " + str(target))
 print(correct)
 
 # update_weights = theano.function([],updates=[
