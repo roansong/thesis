@@ -72,6 +72,10 @@ def ELM(B,T,X,lam=0.001):
     h = np.dot(X,w)
     return (X,softmax(h),np.argmax(h,axis=1))
 
+def one_hot(index,size):
+    lst = [0]*size
+    lst[index] = 1
+    return lst
 
 
 def grad_desc(cost, theta):
@@ -119,286 +123,71 @@ def pad_img(img,IMG_HEIGHT,IMG_WIDTH,IN_HEIGHT,IN_WIDTH):
     return img
 
 
-        
-class Layer():
-    inputs = []
-    outputs = []
-    nodes = []
-    act_str = ""
-    
-    
-    
-    def __init__(self,node_inputs,activation='none',bias = 0.0):
-        
-        self.bias = 0.0
-        self.inputs = node_inputs
-        self.act_str = activation
-        self.activation = activation_functions[activation]
-        if(activation == 'none'):
-            self.outputs = self.inputs
-        else:
-            self.outputs = self.activation(self.inputs)
-        
-        self.nodes = [self.inputs,self.outputs]
-        
-
-
-    @classmethod
-    def fromarr(cls,arr,act='tanh'):
-        return cls(arr,act)
-        
-    @classmethod
-    def fromsize(cls,size,act='tanh'):
-        arr = T.dvector('arr')
-        return cls(arr,act)
-    
-    @classmethod
-    def copy(cls,a):
-        
-        temp = [Node(in_val=i,activation=a.activation) for i in a.output()]
-
-        return cls(temp,activation=a.act_str)
-    
-    def in_vals(self):
-        return none(self.nodes)
-    
-    def output(self):
-        
-        
-        return self.outputs
-        
-    def softmax(self):
-        return softmax([a.in_val for a in self.nodes])
-        
-    def __str__(self):
-        return '-'.join(map(str,self.nodes))
-
-
-        
-class Multilayer_Perceptron():
-    test_layer = []
-    
-    
-    def __init__(self,shape):
-        self.input_size  = shape[0]
-        self.output_size = shape[-1]
-        
-        weights =  [theano.shared(value=np.random.uniform(-1,1,a).transpose()) for a in zip(shape[1:],shape)]
+class HiddenLayer():
+    def __init__(self,input,n_inputs,n_outputs,weights=None,bias=None,activation=T.tanh):
+        self.input = input
+        if(not weights):
+            weights = theano.shared(value=np.random.uniform(-1,1,(n_inputs,n_outputs)),name = 'weights')
+        if(not bias):
+            bias = theano.shared(value=np.zeros((n_outputs,)),name='bias')
+            
         self.weights = weights
-        self.shape = shape
+        self.bias = bias
         
-        self.init_layers()
-        self.inputs = theano.shared(np.zeros((self.shape[0])))
-
-        
-        
-        
-        
-    def init_layers(self):
-        input_l = True
-        self.layers = []
-        
-        for i in self.shape:
-            if(input_l):
-                self.layers.append(Layer.fromsize(i,act='tanh')) 
-                input_l = False
-            else:
-                self.layers.append(Layer.fromsize(i)) 
-  
-        
-    def print_layer(self,num):
-        layer = self.layers[num]
-        out_str = ""
-        for node in range(self.shape[num]):
-            out_str += "%8s | %8s %s\n" % ("%.4f" % (layer.inputs[node]),"%.4f" % layer.outputs[node],layer.act_str)
-        print(out_str)
-
-    def load(self,input_arr,target_arr):
-        self.layers[0] = Layer.fromarr(input_arr,act='none')
-        self.inputs.set_value(np.array(input_arr))
-        self.target = np.array(target_arr)
-        
-
-    def fprop(self,r = False,loss=True):
-        new_layers = [self.layers[0]]
-        o = T.dvector('o')
-        w = T.dmatrix('w')
-        act = 'tanh'
-        
-        l = T.dot(o,w)
-        u = theano.function([o,w],l)
-        
-        temp = u(self.layers[0].outputs,self.weights[0].get_value())
-        
-        temp_l = Layer(temp,act)
-        
-        new_layers.append(temp_l)
-        
-        
-        for i in range(1,len(self.layers)-2):
-            temp = u(np.array(temp),self.weights[1].get_value())
-            temp_l = Layer(temp,act)
-            new_layers.append(temp_l)
-            
-
-        act = 'sigm'
-        temp = u(np.array(temp),self.weights[-1].get_value())
-        temp_l = Layer(temp,act)
-        new_layers.append(temp_l)
-        
-        
-        self.layers = new_layers
-
-        if(loss):
-            self.x = np.array(self.layers[-1].outputs)
-            x = self.x
-            y = self.target
-            self.cross_entropy_loss = T.nnet.nnet.categorical_crossentropy(x,y)
-            self.L1 = abs(x).sum()
-            self.L2 = (x**2).sum()
-            self.cst = self.L1 + self.L2 + self.cross_entropy_loss
-            
-            
-
-        if(r):
-            return main.layers[-1].outputs
+        output = T.dot(input,self.weights) + self.bias
+        self.output = output if activation == None else activation(output) 
+        self.parameters = [self.weights,self.bias]
+ 
+class OutputLayer():
+    def __init__(self,input,n_inputs,n_outputs):
+        self.weights = theano.shared(value=np.zeros((n_inputs,n_outputs)),name='weights')
+        self.bias = theano.shared(value=np.zeros((n_outputs,)),name='bias')
+        self.output = T.nnet.nnet.softmax(T.dot(input,self.weights)+self.bias)
+        self.predicted_class = T.argmax(self.output,axis=1)
+        self.parameters = [self.weights,self.bias]
+        self.input = input
     
-    def fprop2(self,r = False,loss=True):
-        new_layers = [self.layers[0]]
-        o = T.dvector('o')
-        w = T.dmatrix('w')
-        act = 'tanh'
-        
-        
-       
-        
-        temp = np.dot(self.inputs.get_value(),self.weights[0].get_value())
-        
-        temp_l = Layer(temp,act)
-        
-        new_layers.append(temp_l)
-        
-        
-        for i in range(1,len(self.layers)-2):
-            temp = np.dot(np.array(temp),self.weights[1].get_value())
-            temp_l = Layer(temp,act)
-            new_layers.append(temp_l)
+    def neg_log_likelihood(self,target):
+        return -T.mean(T.log(self.output_p)[T.arange(target.shape[0]),target])     
             
 
-        act = 'tanh'
-        temp = np.dot(np.array(temp),self.weights[-1].get_value())
-        temp_l = Layer(temp,act)
-        new_layers.append(temp_l)
-        
-        
-        self.layers = new_layers
+class Multilayer_Perceptron():
+    def __init__(self,input,shape,n_classes):
+        self.hidden_layers = [HiddenLayer(input=input,n_inputs=shape[0],n_outputs=shape[1],activation=None)]
+        self.output_layer = OutputLayer(self.hidden_layers[-1].output,shape[-1],n_classes)
+        self.L1 = abs(self.hidden_layers[-1].weights).sum() + abs(self.output_layer.weights).sum()
+        self.L2 = (self.hidden_layers[-1].weights**2).sum() + (self.output_layer.weights**2).sum()
+        self.neg_log_likelihood = self.output_layer.neg_log_likelihood
+        self.parameters = [a.parameters for a in self.hidden_layers] + self.output_layer.parameters
+        self.input = input
 
-        if(loss):
-            self.x = self.layers[-1].outputs
-            x = self.x
-            y = self.target
-            self.y = y
-            self.cross_entropy_loss = T.nnet.nnet.categorical_crossentropy(x,y)
-            self.L1 = abs(x).sum()
-            self.L2 = (x**2).sum()
-            self.cst = self.L1 + self.L2 + self.cross_entropy_loss
-            
-            
 
-        if(r):
-            return main.layers[-1].outputs
+def get_images(w,h,file_list=None,num_classes=5):
     
-    
-    def log_regression(self):
-        
-        
-        
-        return T.nnet.softmax(T.dot(self.layers[-2].inputs, self.weights[-1]))
-    def cost(self):
-        return self.cst
-        
-    def __str__(self):
-        h_depth = 1
-        temp_str = ""
-        for i in self.shape[1:-1]:
-            temp_str += "Hidden Layer %s: %d\n" % (h_depth,i)
-            h_depth += 1            
-        out_str = "Multilayer Perceptron\n%-14s: %d\n%-14s: %d\n%s%-14s: %d" % ("Hidden layers",len(self.shape[1:-1]),"Input size",self.input_size,temp_str,"Output size",self.output_size) 
-        # out_str += '\n'.join(map(str,self.layers))
-        return out_str
-
-
-
-        
-num_classes = 5
-num_images = 60
-
-output_size = num_classes
-img_x = img_y = 20
-input_size = 1+img_x*img_y
-X = np.zeros((num_images,img_x*img_y))
-X = np.insert(X,0,1,axis=1)
-hidden_sizes = [10,10]
-
-layers_tuple = [input_size,output_size]
-[layers_tuple.insert(-1,a) for a in hidden_sizes]
-layers_tuple = tuple(layers_tuple)
-
-x = T.dvector('x')
-y = T.dvector('y')
-
-tanh = theano.function([x],T.tanh(x))
-sign = theano.function([x],T.sgn(x))
-none = theano.function([x],x)
-soft = theano.function([x],T.nnet.nnet.softmax(x))
-sigm = theano.function([x],T.nnet.nnet.sigmoid(x))
-
-activation_functions = {'tanh':tanh,'sign':sign,'none':none,'soft':soft,'sigm':sigm}
-activation_functions = {'tanh':T.tanh,'sign':T.sgn,'none':none,'soft':T.nnet.nnet.softmax,'sigm':T.nnet.nnet.sigmoid}
-
-def one_hot(index,size):
-    lst = [0]*size
-    lst[index] = 1
-    return lst
-    
-    
-
-
-
-
-# dt = np.dtype([('filename','|S16'),('labels',np.int32,(num_labels,))])
-
-dt = np.dtype([('filename','|S16'),('labels',np.int32,(num_classes,))])
-infile = 'filenames5.txt'
-filedata = np.loadtxt(infile,dtype=dt)
-filenames = [a.decode('UTF-8') for a in filedata['filename']]
-filenames.sort(key=lambda x:x[-7:])
-suffixes = {}
-
-for f in filenames:
-    suffixes[f[-7:]] = suffixes.get(f[-7:], 0) + 1
-
-ind = 0
-for i in suffixes:    
-    suffixes[i] = {"count":suffixes[i],"label":one_hot(ind,num_classes)}
-    ind += 1
-
-images=[]
-
-i = 0
-for key in suffixes.keys():
-    target_temp = num_classes*[0]
-    target_temp[i] = 1
-    temp = ([a for a in filenames if a[-7:] == key],target_temp)
-    images.append(temp)
-    i+=1
-
-def get_images(file_list,w,h):
     infile = 'filenames5.txt'
     folder = 'tiffs5/'
     abspath = 'C:/Users/Roan Song/Desktop/thesis/'
     
+    if(not file_list):
+        dt = np.dtype([('filename','|S16'),('labels',np.int32,(num_classes,))])
+        infile = 'filenames5.txt'
+        filedata = np.loadtxt(infile,dtype=dt)
+        file_list = [a.decode('UTF-8') for a in filedata['filename']]
+        file_list.sort(key=lambda x:x[-7:])
+    
+    suffixes = {}
+    
+    for f in file_list:
+        suffixes[f[-7:]] = suffixes.get(f[-7:], 0) + 1
+    
+    ind = 0
+    for i in suffixes:    
+        suffixes[i] = {"count":suffixes[i],"label":one_hot(ind,num_classes)}
+        ind += 1    
+    
+    
     img_arr = np.zeros((len(file_list),h*w))
+    target_arr = np.zeros((len(file_list),num_classes))
     i = 0
     for fname in file_list:
         img = mpimg.imread(abspath + folder + fname)
@@ -408,71 +197,151 @@ def get_images(file_list,w,h):
         img = pad_img(img,h,w,IN_HEIGHT,IN_WIDTH)
         oneD = img.reshape(h * w)
         oneD = normalise(oneD)
-        img_arr[i] = oneD   
+        img_arr[i] = oneD  
+        target_arr[i] = suffixes[fname[-7:]]["label"]
+         
         i+=1 
-    return img_arr
-    
-num = int(num_images/num_classes)
-# selected_imgs = [(images[a][0][:num],[images[a][1] for x in range(num)]) for a in range(num_classes)]
-
-selected_imgs = np.concatenate(np.array([images[a][0][:num] for a in range(num_classes)]))
-
-img_arr = get_images(selected_imgs,img_x,img_y)
-img_arr = np.insert(img_arr,0,1,axis=1)
-
-def print_outputs(main,img_arr):
-    for img in img_arr:
-        main.load_input(img)
-        main.fprop()
-        print("[%7s %7s] | [%7s %7s]" %(("%.4f" % main.layers[-1].softmax()[0]),("%.4f" % main.layers[-1].softmax()[1]),("%.4f" % main.layers[-1].output()[0]),("%.4f" % main.layers[-1].output()[1])  ) )
-
-
-def float_str(arr,precision,brace):
-    out_str = brace[0]+" "
-    out_str += ("%%.%df, " % (precision)) * len(arr)
-    out_str = out_str[:-2] % tuple(arr)
-    out_str += " "+brace[1]
-    return out_str
-
-
-correct = 0
-
-
-loss_results = []
-
-main = Multilayer_Perceptron(layers_tuple)
-in_arr = np.ones((input_size))
-
-
-for n in range(num_images):
-
-    img_class = selected_imgs[n][-7:]
-    target = suffixes[img_class]['label']
-    
-    main.load(img_arr[n],target)
-    results = main.fprop2(1)
+        
     
     
-    correct_class = np.argmax(suffixes[img_class]['label'])
-    
-    loss_results.append((main.cost(),target))
-    
-    if(results.argmax() == correct_class):
-        correct +=1
-
     
     
+    
+        
+        
+    return img_arr,target_arr
 
-    # print(float_str(softmax(results),2,"[]") + " | " + str(target))
-print(correct)
+num_classes = 5
 
-# update_weights = theano.function([],updates=[
-#                                 (main.weights[-1],main.weights[-1]*0.01 - T.grad(cst,wrt=main.weights[-1])
-# ])
+# 
+# def test(learning_rate = 0.01, L1_weight = 0.0001, L2_weight = 0.0001, n_epochs = 100,batch_size = 20,hidden_shape = (500)):
+#     
 
-# main.load_input(img_arr[0])
+dt = np.dtype([('filename','|S16'),('labels',np.int32,(num_classes,))])
+infile = 'filenames5.txt'
+filedata = np.loadtxt(infile,dtype=dt)
+filenames = [a.decode('UTF-8') for a in filedata['filename']]
+filenames.sort(key=lambda x:x[-7:])
 
-# main.fprop()
+
+# images=[]
+# 
+# i = 0
+# for key in suffixes.keys():
+#     target_temp = num_classes*[0]
+#     target_temp[i] = 1
+#     temp = ([a for a in filenames if a[-7:] == key],target_temp)
+#     images.append(temp)
+#     i+=1
+
+data,targets = get_images(w=20,h=20,file_list = filenames)
+
+ 
+ 
+ 
+    
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    
+
+x = T.dmatrix('x')
+y = T.ivector('y')
+main = Multilayer_Perceptron(input=x,shape=(401,10,10),n_classes=5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+# 
+
+# num = int(num_images/num_classes)
+# # selected_imgs = [(images[a][0][:num],[images[a][1] for x in range(num)]) for a in range(num_classes)]
+# 
+# selected_imgs = np.concatenate(np.array([images[a][0][:num] for a in range(num_classes)]))
+# 
+# img_arr = get_images(selected_imgs,img_x,img_y)
+# img_arr = np.insert(img_arr,0,1,axis=1)
+# 
+# def print_outputs(main,img_arr):
+#     for img in img_arr:
+#         main.load_input(img)
+#         main.fprop()
+#         print("[%7s %7s] | [%7s %7s]" %(("%.4f" % main.layers[-1].softmax()[0]),("%.4f" % main.layers[-1].softmax()[1]),("%.4f" % main.layers[-1].output()[0]),("%.4f" % main.layers[-1].output()[1])  ) )
+# 
+# 
+# def float_str(arr,precision,brace):
+#     out_str = brace[0]+" "
+#     out_str += ("%%.%df, " % (precision)) * len(arr)
+#     out_str = out_str[:-2] % tuple(arr)
+#     out_str += " "+brace[1]
+#     return out_str
+# 
+# 
+# correct = 0
+# 
+# 
+# loss_results = []
+# 
+# # main = Multilayer_Perceptron(layers_tuple)
+# # in_arr = np.ones((input_size))
+# # 
+# # 
+# # for n in range(num_images):
+# # 
+# #     img_class = selected_imgs[n][-7:]
+# #     target = suffixes[img_class]['label']
+# #     
+# #     main.load(img_arr[n],target)
+# #     results = main.fprop2(1)
+# #     
+# #     
+# #     correct_class = np.argmax(suffixes[img_class]['label'])
+# #     
+# #     loss_results.append((main.cost(),target))
+# #     
+# #     if(results.argmax() == correct_class):
+# #         correct +=1
+# 
+#     
+#     
+# 
+#     # print(float_str(softmax(results),2,"[]") + " | " + str(target))
+# 
 
 
 
