@@ -149,7 +149,9 @@ class OutputLayer():
     
     def neg_log_likelihood(self,target):
         return -T.mean(T.log(self.output_p)[T.arange(target.shape[0]),target])     
-            
+    
+    def errors(self,y):
+        return T.mean(T.neq(self.predicted_class,y))        
 
 class Multilayer_Perceptron():
     def __init__(self,input,shape,n_classes):
@@ -160,6 +162,7 @@ class Multilayer_Perceptron():
         self.neg_log_likelihood = self.output_layer.neg_log_likelihood
         self.parameters = [a.parameters for a in self.hidden_layers] + self.output_layer.parameters
         self.input = input
+        self.errors = self.output_layer.errors
 
 
 def get_images(w,h,file_list=None,num_classes=5):
@@ -209,13 +212,14 @@ def get_images(w,h,file_list=None,num_classes=5):
     
         
         
-    return img_arr,target_arr
+    return img_arr,target_arr,suffixes
 
-num_classes = 5
+batch_size = 20
+num_classes=5
 
 # 
-# def test(learning_rate = 0.01, L1_weight = 0.0001, L2_weight = 0.0001, n_epochs = 100,batch_size = 20,hidden_shape = (500)):
-#     
+# def test(learning_rate=0.01, L1_weight=0.0001, L2_weight=0.0001, n_epochs=100, batch_size=20, hidden_shape=(500), num_classes=5):
+     
 
 dt = np.dtype([('filename','|S16'),('labels',np.int32,(num_classes,))])
 infile = 'filenames5.txt'
@@ -224,44 +228,46 @@ filenames = [a.decode('UTF-8') for a in filedata['filename']]
 filenames.sort(key=lambda x:x[-7:])
 
 
-# images=[]
+
+data,targets,suffixes = get_images(w=20,h=20,file_list = filenames)
+
+training_size = len(data)//2
+per_class = training_size//num_classes
+
+training_data = np.zeros((num_classes*per_class,len(data[0])))
+training_labels = np.zeros((num_classes*per_class,num_classes))
+training_set = (training_data,training_labels)
+validation_data = []
+
+i = 0
+ind = 0
+next_ind = suffixes[filenames[i][-7:]]['count']
+temp = per_class
+while i < len(data):
+    if(i < temp):
+        training_data[ind] = data[i]
+        training_labels[ind] = targets[i]
+        i += 1
+        ind += 1
+    
+        
+    else:
+        validation_data.append(data[i:next_ind])
+        
+        i += suffixes[filenames[i][-7:]]['count'] - per_class
+        if(i >= len(data)):
+            validation_data = np.concatenate(validation_data)
+            break
+        next_ind += suffixes[filenames[i][-7:]]['count']
+        temp = i + per_class
+
+training_batches =  []    
+
+    
 # 
-# i = 0
-# for key in suffixes.keys():
-#     target_temp = num_classes*[0]
-#     target_temp[i] = 1
-#     temp = ([a for a in filenames if a[-7:] == key],target_temp)
-#     images.append(temp)
-#     i+=1
-
-data,targets = get_images(w=20,h=20,file_list = filenames)
-
- 
- 
- 
-    
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-    
-
 x = T.dmatrix('x')
 y = T.ivector('y')
-main = Multilayer_Perceptron(input=x,shape=(401,10,10),n_classes=5)
+classifier = Multilayer_Perceptron(input=x,shape=(401,10,10),n_classes=5)
 
 
 
