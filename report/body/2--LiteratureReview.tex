@@ -47,8 +47,7 @@ The MSTAR dataset has been referenced in multiple publications, and is a popular
 \subsection{Relevance}
 The MSTAR dataset was suggested for this study by A. Mishra. It provides a generic SAR image chip dataset on which any classification methods can conceivably be run, with minimal setup and hassle. The number of files available is enough to test any classifier sufficiently .
 
-\subsection{Separability Index}\label{lit:SI}
-Thornton's Separability Index (SI) is used as a metric to show how separable the data is into its different classes, i.e. the confidence level with which distinct classes can be identified with no overlap. Perfectly separable data would have an SI of 1, or 100%.
+
 
 \section{Classification}
 
@@ -91,16 +90,16 @@ The motivation behind using neural networks is simple; instead of specifying bas
 
 \subsection{Multilayer Perceptron}
 \subsubsection{Description}
-A multilayer perceptron is an extension of the simple perceptron network. The initial design was an input layer, an output layer, and a hidden layer of neurons between. The perceptron was deemed unsuitable for complex classification tasks, as its input-output relationship could be reduced (via back-propagation) to a set of linear combinations. This means that is can only correctly classify data that is perfectly linearly separable, which limits its practical applications significantly.
+A multilayer perceptron is an extension of the simple perceptron network. The initial design was an input layer, an output layer, and a hidden layer of neurons between. The basic perceptron was deemed unsuitable for complex classification tasks, as its input-output relationship could be reduced (via back-propagation) to a set of linear combinations. This means that is can only correctly classify data that is perfectly linearly separable, which limits its practical applications significantly.
 
 The multilayer perceptron used two or more hidden neuron layers, with non-linear activation functions at each neuron. This makes a multilayer perceptron an example of a deep neural network. The depth allows for more complex feature detection, and ultimately better performance in complex classification tasks. The multilayer perceptron becomes difficult to optimise as the number of hidden layers grows, because the effect of each neuron on the output, and the effects of previous neurons on \textbf{that} neuron become progressively and recursively difficult to compute.
 \subsubsection{Relevance}
 Implementing a multilayer perceptron is a valuable exercise, as it provides an example of a deep neural network with a fairly straightforward implementation. Training time becomes a significant factor when using a deep neural network due to the time taken to complete back-propagation optimisation, so using a multilayer perceptron will force the development of more efficient methods of data pre-processing to speed up the training as much as possible.
 
 \section{Optimization and Training}
-A classifier is only operating efficiently when it is tuned to the data it is attempting to classify. Deep neural networks are initialised with random weights between their neurons, and at first use will perform worse on average than na{\"ive} classification methods. Through optimisation of these inter-neuron weights, however, the potential of deep neural networks can be reached, and classification results are expected to significantly improve. Tuning the classifier to the dataset is crucial, but optimising too heavily may result in \textit{overfitting} of the data, leaving the classifier with no predictive power.
+A classifier is only operating efficiently when it is tuned to the data it is attempting to classify. Deep neural networks are initialised with random weights between their neurons, and at first use will perform worse on average than na{\"ive} classification methods. Through optimisation of these inter-neuron weights, however, the potential of deep neural networks can be reached, and classification results are expected to significantly improve. Tuning the classifier to the dataset is crucial, but optimising too heavily may result in \textit{overfitting} of the data, leaving the classifier with no predictive power on unseen data.
 
-
+% backprop is low-level optimisation, core to the operation
 \subsection{Back-propagation}
 \subsubsection{Description}
 Back-propagation is a system by which the effects of weights between neurons is adjusted through an iterative process. The base case is that of a single input, single output system. 
@@ -113,10 +112,51 @@ One of the key issues with back-propagation is its computational complexity. Wit
 \subsubsection{Relevance}
 Back-propagation is a popular and successful technique, well-suited to neural networks with only a few layers. With enough time, it can help to optimise much larger networks, and potentially improve classification accuracy by a large margin. It alleviates the concern of trying to find the perfect network from the offset; it allows any network to be tuned to be better than it currently is.
 
+% THERE SHOULD BE SOMETHING ABOUT ACTUAL OPTIMIZATION
+
+\subsection{Hyper-parameters}
+\subsubsection{Description}
+Hyper-parameters are parameters that, when changed, modify the structure or operation of the neural network, without changing its core mechanics. Hyper-parameters under consideration in this project are:
+\begin{itemize}
+	\item Image size (100px vs 1000px)
+	\item Learning Rate
+	\item Network Shape (hidden layer size, and number of layers)
+	\item Choice of activation function
+	\item Weight initialisations % (sqrt(6)?)
+\end{itemize}
+\subsubsection{Relevance}
+
+
 \section{Performance Evaluation}
-\subsection{Cross Validation}\label{lit:loocv}
+\subsection{Separability Index}\label{lit:SI}
+Thornton's Separability Index (SI) is used as a metric to show how separable the data is into its different classes, i.e. the confidence level with which distinct classes can be identified with no overlap. Perfectly separable data would have an SI of 1, or 100%.
+
+\subsection{Training, Validation, and Testing}\label{lit:loocv}
+Successful classification of a dataset is divided into three distinct steps:
+\begin{enumerate}
+	\item Training
+	\item Model Validation
+	\item Testing
+\end{enumerate}
+% http://www-stat.stanford.edu/~tibs/ElemStatLearn/
+
+Training is the process of fitting a classifier - it involves running multiple iterations on a given set of inputs, comparing the output of the classifier to a known target dataset, and adjusting the parameters of the classifier (typically inter-layer weights and bias) through back-propagation. To find the best iteration of the classifier model, it is periodically tested on a different set of known data; the validation dataset. Testing on this intermediate dataset is used to provide performance metrics such as the mean error and the accuracy of classification, which is useful in selecting a model that is optimised to the desired set of parameters. The data from periodically testing on this validation set is used to tune the model, or implement early-stopping procedures. For example, if the desired level of classification accuracy has been achieved or if the mean error hasn't changed significantly after a number of epochs, the training can be stopped early. On the contrary, if the training is approaching its stated limit yet still improving classification accuracy, the number of epochs or 'patience' can be increased to allow for further iterations and tuning.
+
+Once the training is complete, having achieved the desired level of classification accuracy, the chosen model can be tested on another dataset (typically a  set of real-world instances) to see how it performs, providing the testing accuracy. The classifier is no longer tuned, and can be presented with a variety of inputs to simulate its real-world performance.
+
+A dataset is typically split into three sections. 50\% training, 25\% validation, and 25\% testing is a reasonable starting point, and the proportions can be seen as a hyperparameter to be optimised. If the training set is too small, there is a risk that the model will not be able to successfully extract the features required for classification, and its testing accuracy will be low. If the validation or test sets are too small, the model validation and testing might not be thorough enough to cover all reasonable use cases.
+% HOW MANY IMAGES IN MSTAR
+
+\subsection{The Confusion Matrix}
+%http://www.dataschool.io/simple-guide-to-confusion-matrix-terminology/
+% CHECK OUT ROC ANALYSIS AND COHEN's KAPPA
+Confusion matrices are useful tools for evaluating classifier performance. They can show the accuracy, misclassification rate, true/false positive rates, specificity, precision, and prevalence. They clearly show the number of correctly classified classes along the matrix's diagonal, and also shows how many of the incorrect classifications were attributed to which classes. 
+
+\section{Hidden Layers}
+\section{Logistic Regression}
 
 
 \section{Dimensionality Reduction}
+When dealing with images, the number of pixels grows in proportion to the size of the image. Since every pixel has a weight linking it to the first layer of the neural network, and these weights in turn need to be tuned, the computation power required to train the model is proportional to the size of the input. To reduce computational overhead, it is desirable to reduce the input size, without compromising classification accuracy. This can be done using \textit{dimensionality reduction}.
 \subsection{PCA}\label{lit:PCA}
 

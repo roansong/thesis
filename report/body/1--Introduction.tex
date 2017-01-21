@@ -2,19 +2,41 @@
 
 %7593 as of 21/10
 %5763
-As processing power has become more readily available over the years, the field of machine learning has seen many innovations. Deep learning techniques were once considered only theoretically viable, but are now being used to great effect in commercial ventures, including image classification and facial recognition applications. Their success lies in the ability of neural networks to train themselves under human supervision,  extracting features from a dataset that are not always intuitive in a human sense, and in many cases providing greater accuracy in classification than humans can achieve, in a fraction of the time (cite some medical science paper here). This accuracy and speed of classification lends itself to the field of target acquisition and recognition; recognising and classifying a target based on its radar signature, to allow for human action to be taken. Na{\"i}ve classification methods have proven to be somewhat effective, and the aim of this study is to assess the possible application of deep learning techniques in this field.
 
-For this study, the MSTAR dataset of radar images will be used to train the various classifiers. The Nearest Neighbour classifier will be used as a benchmark against which the effectiveness of a neural network-based approach will be compared. The hope of this study is that the use of neural networks will allow for significantly higher classification accuracy, with the potential extension to different datasets without compromising the effectiveness of the classifier.
+This thesis aims to asses the effectiveness of deep learning techniques in the classification of radar imagery. Deep learning relies on the use of neural networks; interconnected layers of nodes sharing information and undergoing non-linear transformations that, through training and optimisation, can automatically detect and extract features from a dataset. By training a model to classify known instances, it gains predictive power, which can then be tested and used on instances not previously encountered by the model, with varying degrees of accuracy. In the specific case of this thesis, the instances are radar images from the MSTAR dataset.
+
+%The better the optimisation and training of the model, the greater its predictive power.
+
+
+
 
 %5998
 
 \section{Background}
+As processing power has become more readily available over the years, the field of machine learning has seen many innovations. Deep learning techniques were once considered only theoretically viable due to the limits of computing power when the concepts were developed, but are now being used to great effect in commercial ventures, including image classification and facial recognition applications. Their success lies in the ability of neural networks to train themselves under human supervision,  extracting features from a dataset that are not always intuitive in a human sense, and in many cases providing greater accuracy in classification than humans can achieve, in a fraction of the time (cite some medical science paper here). This accuracy and speed of classification lends itself to the field of target acquisition and recognition; recognising and classifying a target based on its radar signature, to allow for human action to be taken. Na{\"i}ve classification methods have already been proven somewhat effective (REALLY???), and the aim of this study is to assess the possible application of deep learning techniques in this field.
 
 \section{Motivation}
 
+Deep learning techniques have been proven effective in many different fields. They promote fast classification suitable for real-time applications; the time taken to train a model is much greater than the time taken to classify a specific instance. Image classification is a complex problem, and simple classification methods are not as effective on feature-rich data such as images, because the classes are typically not linearly separable.
+
+
 \section{Objectives}
 
+The goals of this thesis are to assess the effectiveness of deep learning techniques in classifying radar imagery from the MSTAR dataset. The assessment will compare and contrast different types of classifiers: K-Nearest Neighbours, Multilayer Perceptron (one hidden layer), Multilayer Perceptron (two hidden layers), and a Convolutional Neural Network.
+
+The performance of each classifier will be assessed in terms of its accuracy, training time, and classification time.
+
 \section{Scope and Limitations}
+
+\subsection{Focus}
+\subsection{Scope}
+\subsubsection{Within project scope}
+\subsubsection{Outside project scope}
+\subsection{Limitations}
+The MSTAR dataset is comparatively small, with 100-274 images per class.
+
+
+
 
 \section{Report Overview}
 

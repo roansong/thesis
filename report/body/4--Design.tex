@@ -75,7 +75,7 @@ The first foray into dimensionality reduction will be conducted using PCA techni
 \end{figure}
 
 
-The high-level design is fairly straightforward, and is shown in figure~\ref{fig:nn}. Its principles of operation are covered in section~\ref{lit:nn}. To implement this classifier, the following is needed:
+The high-level design is fairly straightforward, and is shown in Figure~\ref{fig:nn}. Its principles of operation are covered in section~\ref{lit:nn}. To implement this classifier, the following is needed:
 
 \begin{itemize}
 	\item Access to the dataset
@@ -118,9 +118,9 @@ While implementing the software for this report, I ran into some early issues th
 
 %TODO: add code corresponding to each area of the diagram
 
- In a process outlined in figure~\ref{fig:multi_input}, the input image is converted to an array of unsigned 8-bit integers (ranging from 0 to 255). The elements of the array are 'unitised' by subtracting the mean of the array from each and then dividing each element by the standard deviation of the array. This ensures that the processed values lie centred around zero, and mostly between -1 and 1. Unsigned integers are no longer suited to represent this data, so 32-bit floating point numbers (floats) are used.
+ In a process outlined in Figure~\ref{fig:multi_input}, the input image is converted to an array of unsigned 8-bit integers (ranging from 0 to 255). The elements of the array are 'unitised' by subtracting the mean of the array from each and then dividing each element by the standard deviation of the array. This ensures that the processed values lie centred around zero, and mostly between -1 and 1. Unsigned integers are no longer suited to represent this data, so 32-bit floating point numbers (floats) are used. %WHY ARE THEY UNSUITABLE?
  
- Once each pixel has been unitised, they form the input layer of the neural network, with each pixel representing a neuron in the input layer shown in figure~\ref{fig:multi}. 
+ Once each pixel has been unitised, they form the input layer of the neural network, with each pixel representing a neuron in the input layer shown in Figure~\ref{fig:multi}. 
  
  Each of these input layer neurons has a random weight applied, and is then fed into the neurons that form the first hidden layer. Every neuron in the input layer contributes to every neuron in the next layer. At each neuron in the first hidden layer, the 'net' value is formed by summing all of the values present at its input (i.e. all the weighted values passed along from the input layer). An activation function is applied to this 'net' value to compress the range of values. There are many different activation functions that can be used, and for this study I narrowed down the choice to either the logistic function $ \frac{1}{1 + \exp^{-net}} $ or the hyperbolic tangent function. The logistic function produces an output between 0 and 1, while the hyperbolic tangent function's output is between -1 and 1. I decided to use the hyperbolic tangent function, because the logistic function has a tendency to incur long training times if its values lie very close to 0, while the hyperbolic tangent function tends to move towards its extreme values more quickly.  
  
