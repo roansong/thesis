@@ -174,6 +174,90 @@ class Multilayer_Perceptron():
         self.shape = shape
 
 
+class KNN():
+    def __init__(self,input,targets):
+        # note that inputs and targets are of type numpy.ndarray
+        self.data = input
+        self.targets = targets
+     
+    
+    def initD2(self):
+        D2 = np.zeros((len(self.data),len(self.data)))
+        for i in range(len(self.data)):
+            for l in range(len(self.data)):
+                cost = 0
+                if(i != l):
+                    for j in range(len(self.data[i])):
+                        cost += pow(self.data[i][j] - self.data[l][j],2)
+                D2[i][l] = D2[l][i] = cost      
+        self.D2 = D2
+          
+    
+    def test(self,k1,k2):
+        results = []
+        
+        for k in range(k1,k2+1):
+            correct = 0
+            confidence = 0.
+            for img in range(len(self.data)):
+                # the 0th item in the list is the iage to itself, so it is removed
+                # put K in HERE you konb, instead of recalculating and sorting each time
+                costs = sorted(list(zip(self.D2[img],self.targets.argmax(axis=1))))
+                
+                pred = list(zip(*costs[:k]))[1]
+                max = 0
+                predicted_class = 0
+                for i in pred:
+                    cnt = 0
+                    for l in pred:
+                        
+                        if(i == l):
+                            cnt += 1
+                    if(cnt > max):
+                        max = cnt
+                        predicted_class = i
+                    
+                confidence += max/k * 100
+                if(predicted_class == self.targets[img].argmax()):
+                    correct += 1
+            confidence /= len(self.data)
+            results.append((correct, confidence))
+        
+        return results
+    
+    def run(self,x,y,k):
+        temp = []
+        for img in range(len(self.data)):
+            if((self.data[img] == x).all()):
+                continue
+            cost2 = 0
+            for px in range(len(self.data[img])):
+                
+                cost2 += pow(self.data[img][px] - x[px],2)
+            temp.append((cost2,self.targets[img].argmax()))
+        
+        temp = sorted(temp)
+        
+        cost = list(zip(*temp[:k]))[0]
+        pred = list(zip(*temp[:k]))[1]
+        
+        max = 0
+        predicted_class = []
+        for i in pred:
+            cnt = 0
+            for l in pred:
+                
+                if(i == l):
+                    cnt += 1
+            if(cnt > max):
+                max = cnt
+                predicted_class = i
+
+        confidence = max/k * 100
+        
+        return  predicted_class, (y.argmax() == predicted_class), confidence
+
+
 def get_images(w,h,file_list=None,num_classes=5):
     
     infile = 'filenames5.txt'
@@ -445,26 +529,26 @@ def test(learning_rate=0.001, L1_rg=0.0000, L2_rg=0.0001, n_epochs=100, batch_si
     return (classifier.shape, best_validation_loss*100, best_iter +1, (end_time-start_time)/60,learning_rate), confusion_matrix(a,b),confusion_matrix(c,d)
     
     
-results = []
-
-l = [0.00001,0.0001,0.001,0.01]
-s = [10,50,100,250,500,1000]
-# results.append(test(learning_rate = 0.01, shape = (10000,s),print_val = True))
-# results.append(test(learning_rate = 0.00001, shape = (10000,s),print_val = True))
-x = T.dmatrix('x')
-y = T.lvector('y')
-
-
-
-for i in s:
-    classifier = init_classifier(x,(IMG_WIDTH*IMG_HEIGHT,i),num_classes=5)
-    for k in l:
-        results.append(test(learning_rate = k))
-
-for k in results:
-    print(k[0])
-    print(k[1])
-    print(k[2])
+# results = []
+# 
+# l = [0.00001,0.0001,0.001,0.01]
+# s = [10,50,100,250,500,1000]
+# # results.append(test(learning_rate = 0.01, shape = (10000,s),print_val = True))
+# # results.append(test(learning_rate = 0.00001, shape = (10000,s),print_val = True))
+# x = T.dmatrix('x')
+# y = T.lvector('y')
+# 
+# 
+# 
+# for i in s:
+#     classifier = init_classifier(x,(IMG_WIDTH*IMG_HEIGHT,i),num_classes=5)
+#     for k in l:
+#         results.append(test(learning_rate = k))
+# 
+# for k in results:
+#     print(k[0])
+#     print(k[1])
+#     print(k[2])
 
 
 
@@ -482,6 +566,37 @@ def reverseImgShow(weights,num_classes):
         return results
 
 
+
+
+
+
+
+x = data[0]
+
+
+
+y = targets[0]
+
+
+data2 = data[:]
+targets2 = targets[:]
+k = KNN(data2,targets2)
+k.initD2()
+
+
+print(k.run(x,y,3))
+print(k.test(100,100))
+# results = []
+# data = data[:]
+# targets = targets[:]
+# for n in range(1,3):
+#     correct = 0
+#     for i in range(len(data)):
+#         temp = k.run(data[i],targets[i],n)
+#         if(temp[1]):
+#             correct += 1
+#     results.append((n,correct))
+# print(results)
 # a = reverseImgShow(classifier.weights,5)
 
 # fig = plt.figure()
