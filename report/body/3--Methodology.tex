@@ -1,5 +1,5 @@
 \chapter{Methodology}
-\section{Nearest Neighbour Classification}
+\section{K-Nearest Neighbour Classification}
 The steps necessary to implement the NN on the MSTAR dataset are as follows:\\
 
 \begin{itemize}
@@ -12,6 +12,19 @@ The steps necessary to implement the NN on the MSTAR dataset are as follows:\\
 \item TEST
 \item collect results!
 \end{itemize}
+
+
+
+
+The KNN classifier works by predicting the class of an instance based on its relative distance to nearby instances. The K nearest instances (the ``neighbours'' after which the classifier is named) are used, and the most common class amongst them is selected as the predicted class. K can be optimised for each dataset, and 
+
+\subsection{Implementation}
+\subsubsection{The algorithm}
+Given a training dataset of known instances and targets
+\subsubsection{Optimising the classifier}
+Optimal K values are found by performing leave-one-out cross-validation (LOOCV) and finding which value of k gives the greatest prediction accuracy across all cases. To find this value of k using the previous algorithm is a very time-consuming process. Because this optimisation uses only the training set, the process can be sped up significantly. A matrix containing the squared distances between each instance is constructed. An example of such a matrix is show in Figure~\ref{D2}.
+
+
 
 \paragraph{}
 After testing the Nearest Neighbour algorithm on a set of single-target data, it is necessary to see how well the algorithm performs when other targets are added to the mix. A subset of 10 images of each target is selected, and added to the testing pool.

@@ -20,6 +20,19 @@ import timeit
 import os
 from collections import OrderedDict
 
+
+def progress_bar(current,total):
+    div = current/total
+    bar_length = 20
+    percentage = 100*div
+    progress = '#'*int(bar_length*div) + ' '*(bar_length-int(bar_length*div))
+    out_str = "Progress: [%s] %.3f%%\r" % (progress,percentage)
+    sys.stdout.write(out_str)
+    sys.stdout.flush()
+    if(current >= total):
+        print("Complete.")
+    
+
 def pinv(M,eps=0.0001):
     u,s,v = np.linalg.svd(M)
     u = u.transpose()
@@ -181,30 +194,36 @@ class KNN():
         self.targets = targets
      
     
-    def initD2(self):
-        D2 = np.zeros((len(self.data),len(self.data)))
-        for i in range(len(self.data)):
-            for l in range(len(self.data)):
-                cost = 0
-                if(i != l):
-                    for j in range(len(self.data[i])):
-                        cost += pow(self.data[i][j] - self.data[l][j],2)
-                D2[i][l] = D2[l][i] = cost      
+    def initD2(self,filename=None):
+        if(filename==None):
+            D2 = np.zeros((len(self.data),len(self.data)))
+            for i in range(len(self.data)):
+                for l in range(i,len(self.data)):
+                    cost = 0
+                    if(i != l):
+                        for j in range(len(self.data[i])):
+                            cost += pow(self.data[i][j] - self.data[l][j],2)
+                    D2[i][l] = D2[l][i] = cost      
+            
+                progress_bar(i,len(self.data))    
+        else:
+            D2 = np.load(filename)
         self.D2 = D2
           
     
     def test(self,k1,k2):
         results = []
         
-        for k in range(k1,k2+1):
+        for k in range(k1,k2+1,2):
             correct = 0
             confidence = 0.
             for img in range(len(self.data)):
                 # the 0th item in the list is the iage to itself, so it is removed
-                # put K in HERE you konb, instead of recalculating and sorting each time
+                # put K in HERE you knob, instead of recalculating and sorting each time
                 costs = sorted(list(zip(self.D2[img],self.targets.argmax(axis=1))))
                 
-                pred = list(zip(*costs[:k]))[1]
+                pred = list(zip(*costs[:k]))[1][1:]
+                
                 max = 0
                 predicted_class = 0
                 for i in pred:
@@ -222,6 +241,55 @@ class KNN():
                     correct += 1
             confidence /= len(self.data)
             results.append((correct, confidence))
+        self.results = results  
+        self.pred = list(zip(*costs[:k]))[1][1:]
+        self.costs= list(zip(*costs[:k]))[0][1:]
+        return results
+        
+    def test2(self,k_arr):
+        
+        results = []
+        correct = np.zeros((len(k_arr))) 
+             
+        for img in range(len(self.data)):
+            # the 0th item in the list is the image to itself, so it is removed
+            # put K in HERE you knob, instead of recalculating and sorting each time
+            costs = sorted(list(zip(self.D2[img],self.targets.argmax(axis=1))))
+            
+            pred_lst = np.zeros((len(k_arr)))
+            confidence = np.zeros((len(k_arr)))
+            accuracy = np.zeros((len(k_arr)))
+            ind = 0
+            for k in k_arr:
+                
+                
+                pred = list(zip(*costs[:k]))[1][1:]
+            
+                predicted_class = 0
+                max = 0 
+                for i in pred: 
+                    cnt = 0
+                    for l in pred:
+                        
+                        if(i == l):
+                            cnt += 1
+                    if(cnt > max):
+                        max = cnt
+                        predicted_class = i
+                # pred_lst[ind] = predicted_class
+                if(predicted_class == self.targets[img].argmax()):
+                    correct[ind] += 1
+                confidence[ind] += max/k * 100
+                accuracy[ind] = correct[ind]/len(self.data) * 100
+                ind +=1 
+                
+        
+        for x in range(ind):
+            results.append((k_arr[x],correct[x],accuracy[x],confidence[x]))
+        
+        self.results = results  
+        self.pred = list(zip(*costs[:k]))[1][1:]
+        self.costs= list(zip(*costs[:k]))[0][1:]
         
         return results
     
@@ -236,7 +304,7 @@ class KNN():
                 cost2 += pow(self.data[img][px] - x[px],2)
             temp.append((cost2,self.targets[img].argmax()))
         
-        temp = sorted(temp)
+        temp = sorted(temp)[1:]
         
         cost = list(zip(*temp[:k]))[0]
         pred = list(zip(*temp[:k]))[1]
@@ -254,6 +322,8 @@ class KNN():
                 predicted_class = i
 
         confidence = max/k * 100
+        
+        
         
         return  predicted_class, (y.argmax() == predicted_class), confidence
 
@@ -308,8 +378,8 @@ def get_images(w,h,file_list=None,num_classes=5):
     return img_arr,target_arr,suffixes
 
 
-IMG_WIDTH = 20
-IMG_HEIGHT = 20
+IMG_WIDTH = 100
+IMG_HEIGHT = 100
 
 batch_size = 30
 num_classes=5
@@ -568,6 +638,13 @@ def reverseImgShow(weights,num_classes):
 
 
 
+def gen_sets(data,targets,train,val,test):
+    training_set = np.zeros((len(data)*train,2))
+    validation_set = np.zeros((len(data)*valid,2))
+    test_set = np.zeros((len(data)*test,2))
+    
+    
+
 
 
 
@@ -577,15 +654,86 @@ x = data[0]
 
 y = targets[0]
 
+instances = 1291
+k1 = 1
+k2 = 1000
+k_arr = [1,3,5,7,9,11,21,51,101,251,501,1001]
+k_arr = list(range(1,1291,2))
 
-data2 = data[:]
-targets2 = targets[:]
+data2 = data[:instances]
+targets2 = targets[:instances]
 k = KNN(data2,targets2)
-k.initD2()
 
 
-print(k.run(x,y,3))
-print(k.test(100,100))
+
+
+print("Beginning KNN")
+start_time = timeit.default_timer()
+k.initD2(filename="100x100.npy")
+end_time = timeit.default_timer()
+print("%.4fm taken to load the squared distance matrix" % ((end_time-start_time)/60.))
+
+
+
+
+# start_time = timeit.default_timer()
+# a = k.test(k1,k2)
+# end_time = timeit.default_timer()
+# print("%.4fm taken to run the old way" % ((end_time-start_time)/60.))
+
+
+start_time = timeit.default_timer()
+# results = k.test2(k_arr)
+results = np.load("k_values.npy")
+end_time = timeit.default_timer()
+print("%.4fm loading K values" % ((end_time-start_time)/60.))
+
+
+k_ascending = sorted(results,key=lambda x:x[1])[-1]
+
+# start_time = timeit.default_timer()
+# t = k.run(x,y,i)
+# end_time = timeit.default_timer()
+# 
+# print("%.4fm taken to classify" % ((end_time-start_time)/60.))
+
+
+
+print("Top 3 K values: %d, %d, %d" %(k_ascending[0],k_ascending[1],k_ascending[2]))
+# 
+# i = int(k_ascending[0])
+# temp = []
+# start_time = timeit.default_timer()
+# right = 0
+# for j in range(instances):
+#     b = k.run(data[j],targets[j],i)
+#     temp.append(b)
+#     if(b[1]):
+#         right +=1
+# end_time = timeit.default_timer()
+# print("Prediction accuracy: %.4f (%d/%d)" % (right/instances,right,instances))
+# print("%.4fm taken to run the shit part" % ((end_time-start_time)/60.))
+# 
+# np.save("knn_test" + str(i),temp)
+# 
+# 
+# 
+# i = int(k_ascending[2])
+# temp = []
+# start_time = timeit.default_timer()
+# right = 0
+# for j in range(instances):
+#     b = k.run(data[j],targets[j],i)
+#     temp.append(b)
+#     if(b[1]):
+#         right +=1
+# end_time = timeit.default_timer()
+# print("Prediction accuracy: %.4f (%d/%d)" % (right/instances,right,instances))
+# print("%.4fm taken to run the shit part" % ((end_time-start_time)/60.))
+# 
+# np.save("knn_test" + str(i),temp)
+
+
 # results = []
 # data = data[:]
 # targets = targets[:]
