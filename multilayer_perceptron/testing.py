@@ -53,6 +53,9 @@ def softmax(h):
     else:
         return h
 
+def unit(a):
+    return np.divide(a,np.sum(a))
+
 class ELM():
     A = []
     R = []
@@ -185,7 +188,150 @@ class Multilayer_Perceptron():
         self.weights = [self.hidden_layers[-1].weights]
         self.weights.append(self.output_layer.weights)
         self.shape = shape
-
+    
+    def test(self,learning_rate=0.001, L1_rg=0.0000, L2_rg=0.0001, n_epochs=100, batch_size=30, print_val = True):
+    
+        
+    
+        batch_index = T.lscalar('batch_index')
+        
+        rng = np.random.RandomState(2)
+        # classifier = Multilayer_Perceptron(input=x,shape=shape,n_classes=5,rng=rng)
+        cost = self.neg_log_likelihood(y) + L1_rg * self.L1 + L2_rg + self.L2
+        correct_classes = self.predicted_class
+        
+        gradients = [T.grad(cost,param) for param in self.parameters]
+        
+        updates = [(param, param - learning_rate*gparam) for param, gparam in zip(self.parameters,gradients)]
+        
+        validation_set_x = theano.shared(value=validation_set[0])
+        validation_set_y = theano.shared(value=validation_set[1].argmax(axis=1))
+        training_set_x = theano.shared(value=training_set[0])
+        training_set_y = theano.shared(value=training_set[1].argmax(axis=1))
+        
+    
+        
+        validate = theano.function(
+            inputs = [batch_index],
+            outputs= self.errors(y),
+            givens={
+            x: validation_set_x[batch_index * batch_size: (batch_index+1)*batch_size],
+            y: validation_set_y[batch_index * batch_size: (batch_index+1)*batch_size]}
+            )
+        
+        train = theano.function(
+            inputs = [batch_index],
+            outputs = cost,
+            updates = updates,
+            givens = {
+            x: training_set_x[batch_index * batch_size: (batch_index+1)*batch_size],
+            y: training_set_y[batch_index * batch_size: (batch_index+1)*batch_size]}
+            )
+        
+        evaluate_train = theano.function(
+        inputs = [],
+        outputs = [self.predicted_class,y],
+        givens = {
+            x: training_set_x,
+            y:training_set_y
+        }
+        )
+        
+        evaluate_validation = theano.function(
+        inputs = [],
+        outputs = [self.predicted_class,y],
+        givens = {
+            x: validation_set_x,
+            y:validation_set_y
+        }
+        )
+        
+        
+        
+        patience = 10000  # look as this many examples regardless
+        patience_increase = 2  # wait this much longer when a new best is
+                                # found
+        improvement_threshold = 0.995  # a relative improvement of this much is
+                                        # considered significant
+        validation_frequency = min(training_batches, patience // 2)
+                                        # go through this many
+                                        # minibatche before checking the network
+                                        # on the validation set; in this case we
+                                        # check every epoch
+        
+        best_validation_loss = np.inf
+        best_iter = 0
+        test_score = 0.
+        start_time = timeit.default_timer()
+        n_epochs = 1000
+        epoch = 0
+        done_looping = False
+        loss_arr = []
+        while (epoch < n_epochs) and (not done_looping):
+            epoch = epoch + 1
+            for minibatch_index in range(training_batches):
+        
+                minibatch_avg_cost = train(minibatch_index)
+                # iteration number
+                iter = (epoch - 1) * training_batches + minibatch_index
+        
+                if print_val and ((iter + 1) % validation_frequency == 0):
+                    # compute zero-one loss on validation set
+                    validation_losses = [validate(i) for i
+                                            in range(validation_batches)]
+                    this_validation_loss = np.mean(validation_losses)
+                    loss_arr.append(this_validation_loss)
+        
+                    if print_val and ((iter + 1) % (validation_frequency*50) == 0):
+                        print(
+                            'epoch %i, minibatch %i/%i, validation error %f %%' %
+                            (
+                                epoch,
+                                minibatch_index + 1,
+                                training_batches,
+                                this_validation_loss * 100.
+                            )
+                        )
+        
+                    # if we got the best validation score until now
+                    if this_validation_loss < best_validation_loss:
+                        #improve patience if loss improvement is good enough
+                        if (
+                            this_validation_loss < best_validation_loss *
+                            improvement_threshold
+                        ):
+                            patience = max(patience, iter * patience_increase)
+        
+                        best_validation_loss = this_validation_loss
+                        best_iter = iter
+        
+                        # test it on the test set
+                        # test_losses = [test_model(i) for i
+                        #                 in range(n_test_batches)]
+                        # test_score = np.mean(test_losses)
+        
+                    ##   print(('     epoch %i, minibatch %i/%i, test error of '
+                        #         'best model %f %%') %
+                        #         (epoch, minibatch_index + 1, training_batches,
+                        #         test_score * 100.))
+        
+                if patience <= iter:
+                    done_looping = True
+                    break
+        
+        end_time = timeit.default_timer()
+        print(('Complete. Final score: %.3f. Best validation score of %.3f %% '
+                'obtained at iteration %i') %
+                (this_validation_loss*100.,best_validation_loss * 100., best_iter + 1),file=sys.stderr)
+        
+        print(('The code for file ' +
+                os.path.split(__file__)[1] +
+                ' ran for %.2fm' % ((end_time - start_time) / 60.) +
+                ' with learning_rate of %.5f' % (learning_rate)), file=sys.stderr)
+        
+        a,b = evaluate_train()
+        c,d = evaluate_validation()
+        return (self.shape, best_validation_loss*100, best_iter +1, (end_time-start_time)/60,learning_rate), confusion_matrix(a,b),confusion_matrix(c,d)
 
 class KNN():
     def __init__(self,input,targets):
@@ -194,7 +340,7 @@ class KNN():
         self.targets = targets
      
     
-    def initD2(self,filename=None):
+    def initD2(self,filename=None,size=None,indices=None):
         if(filename==None):
             D2 = np.zeros((len(self.data),len(self.data)))
             for i in range(len(self.data)):
@@ -208,46 +354,21 @@ class KNN():
                 progress_bar(i,len(self.data))    
         else:
             D2 = np.load(filename)
+            if(indices != None):
+                
+                temp = np.zeros((len(indices),len(indices)))
+                for y in range(len(indices)):
+                    for x in range(len(indices)):
+                        temp[y,x] = D2[indices[y],indices[x]]
+
+                D2 = temp
+                
+            elif(size):
+                D2 = D2[:size,:size]
+            
         self.D2 = D2
-          
-    
-    def test(self,k1,k2):
-        results = []
         
-        for k in range(k1,k2+1,2):
-            correct = 0
-            confidence = 0.
-            for img in range(len(self.data)):
-                # the 0th item in the list is the iage to itself, so it is removed
-                # put K in HERE you knob, instead of recalculating and sorting each time
-                costs = sorted(list(zip(self.D2[img],self.targets.argmax(axis=1))))
-                
-                pred = list(zip(*costs[:k]))[1][1:]
-                
-                max = 0
-                predicted_class = 0
-                for i in pred:
-                    cnt = 0
-                    for l in pred:
-                        
-                        if(i == l):
-                            cnt += 1
-                    if(cnt > max):
-                        max = cnt
-                        predicted_class = i
-                    
-                confidence += max/k * 100
-                if(predicted_class == self.targets[img].argmax()):
-                    correct += 1
-            confidence /= len(self.data)
-            results.append((correct, confidence))
-        self.results = results  
-        self.pred = list(zip(*costs[:k]))[1][1:]
-        self.costs= list(zip(*costs[:k]))[0][1:]
-        return results
-        
-    def test2(self,k_arr):
-        
+    def test(self,k_arr):
         results = []
         correct = np.zeros((len(k_arr))) 
              
@@ -285,18 +406,19 @@ class KNN():
                 
         
         for x in range(ind):
-            results.append((k_arr[x],correct[x],accuracy[x],confidence[x]))
+            results.append([k_arr[x],correct[x],accuracy[x],confidence[x]])
         
         self.results = results  
         self.pred = list(zip(*costs[:k]))[1][1:]
         self.costs= list(zip(*costs[:k]))[0][1:]
         
-        return results
+        return np.array(results)
     
     def run(self,x,y,k):
         temp = []
+        
         for img in range(len(self.data)):
-            if((self.data[img] == x).all()):
+            if(np.equal(self.data[img],x).all()):
                 continue
             cost2 = 0
             for px in range(len(self.data[img])):
@@ -304,7 +426,8 @@ class KNN():
                 cost2 += pow(self.data[img][px] - x[px],2)
             temp.append((cost2,self.targets[img].argmax()))
         
-        temp = sorted(temp)[1:]
+        temp = sorted(temp)[:]
+        
         
         cost = list(zip(*temp[:k]))[0]
         pred = list(zip(*temp[:k]))[1]
@@ -325,8 +448,10 @@ class KNN():
         
         
         
-        return  predicted_class, (y.argmax() == predicted_class), confidence
+        return  predicted_class, (y.argmax() == predicted_class), y.argmax(),confidence
 
+   
+        
 
 def get_images(w,h,file_list=None,num_classes=5):
     
@@ -447,163 +572,6 @@ def confusion_matrix(pred,target):
     return confusion_matrix
 
 
-
-def init_classifier(x,shape,num_classes=5,rng=np.random.RandomState(2)):
-    
-    return Multilayer_Perceptron(input=x,shape=shape,num_classes=5,rng=rng)
-
-
-    
-def test(learning_rate=0.001, L1_rg=0.0000, L2_rg=0.0001, n_epochs=100, batch_size=30, print_val = True):
-
-    
-
-    batch_index = T.lscalar('batch_index')
-    
-    rng = np.random.RandomState(2)
-    # classifier = Multilayer_Perceptron(input=x,shape=shape,n_classes=5,rng=rng)
-    cost = classifier.neg_log_likelihood(y) + L1_rg * classifier.L1 + L2_rg + classifier.L2
-    correct_classes = classifier.predicted_class
-    
-    gradients = [T.grad(cost,param) for param in classifier.parameters]
-    
-    updates = [(param, param - learning_rate*gparam) for param, gparam in zip(classifier.parameters,gradients)]
-    
-    validation_set_x = theano.shared(value=validation_set[0])
-    validation_set_y = theano.shared(value=validation_set[1].argmax(axis=1))
-    training_set_x = theano.shared(value=training_set[0])
-    training_set_y = theano.shared(value=training_set[1].argmax(axis=1))
-    
-  
-    
-    validate = theano.function(
-        inputs = [batch_index],
-        outputs= classifier.errors(y),
-        givens={
-        x: validation_set_x[batch_index * batch_size: (batch_index+1)*batch_size],
-        y: validation_set_y[batch_index * batch_size: (batch_index+1)*batch_size]}
-        )
-    
-    train = theano.function(
-        inputs = [batch_index],
-        outputs = cost,
-        updates = updates,
-        givens = {
-        x: training_set_x[batch_index * batch_size: (batch_index+1)*batch_size],
-        y: training_set_y[batch_index * batch_size: (batch_index+1)*batch_size]}
-        )
-    
-    evaluate_train = theano.function(
-    inputs = [],
-    outputs = [classifier.predicted_class,y],
-    givens = {
-        x: training_set_x,
-        y:training_set_y
-    }
-    )
-    
-    evaluate_validation = theano.function(
-    inputs = [],
-    outputs = [classifier.predicted_class,y],
-    givens = {
-        x: validation_set_x,
-        y:validation_set_y
-    }
-    )
-    
-    
-    
-    patience = 10000  # look as this many examples regardless
-    patience_increase = 2  # wait this much longer when a new best is
-                            # found
-    improvement_threshold = 0.995  # a relative improvement of this much is
-                                    # considered significant
-    validation_frequency = min(training_batches, patience // 2)
-                                    # go through this many
-                                    # minibatche before checking the network
-                                    # on the validation set; in this case we
-                                    # check every epoch
-    
-    best_validation_loss = np.inf
-    best_iter = 0
-    test_score = 0.
-    start_time = timeit.default_timer()
-    n_epochs = 1000
-    epoch = 0
-    done_looping = False
-    loss_arr = []
-    while (epoch < n_epochs) and (not done_looping):
-        epoch = epoch + 1
-        for minibatch_index in range(training_batches):
-    
-            minibatch_avg_cost = train(minibatch_index)
-            # iteration number
-            iter = (epoch - 1) * training_batches + minibatch_index
-    
-            if print_val and ((iter + 1) % validation_frequency == 0):
-                # compute zero-one loss on validation set
-                validation_losses = [validate(i) for i
-                                        in range(validation_batches)]
-                this_validation_loss = np.mean(validation_losses)
-                loss_arr.append(this_validation_loss)
-    
-                # if print_val and ((iter + 1) % (validation_frequency*50) == 0):
-                #     print(
-                #         'epoch %i, minibatch %i/%i, validation error %f %%' %
-                #         (
-                #             epoch,
-                #             minibatch_index + 1,
-                #             training_batches,
-                #             this_validation_loss * 100.
-                #         )
-                #     )
-    
-                # if we got the best validation score until now
-                if this_validation_loss < best_validation_loss:
-                    #improve patience if loss improvement is good enough
-                    if (
-                        this_validation_loss < best_validation_loss *
-                        improvement_threshold
-                    ):
-                        patience = max(patience, iter * patience_increase)
-    
-                    best_validation_loss = this_validation_loss
-                    best_iter = iter
-    
-                    # test it on the test set
-                    # test_losses = [test_model(i) for i
-                    #                 in range(n_test_batches)]
-                    # test_score = np.mean(test_losses)
-    
-                ##   print(('     epoch %i, minibatch %i/%i, test error of '
-                    #         'best model %f %%') %
-                    #         (epoch, minibatch_index + 1, training_batches,
-                    #         test_score * 100.))
-    
-            if patience <= iter:
-                done_looping = True
-                break
-    
-    end_time = timeit.default_timer()
-    print(('Complete. Final score: %.3f. Best validation score of %.3f %% '
-            'obtained at iteration %i') %
-            (this_validation_loss*100.,best_validation_loss * 100., best_iter + 1),file=sys.stderr)
-    
-    print(('The code for file ' +
-            os.path.split(__file__)[1] +
-            ' ran for %.2fm' % ((end_time - start_time) / 60.) +
-            ' with learning_rate of %.5f' % (learning_rate)), file=sys.stderr)
-    
-    a,b = evaluate_train()
-    c,d = evaluate_validation()
-    return (classifier.shape, best_validation_loss*100, best_iter +1, (end_time-start_time)/60,learning_rate), confusion_matrix(a,b),confusion_matrix(c,d)
-    
-    
-
-
-
-
-
 def reverseImgShow(weights,num_classes):
         weights = [np.fliplr(x.get_value().transpose()) for x in weights]
         weights = weights[::-1]
@@ -620,39 +588,85 @@ def reverseImgShow(weights,num_classes):
 
 
 def gen_sets(data,targets,train,val,test):
+    train,val,test = unit([train,val,test])
+    
     training_set   = np.zeros((int(len(data)*train),2))
     validation_set = np.zeros((int(len(data)*val  ),2))
     test_set       = np.zeros((int(len(data)*test ),2))
     rng = np.random.RandomState(2)
     indices = np.arange(len(data))
     
-    temp = rng.choice(np.arange(len(indices)),size=len(training_set),replace=False)
-    training_set = np.array([[data[x],targets[x]] for x in temp])\
+    temp = rng.choice(indices,size=len(training_set),replace=False)
+    training_indices = temp
+    training_set = (np.vstack(data[temp]),np.vstack(targets[temp]))
     # training_set = (data[temp],targets[temp])
     indices = np.delete(indices,temp)
     
-    temp = rng.choice(np.arange(len(indices)),size=len(validation_set),replace=False)
-    validation_set = (data[temp],targets[temp])
+    temp = rng.choice(indices,size=len(validation_set),replace=False)
+    validation_indices = temp
+    validation_set = (np.vstack(data[temp]),np.vstack(targets[temp]))
     indices = np.delete(indices,temp)
     
-    temp = rng.choice(np.arange(len(indices)),size=len(test_set),replace=False)
-    test_set = (data[temp],targets[temp])
+    temp = rng.choice(indices,size=len(test_set),replace=False)
+    testing_indices = temp
+    test_set = (np.vstack(data[temp]),np.vstack(targets[temp]))
     indices = np.delete(indices,temp)
-    print(indices)
     
-    return training_set, validation_set, test_set
+    return training_set, validation_set, test_set, (training_indices,validation_indices,testing_indices)
     
-def load_KNN(data,targets):
+def load_KNN(data,targets,indices=None):
     k = KNN(data,targets)
-    k.initD2("100x100.npy")
+    k.initD2(filename="100x100.npy",indices=indices)
+    k_arr = np.arange(1,int(len(data)/2),2,dtype="int32")
+    # k_values = k.test(k_arr)
     k_values = np.load("k_values.npy")
-    k_sorted = sorted(k_values,key=lambda x:x[1])
-    top3 = list(zip(*k_sorted[:3]))[0]
-    return k, k_values
+    k_sorted = sorted(k_values,key=lambda x:x[1])[::-1]
+    best_k = k_sorted[0][0]
+    return k, k_values, int(best_k)
 
-k, k_values = load_KNN(data,targets)
 
-training, validation, testing = gen_sets(data,targets,0.5,0.25,0.25)
+
+training_set, validation_set, test_set,indices = gen_sets(data,targets,50,25,25)
+
+
+def testKNN(training_set,validation_set,test):
+    #  KNN has no validation step, so the training and validation sets are combined
+    kdata = np.concatenate((training_set[0],validation_set[0]))
+    
+    ktargets= np.concatenate((training_set[1],validation_set[1]))
+    k_indices = np.concatenate((indices[0],indices[1]))
+    
+    
+    # 15.7229m calculating K values
+    
+    
+    
+    start_time = timeit.default_timer()
+    k, k_values, best_k = load_KNN(kdata,ktargets,indices=k_indices)
+    
+    
+    end_time = timeit.default_timer()
+    print("%.4fm calculating K values" % ((end_time-start_time)/60.))
+    
+    print(best_k)
+    
+    
+    start_time = timeit.default_timer()
+    correct = 0
+    results = []
+    for i in range(len(test_set[0])):
+        a = k.run(test_set[0][i],test_set[1][i],best_k)
+        results.append(a)
+        if(a[1]):
+            correct +=1
+        print("%s %d/%d (%d) correct"%((a,),correct,i+1,len(test_set[0])))
+    
+    end_time = timeit.default_timer()
+    print("%.4fm testing with optimal K" % ((end_time-start_time)/60.))
+    
+    return results
+
+
 
 # results = []
 # 
@@ -660,8 +674,10 @@ training, validation, testing = gen_sets(data,targets,0.5,0.25,0.25)
 # s = [10,50,100,250,500,1000]
 # # results.append(test(learning_rate = 0.01, shape = (10000,s),print_val = True))
 # # results.append(test(learning_rate = 0.00001, shape = (10000,s),print_val = True))
-# x = T.dmatrix('x')
-# y = T.lvector('y')
+x = T.dmatrix('x')
+y = T.lvector('y')
+classifier = Multilayer_Perceptron(x,(IMG_WIDTH*IMG_HEIGHT,10),num_classes=5,rng=np.random.RandomState(2))
+classifier.test(n_epochs=1000)
 # 
 # 
 # 
