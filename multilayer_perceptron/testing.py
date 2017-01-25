@@ -20,6 +20,19 @@ import timeit
 import os
 from collections import OrderedDict
 
+
+def progress_bar(current,total):
+    div = current/total
+    bar_length = 20
+    percentage = 100*div
+    progress = '#'*int(bar_length*div) + ' '*(bar_length-int(bar_length*div))
+    out_str = "Progress: [%s] %.3f%%\r" % (progress,percentage)
+    sys.stdout.write(out_str)
+    sys.stdout.flush()
+    if(current >= total):
+        print("Complete.")
+    
+
 def pinv(M,eps=0.0001):
     u,s,v = np.linalg.svd(M)
     u = u.transpose()
@@ -174,6 +187,147 @@ class Multilayer_Perceptron():
         self.shape = shape
 
 
+class KNN():
+    def __init__(self,input,targets):
+        # note that inputs and targets are of type numpy.ndarray
+        self.data = input
+        self.targets = targets
+     
+    
+    def initD2(self,filename=None):
+        if(filename==None):
+            D2 = np.zeros((len(self.data),len(self.data)))
+            for i in range(len(self.data)):
+                for l in range(i,len(self.data)):
+                    cost = 0
+                    if(i != l):
+                        for j in range(len(self.data[i])):
+                            cost += pow(self.data[i][j] - self.data[l][j],2)
+                    D2[i][l] = D2[l][i] = cost      
+            
+                progress_bar(i,len(self.data))    
+        else:
+            D2 = np.load(filename)
+        self.D2 = D2
+          
+    
+    def test(self,k1,k2):
+        results = []
+        
+        for k in range(k1,k2+1,2):
+            correct = 0
+            confidence = 0.
+            for img in range(len(self.data)):
+                # the 0th item in the list is the iage to itself, so it is removed
+                # put K in HERE you knob, instead of recalculating and sorting each time
+                costs = sorted(list(zip(self.D2[img],self.targets.argmax(axis=1))))
+                
+                pred = list(zip(*costs[:k]))[1][1:]
+                
+                max = 0
+                predicted_class = 0
+                for i in pred:
+                    cnt = 0
+                    for l in pred:
+                        
+                        if(i == l):
+                            cnt += 1
+                    if(cnt > max):
+                        max = cnt
+                        predicted_class = i
+                    
+                confidence += max/k * 100
+                if(predicted_class == self.targets[img].argmax()):
+                    correct += 1
+            confidence /= len(self.data)
+            results.append((correct, confidence))
+        self.results = results  
+        self.pred = list(zip(*costs[:k]))[1][1:]
+        self.costs= list(zip(*costs[:k]))[0][1:]
+        return results
+        
+    def test2(self,k_arr):
+        
+        results = []
+        correct = np.zeros((len(k_arr))) 
+             
+        for img in range(len(self.data)):
+            # the 0th item in the list is the image to itself, so it is removed
+            # put K in HERE you knob, instead of recalculating and sorting each time
+            costs = sorted(list(zip(self.D2[img],self.targets.argmax(axis=1))))
+            
+            pred_lst = np.zeros((len(k_arr)))
+            confidence = np.zeros((len(k_arr)))
+            accuracy = np.zeros((len(k_arr)))
+            ind = 0
+            for k in k_arr:
+                
+                
+                pred = list(zip(*costs[:k]))[1][1:]
+            
+                predicted_class = 0
+                max = 0 
+                for i in pred: 
+                    cnt = 0
+                    for l in pred:
+                        
+                        if(i == l):
+                            cnt += 1
+                    if(cnt > max):
+                        max = cnt
+                        predicted_class = i
+                # pred_lst[ind] = predicted_class
+                if(predicted_class == self.targets[img].argmax()):
+                    correct[ind] += 1
+                confidence[ind] += max/k * 100
+                accuracy[ind] = correct[ind]/len(self.data) * 100
+                ind +=1 
+                
+        
+        for x in range(ind):
+            results.append((k_arr[x],correct[x],accuracy[x],confidence[x]))
+        
+        self.results = results  
+        self.pred = list(zip(*costs[:k]))[1][1:]
+        self.costs= list(zip(*costs[:k]))[0][1:]
+        
+        return results
+    
+    def run(self,x,y,k):
+        temp = []
+        for img in range(len(self.data)):
+            if((self.data[img] == x).all()):
+                continue
+            cost2 = 0
+            for px in range(len(self.data[img])):
+                
+                cost2 += pow(self.data[img][px] - x[px],2)
+            temp.append((cost2,self.targets[img].argmax()))
+        
+        temp = sorted(temp)[1:]
+        
+        cost = list(zip(*temp[:k]))[0]
+        pred = list(zip(*temp[:k]))[1]
+        
+        max = 0
+        predicted_class = []
+        for i in pred:
+            cnt = 0
+            for l in pred:
+                
+                if(i == l):
+                    cnt += 1
+            if(cnt > max):
+                max = cnt
+                predicted_class = i
+
+        confidence = max/k * 100
+        
+        
+        
+        return  predicted_class, (y.argmax() == predicted_class), confidence
+
+
 def get_images(w,h,file_list=None,num_classes=5):
     
     infile = 'filenames5.txt'
@@ -224,8 +378,8 @@ def get_images(w,h,file_list=None,num_classes=5):
     return img_arr,target_arr,suffixes
 
 
-IMG_WIDTH = 20
-IMG_HEIGHT = 20
+IMG_WIDTH = 100
+IMG_HEIGHT = 100
 
 batch_size = 30
 num_classes=5
@@ -445,26 +599,7 @@ def test(learning_rate=0.001, L1_rg=0.0000, L2_rg=0.0001, n_epochs=100, batch_si
     return (classifier.shape, best_validation_loss*100, best_iter +1, (end_time-start_time)/60,learning_rate), confusion_matrix(a,b),confusion_matrix(c,d)
     
     
-results = []
 
-l = [0.00001,0.0001,0.001,0.01]
-s = [10,50,100,250,500,1000]
-# results.append(test(learning_rate = 0.01, shape = (10000,s),print_val = True))
-# results.append(test(learning_rate = 0.00001, shape = (10000,s),print_val = True))
-x = T.dmatrix('x')
-y = T.lvector('y')
-
-
-
-for i in s:
-    classifier = init_classifier(x,(IMG_WIDTH*IMG_HEIGHT,i),num_classes=5)
-    for k in l:
-        results.append(test(learning_rate = k))
-
-for k in results:
-    print(k[0])
-    print(k[1])
-    print(k[2])
 
 
 
@@ -482,24 +617,100 @@ def reverseImgShow(weights,num_classes):
         return results
 
 
-# a = reverseImgShow(classifier.weights,5)
 
-# fig = plt.figure()
-# a1 = fig.add_subplot()
-# plt.imshow(a[0],interpolation="none",cmap="gray")
+
+def gen_sets(data,targets,train,val,test):
+    training_set   = np.zeros((int(len(data)*train),2))
+    validation_set = np.zeros((int(len(data)*val  ),2))
+    test_set       = np.zeros((int(len(data)*test ),2))
+    rng = np.random.RandomState(2)
+    indices = np.arange(len(data))
+    
+    temp = rng.choice(np.arange(len(indices)),size=len(training_set),replace=False)
+    training_set = np.array([[data[x],targets[x]] for x in temp])\
+    # training_set = (data[temp],targets[temp])
+    indices = np.delete(indices,temp)
+    
+    temp = rng.choice(np.arange(len(indices)),size=len(validation_set),replace=False)
+    validation_set = (data[temp],targets[temp])
+    indices = np.delete(indices,temp)
+    
+    temp = rng.choice(np.arange(len(indices)),size=len(test_set),replace=False)
+    test_set = (data[temp],targets[temp])
+    indices = np.delete(indices,temp)
+    print(indices)
+    
+    return training_set, validation_set, test_set
+    
+def load_KNN(data,targets):
+    k = KNN(data,targets)
+    k.initD2("100x100.npy")
+    k_values = np.load("k_values.npy")
+    k_sorted = sorted(k_values,key=lambda x:x[1])
+    top3 = list(zip(*k_sorted[:3]))[0]
+    return k, k_values
+
+k, k_values = load_KNN(data,targets)
+
+training, validation, testing = gen_sets(data,targets,0.5,0.25,0.25)
+
+# results = []
+# 
+# l = [0.00001,0.0001,0.001,0.01]
+# s = [10,50,100,250,500,1000]
+# # results.append(test(learning_rate = 0.01, shape = (10000,s),print_val = True))
+# # results.append(test(learning_rate = 0.00001, shape = (10000,s),print_val = True))
+# x = T.dmatrix('x')
+# y = T.lvector('y')
+# 
+# 
+# 
+# for i in s:
+#     classifier = init_classifier(x,(IMG_WIDTH*IMG_HEIGHT,i),num_classes=5)
+#     for k in l:
+#         results.append(test(learning_rate = k))
+# 
+# for k in results:
+#     print(k[0])
+#     print(k[1])
+#     print(k[2])
+
+
+
+# 
+# start_time = timeit.default_timer()
+# results = k.test2(k_arr)
+# np.save("k_values10x10",results)
+# end_time = timeit.default_timer()
+# print("%.4fm calculating K values" % ((end_time-start_time)/60.))
+# 
+# 
+# k_ascending = sorted(results,key=lambda x:x[1])[-1]
+# 
+# print("Top 3 K values: %d, %d, %d" %(k_ascending[0],k_ascending[1],k_ascending[2]))
+# 
+
+
+
+# plt.figure(1)
+# plt.subplot(2,1,1)
+# x = k_arr
+# y = k_err
+# plt.axis([min(x), max(x)+1, 0, 100])
+# plt.xlabel("K")
+# plt.ylabel("Error")
+# plt.title("All values of K up to 1291")
+# plt.plot(x,y)
+# plt.subplot(2,1,2)
+# x = k_arr[:25]
+# y = k_err[:25]
+# plt.plot(x,y)
+# plt.axis([min(x), max(x), 0, 100])
+# plt.ylabel("Error")
+# plt.xlabel("K")
+# plt.xticks(np.arange(min(x), max(x)+1, 10))
+# plt.title("First 25 values of K")
 # plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

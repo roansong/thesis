@@ -1,6 +1,18 @@
 \chapter{Results}
 
 
+\section{KNN Results}
+The KNN algorithm is simple to execute, but scales poorly with dataset size and image size. Using a dataset of 1291 images, of size 100x100, the largest bottleneck in the procedure is the generation of the squared distance matrix D2, taking 182 minutes (3 hours and 2 minutes) to complete. This was then saved to prevent the need to recalculate it in future. The time taken to calculate the optimal value of K is also proportional to the number of images, taking 379 minutes (6 hours and 19 minutes) when considering all odd values of K up to and including 1291. Plotting these K-values vs the training error obtained for each value is shown in Figure~\ref{fig:k_values}. The time taken to classify a single instance is 0.25m (15s). Testing though the full set of 1291 to obtain the training classification accuracy takes \~1291*0.25 minutes, resulting in a real-world time of 342 minutes (5 hours and 42 minutes). 
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{figures/k_values1291}
+	\caption{Optimising for K}
+	\label{fig:k_values}
+	\centering
+\end{figure}
+
+
 \section{Multilayer Perceptron Initial Results}
 The results in this section use an input image of 100x100px. The image is cropped around the center of the image. For some images smaller than this size (e.g. the SLICY set at 54x54px) the images are padded with zeroes to ensure a consistent input image size. The multilayer perceptron has two hidden layers, of 30 and 20 neurons, respectively. The resulting structure is thus 10,000 input neurons feeding into 30, feeding into 20, feeding into the five output neurons. Back-propagation through all layers is applied after every forward run, which has effects on the output that can be seen in ~\ref{sec:analysis}. The cost function is the square of the error. The system is trained for 10,000 iterations, and settles after approximately 300. The input images are taken in order (i.e. 195 BTR 60 images, then 274 2S1 images, etc.) per iteration. The layout of the input data is shown in Table~\ref{tab:input_data}. \\
 

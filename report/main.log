@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2016.10.1)  20 JAN 2017 20:25
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2016.10.1)  24 JAN 2017 20:41
 entering extended mode
 **./main.tex
 (main.tex
@@ -896,7 +896,7 @@ LaTeX Info: Redefining \nameref on input line 11.
 \openout4 = `main.out'.
 
  (frontmatter/Cover.tex
-<figures/logo.pdf, id=265, 115.1502pt x 116.8365pt>
+<figures/logo.pdf, id=293, 115.1502pt x 116.8365pt>
 File: figures/logo.pdf Graphic file (type pdf)
  <use figures/logo.pdf>
 Package pdftex.def Info: figures/logo.pdf used on input line 6.
@@ -942,52 +942,64 @@ No file main.nls.
 Chapter 1.
 [1
 
-]) (body/2--LiteratureReview.tex [2]
+] [2]) (body/2--LiteratureReview.tex [3]
 Chapter 2.
 
-Underfull \hbox (badness 1454) in paragraph at lines 3--3
-[]\OT1/cmr/bx/n/17.28 What is a Lit-er-a-ture Re-view (Temp
+Underfull \hbox (badness 2717) in paragraph at lines 47--48
+\OT1/cmr/m/n/12 The dataset cho-sen for this re-port is com-prised of SAR im-ag
+ery.
  []
 
-[3
 
-]
-Underfull \hbox (badness 1062) in paragraph at lines 45--47
+Underfull \hbox (badness 1062) in paragraph at lines 51--52
 \OT1/cmr/m/n/12 The MSTAR pub-lic mixed tar-gets dataset con-tains X-band syn-t
 hetic
  []
 
-[4] [5] [6]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 80.
+[4
+
+] <figures/sar_differences.png, id=465, 694.09312pt x 345.54094pt>
+File: figures/sar_differences.png Graphic file (type png)
+
+<use figures/sar_differences.png>
+Package pdftex.def Info: figures/sar_differences.png used on input line 58.
+(pdftex.def)             Requested size: 390.0pt x 194.16066pt.
+ [5] [6 <./figures/sar_differences.png>]
+[7]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 94.
  ("C:\Program Files\MiKTeX 2.9\tex\latex\base\omscmr.fd"
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 80.
- [7]
-Underfull \hbox (badness 1708) in paragraph at lines 97--98
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 94.
+ [8]
+Underfull \hbox (badness 1708) in paragraph at lines 111--112
 \OT1/cmr/m/n/12 an ex-am-ple of a deep neu-ral net-work with a fairly straight-
 for-ward
  []
 
-[8] [9] [10]
-Underfull \hbox (badness 1460) in paragraph at lines 145--146
+[9] [10] [11]
+Underfull \hbox (badness 1460) in paragraph at lines 159--160
 []\OT1/cmr/m/n/12 Once the train-ing is com-plete, hav-ing achieved the de-sire
 d level of
  []
 
-[11]) (body/3--Methodology.tex [12]
+[12]) (body/3--Methodology.tex [13]
 Chapter 3.
 
 Underfull \hbox (badness 10000) in paragraph at lines 3--4
 
  []
 
-[13
+[14
 
-]) (body/4--Design.tex [14] [15]
+]
+
+LaTeX Warning: Reference `D2' on page 15 undefined on input line 26.
+
+[15]) (body/4--Design.tex [16] [17]
 Chapter 4.
-<figures/vee_diagram.pdf, id=501, 848.16875pt x 439.6425pt>
+<figures/vee_diagram.pdf, id=554, 848.16875pt x 439.6425pt>
 File: figures/vee_diagram.pdf Graphic file (type pdf)
 
 <use figures/vee_diagram.pdf>
@@ -999,22 +1011,22 @@ Underfull \hbox (badness 1286) in paragraph at lines 19--20
 eep learn-ing
  []
 
-[16
+[18
 
-] [17 <./figures/vee_diagram.pdf>]
+] [19 <./figures/vee_diagram.pdf>]
 Underfull \hbox (badness 2452) in paragraph at lines 35--36
 \OT1/cmr/m/n/12 op-er-a-tion, and im-ple-men-ta-tion. An ac-com-pa-ni-ment ex-p
 lain-ing the
  []
 
-[18] [19] <figures/nearest-neighbour.pdf, id=524, 611.28375pt x 654.445pt>
+[20] [21] <figures/nearest-neighbour.pdf, id=578, 611.28375pt x 654.445pt>
 File: figures/nearest-neighbour.pdf Graphic file (type pdf)
 
 <use figures/nearest-neighbour.pdf>
 Package pdftex.def Info: figures/nearest-neighbour.pdf used on input line 71.
 (pdftex.def)             Requested size: 390.0pt x 417.5352pt.
- [20] [21 <./figures/nearest-neighbour.pdf>] [22]
-<figures/multilayer_perceptron_neuron.pdf, id=553, 684.5575pt x 423.5825pt>
+ [22] [23 <./figures/nearest-neighbour.pdf>] [24]
+<figures/multilayer_perceptron_neuron.pdf, id=606, 684.5575pt x 423.5825pt>
 File: figures/multilayer_perceptron_neuron.pdf Graphic file (type pdf)
 
 <use figures/multilayer_perceptron_neuron.pdf>
@@ -1025,7 +1037,7 @@ Package pdftex.def Info: figures/multilayer_perceptron_neuron.pdf used on input
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<figures/multilayer_perceptron_neuron2.pdf, id=554, 610.28pt x 130.4875pt>
+<figures/multilayer_perceptron_neuron2.pdf, id=607, 610.28pt x 130.4875pt>
 File: figures/multilayer_perceptron_neuron2.pdf Graphic file (type pdf)
 
 <use figures/multilayer_perceptron_neuron2.pdf>
@@ -1036,9 +1048,9 @@ t line 141.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[23] [24 <./figures/multilayer_perceptron_neuron.pdf> <./figures/multilayer_per
+[25] [26 <./figures/multilayer_perceptron_neuron.pdf> <./figures/multilayer_per
 ceptron_neuron2.pdf>]
-<figures/multilayer_perceptron.pdf, id=575, 764.8575pt x 744.7825pt>
+<figures/multilayer_perceptron.pdf, id=628, 764.8575pt x 744.7825pt>
 File: figures/multilayer_perceptron.pdf Graphic file (type pdf)
 
 <use figures/multilayer_perceptron.pdf>
@@ -1046,7 +1058,7 @@ Package pdftex.def Info: figures/multilayer_perceptron.pdf used on input line 1
 60.
 (pdftex.def)             Requested size: 390.0pt x 379.76587pt.
 
-<figures/multilayer_perceptron_input.pdf, id=576, 764.8575pt x 283.0575pt>
+<figures/multilayer_perceptron_input.pdf, id=629, 764.8575pt x 283.0575pt>
 File: figures/multilayer_perceptron_input.pdf Graphic file (type pdf)
 
 <use figures/multilayer_perceptron_input.pdf>
@@ -1057,47 +1069,53 @@ line 170.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[25 <./figures/multilayer_perceptron.pdf>]
+[27 <./figures/multilayer_perceptron.pdf>]
 Underfull \hbox (badness 10000) in paragraph at lines 180--182
 
  []
 
-[26 <./figures/multilayer_perceptron_input.pdf>] [27]) (body/5--Results.tex
-[28]
+[28 <./figures/multilayer_perceptron_input.pdf>] [29]) (body/5--Results.tex
+[30]
 Chapter 5.
+<figures/k_values1291.pdf, id=659, 886.2109pt x 729.0236pt>
+File: figures/k_values1291.pdf Graphic file (type pdf)
 
-Underfull \hbox (badness 10000) in paragraph at lines 5--6
+<use figures/k_values1291.pdf>
+Package pdftex.def Info: figures/k_values1291.pdf used on input line 9.
+(pdftex.def)             Requested size: 390.0pt x 320.827pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 17--18
 
  []
 
-[29
+[31
 
-]
-<figures/multilayer_perceptron_average_cost.pdf, id=614, 578.16pt x 431.81326pt
+] [32 <./figures/k_values1291.pdf>]
+<figures/multilayer_perceptron_average_cost.pdf, id=705, 578.16pt x 431.81326pt
 >
 File: figures/multilayer_perceptron_average_cost.pdf Graphic file (type pdf)
  <use figures/multilayer_perceptron_average_cost.pdf>
 Package pdftex.def Info: figures/multilayer_perceptron_average_cost.pdf used on
- input line 44.
+ input line 56.
 (pdftex.def)             Requested size: 390.0pt x 291.27687pt.
 
-<figures/multilayer_perceptron_actual_cost.pdf, id=615, 578.16pt x 431.81326pt>
+<figures/multilayer_perceptron_actual_cost.pdf, id=706, 578.16pt x 431.81326pt>
 File: figures/multilayer_perceptron_actual_cost.pdf Graphic file (type pdf)
 <use figures/multilayer_perceptron_actual_cost.pdf>
 Package pdftex.def Info: figures/multilayer_perceptron_actual_cost.pdf used on 
-input line 52.
+input line 64.
 (pdftex.def)             Requested size: 390.0pt x 291.27687pt.
 ) (body/6--Conclusion.tex
-[30] [31 <./figures/multilayer_perceptron_average_cost.pdf>] [32 <./figures/mul
-tilayer_perceptron_actual_cost.pdf>]
+[33] [34 <./figures/multilayer_perceptron_average_cost.pdf>] [35 <./figures/mul
+tilayer_perceptron_actual_cost.pdf>] [36]
 Chapter 6.
-) (main.bbl [33
+) (main.bbl [37
 
 ]
 Missing character: There is no â in font cmr12!
 Missing character: There is no € in font cmr12!
 Missing character: There is no “ in font cmr12!
-) (body/7--Appendices.tex [34
+) (body/7--Appendices.tex [38
 
 ]
 Appendix A.
@@ -1107,23 +1125,27 @@ Underfull \hbox (badness 1019) in paragraph at lines 11--12
 ith the
  []
 
-[35
+[39
 
-]) [36]
+]) [40]
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 36.
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 36.
  (main.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 36.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 36.
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 80A6DD0CD7D49C6AC972D4EDD85207EA;4613.
+(rerunfilecheck)             Checksum: F8D5C1EC7D4BE0CD4B3F92D12BE13901;5079.
+
+
+LaTeX Warning: There were undefined references.
+
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 36.
  ) 
 Here is how much of TeX's memory you used:
- 27846 strings out of 493334
- 657385 string characters out of 3139238
- 843930 words of memory out of 3000000
- 30693 multiletter control sequences out of 15000+200000
+ 27883 strings out of 493334
+ 658021 string characters out of 3139238
+ 844930 words of memory out of 3000000
+ 30711 multiletter control sequences out of 15000+200000
  10836 words of font info for 38 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  64i,12n,96p,1223b,609s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -1137,9 +1159,9 @@ s/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Program Files/MiKTeX
 type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/pu
 blic/amsfonts/cm/cmsy6.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsf
 onts/cm/cmti12.pfb>
-Output written on main.pdf (46 pages, 610008 bytes).
+Output written on main.pdf (50 pages, 688523 bytes).
 PDF statistics:
- 774 PDF objects out of 1000 (max. 8388607)
- 156 named destinations out of 1000 (max. 500000)
- 578 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 873 PDF objects out of 1000 (max. 8388607)
+ 173 named destinations out of 1000 (max. 500000)
+ 644 words of extra memory for PDF output out of 10000 (max. 10000000)
 
