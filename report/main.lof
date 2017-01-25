@@ -1,15 +1,17 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Rotational difference between two images of the same class}}{6}{figure.2.1}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Vee Diagram}}{18}{figure.4.1}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Nearest Neighbour Classification Flow Diagram}}{22}{figure.4.2}
-\contentsline {figure}{\numberline {4.3}{\ignorespaces A Neuron in the Network}}{25}{figure.4.3}
-\contentsline {figure}{\numberline {4.4}{\ignorespaces The Internal Workings of a Neuron}}{25}{figure.4.4}
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Multilayer Perceptron Overview}}{26}{figure.4.5}
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Multilayer Perceptron Input Layer}}{27}{figure.4.6}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Vee Diagram}}{19}{figure.4.1}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Nearest Neighbour Classification Flow Diagram}}{23}{figure.4.2}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces A Neuron in the Network}}{26}{figure.4.3}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces The Internal Workings of a Neuron}}{26}{figure.4.4}
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Multilayer Perceptron Overview}}{27}{figure.4.5}
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Multilayer Perceptron Input Layer}}{28}{figure.4.6}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {5.1}{\ignorespaces Average Cost Over Time}}{32}{figure.5.1}
-\contentsline {figure}{\numberline {5.2}{\ignorespaces Actual Cost Within an Iteration}}{33}{figure.5.2}
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Optimising for K}}{32}{figure.5.1}
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Average Cost Over Time}}{34}{figure.5.2}
+\contentsline {figure}{\numberline {5.3}{\ignorespaces Actual Cost Within an Iteration}}{35}{figure.5.3}
 \addvspace {10\p@ }
 \addvspace {10\p@ }

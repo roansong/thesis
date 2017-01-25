@@ -599,6 +599,61 @@ def test(learning_rate=0.001, L1_rg=0.0000, L2_rg=0.0001, n_epochs=100, batch_si
     return (classifier.shape, best_validation_loss*100, best_iter +1, (end_time-start_time)/60,learning_rate), confusion_matrix(a,b),confusion_matrix(c,d)
     
     
+
+
+
+
+
+def reverseImgShow(weights,num_classes):
+        weights = [np.fliplr(x.get_value().transpose()) for x in weights]
+        weights = weights[::-1]
+        targets = np.diag(np.ones(num_classes))
+        results = []
+        for i in targets:
+            temp = np.dot(i,weights[0])
+            temp = np.dot(temp,weights[1])
+            results.append(temp)
+        results = [x.reshape((IMG_HEIGHT,IMG_WIDTH)).astype('float32') for x in results]
+        return results
+
+
+
+
+def gen_sets(data,targets,train,val,test):
+    training_set   = np.zeros((int(len(data)*train),2))
+    validation_set = np.zeros((int(len(data)*val  ),2))
+    test_set       = np.zeros((int(len(data)*test ),2))
+    rng = np.random.RandomState(2)
+    indices = np.arange(len(data))
+    
+    temp = rng.choice(np.arange(len(indices)),size=len(training_set),replace=False)
+    training_set = np.array([[data[x],targets[x]] for x in temp])\
+    # training_set = (data[temp],targets[temp])
+    indices = np.delete(indices,temp)
+    
+    temp = rng.choice(np.arange(len(indices)),size=len(validation_set),replace=False)
+    validation_set = (data[temp],targets[temp])
+    indices = np.delete(indices,temp)
+    
+    temp = rng.choice(np.arange(len(indices)),size=len(test_set),replace=False)
+    test_set = (data[temp],targets[temp])
+    indices = np.delete(indices,temp)
+    print(indices)
+    
+    return training_set, validation_set, test_set
+    
+def load_KNN(data,targets):
+    k = KNN(data,targets)
+    k.initD2("100x100.npy")
+    k_values = np.load("k_values.npy")
+    k_sorted = sorted(k_values,key=lambda x:x[1])
+    top3 = list(zip(*k_sorted[:3]))[0]
+    return k, k_values
+
+k, k_values = load_KNN(data,targets)
+
+training, validation, testing = gen_sets(data,targets,0.5,0.25,0.25)
+
 # results = []
 # 
 # l = [0.00001,0.0001,0.001,0.01]
@@ -622,147 +677,40 @@ def test(learning_rate=0.001, L1_rg=0.0000, L2_rg=0.0001, n_epochs=100, batch_si
 
 
 
-
-def reverseImgShow(weights,num_classes):
-        weights = [np.fliplr(x.get_value().transpose()) for x in weights]
-        weights = weights[::-1]
-        targets = np.diag(np.ones(num_classes))
-        results = []
-        for i in targets:
-            temp = np.dot(i,weights[0])
-            temp = np.dot(temp,weights[1])
-            results.append(temp)
-        results = [x.reshape((IMG_HEIGHT,IMG_WIDTH)).astype('float32') for x in results]
-        return results
-
-
-
-
-def gen_sets(data,targets,train,val,test):
-    training_set = np.zeros((len(data)*train,2))
-    validation_set = np.zeros((len(data)*valid,2))
-    test_set = np.zeros((len(data)*test,2))
-    
-    
-
-
-
-
-x = data[0]
-
-
-
-y = targets[0]
-
-instances = 1291
-k1 = 1
-k2 = 1000
-k_arr = [1,3,5,7,9,11,21,51,101,251,501,1001]
-k_arr = list(range(1,1291,2))
-
-data2 = data[:instances]
-targets2 = targets[:instances]
-k = KNN(data2,targets2)
-
-
-
-
-print("Beginning KNN")
-start_time = timeit.default_timer()
-k.initD2(filename="100x100.npy")
-end_time = timeit.default_timer()
-print("%.4fm taken to load the squared distance matrix" % ((end_time-start_time)/60.))
-
-
-
-
+# 
 # start_time = timeit.default_timer()
-# a = k.test(k1,k2)
-# end_time = timeit.default_timer()
-# print("%.4fm taken to run the old way" % ((end_time-start_time)/60.))
-
-
-start_time = timeit.default_timer()
 # results = k.test2(k_arr)
-results = np.load("k_values.npy")
-end_time = timeit.default_timer()
-print("%.4fm loading K values" % ((end_time-start_time)/60.))
-
-
-k_ascending = sorted(results,key=lambda x:x[1])[-1]
-
-# start_time = timeit.default_timer()
-# t = k.run(x,y,i)
+# np.save("k_values10x10",results)
 # end_time = timeit.default_timer()
+# print("%.4fm calculating K values" % ((end_time-start_time)/60.))
 # 
-# print("%.4fm taken to classify" % ((end_time-start_time)/60.))
+# 
+# k_ascending = sorted(results,key=lambda x:x[1])[-1]
+# 
+# print("Top 3 K values: %d, %d, %d" %(k_ascending[0],k_ascending[1],k_ascending[2]))
+# 
 
 
 
-print("Top 3 K values: %d, %d, %d" %(k_ascending[0],k_ascending[1],k_ascending[2]))
-# 
-# i = int(k_ascending[0])
-# temp = []
-# start_time = timeit.default_timer()
-# right = 0
-# for j in range(instances):
-#     b = k.run(data[j],targets[j],i)
-#     temp.append(b)
-#     if(b[1]):
-#         right +=1
-# end_time = timeit.default_timer()
-# print("Prediction accuracy: %.4f (%d/%d)" % (right/instances,right,instances))
-# print("%.4fm taken to run the shit part" % ((end_time-start_time)/60.))
-# 
-# np.save("knn_test" + str(i),temp)
-# 
-# 
-# 
-# i = int(k_ascending[2])
-# temp = []
-# start_time = timeit.default_timer()
-# right = 0
-# for j in range(instances):
-#     b = k.run(data[j],targets[j],i)
-#     temp.append(b)
-#     if(b[1]):
-#         right +=1
-# end_time = timeit.default_timer()
-# print("Prediction accuracy: %.4f (%d/%d)" % (right/instances,right,instances))
-# print("%.4fm taken to run the shit part" % ((end_time-start_time)/60.))
-# 
-# np.save("knn_test" + str(i),temp)
-
-
-# results = []
-# data = data[:]
-# targets = targets[:]
-# for n in range(1,3):
-#     correct = 0
-#     for i in range(len(data)):
-#         temp = k.run(data[i],targets[i],n)
-#         if(temp[1]):
-#             correct += 1
-#     results.append((n,correct))
-# print(results)
-# a = reverseImgShow(classifier.weights,5)
-
-# fig = plt.figure()
-# a1 = fig.add_subplot()
-# plt.imshow(a[0],interpolation="none",cmap="gray")
+# plt.figure(1)
+# plt.subplot(2,1,1)
+# x = k_arr
+# y = k_err
+# plt.axis([min(x), max(x)+1, 0, 100])
+# plt.xlabel("K")
+# plt.ylabel("Error")
+# plt.title("All values of K up to 1291")
+# plt.plot(x,y)
+# plt.subplot(2,1,2)
+# x = k_arr[:25]
+# y = k_err[:25]
+# plt.plot(x,y)
+# plt.axis([min(x), max(x), 0, 100])
+# plt.ylabel("Error")
+# plt.xlabel("K")
+# plt.xticks(np.arange(min(x), max(x)+1, 10))
+# plt.title("First 25 values of K")
 # plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

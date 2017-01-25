@@ -16,13 +16,16 @@ The steps necessary to implement the NN on the MSTAR dataset are as follows:\\
 
 
 
-The KNN classifier works by predicting the class of an instance based on its relative distance to nearby instances. The K nearest instances (the ``neighbours'' after which the classifier is named) are used, and the most common class amongst them is selected as the predicted class. K can be optimised for each dataset, and 
+The KNN classifier works by predicting the class of an instance based on its relative distance to nearby instances. The K nearest instances (the ``neighbours'' after which the classifier is named) are used, and the most common class amongst them is selected as the predicted class. K is always an odd number, to prevent ties. A measure of confidence in the prediction can be taken as the ratio of the most occurring class to the total number of neighbours under consideration. K can be optimised for each dataset
 
 \subsection{Implementation}
 \subsubsection{The algorithm}
-Given a training dataset of known instances and targets
-\subsubsection{Optimising the classifier}
-Optimal K values are found by performing leave-one-out cross-validation (LOOCV) and finding which value of k gives the greatest prediction accuracy across all cases. To find this value of k using the previous algorithm is a very time-consuming process. Because this optimisation uses only the training set, the process can be sped up significantly. A matrix containing the squared distances between each instance is constructed. An example of such a matrix is show in Figure~\ref{D2}.
+Given a training dataset of known instances and targets, and an input instance X, the squared difference between X and each instance in the dataset is calculated. The K closest instances (neighbours) are selected, and the class predicted is the most commonly occurring class within the selection of neighbours. The time taken to predict a class is linearly proportional to the size of the training dataset $(O(n))$, and exponentially proportional to the size of each instance $(O(n^2))$. A 100x100 image has 10,000 points of comparison; 100 times more than a 10x10px image. Reducing the image size through cropping or dimensionality reduction can thus have a desirable effect on computation time.
+
+\subsubsection{Optimising for K}
+Optimal K values are found by performing leave-one-out cross-validation (LOOCV) and finding which value of k gives the greatest prediction accuracy across all cases. To find this value of k using the previous algorithm is a very time-consuming process. Because this optimisation uses only the training set, the process can be sped up significantly. A matrix containing the squared distances between each instance is constructed. An example of such a matrix is shown in Figure~\ref{D2}. Each row represents the squared distances between the instance corresponding to that row, and every other instance. This leads to the matrix being mirrored along its leading diagonal, which speeds up the construction of the matrix by not having to recalculate those values. All of the diagonals of the matrix are zero; they represent the distance between an instance and itself. 
+
+To optimise for K, each row is taken in turn, sorted in ascending order, removing the first element (the zero self-term), and calculating the predicted class and confidence.
 
 
 

@@ -1,51 +1,65 @@
 \chapter{Literature Review}
 
-\section{What is a Literature Review (Temp Section)}
-A lit review...
+%\section{What is a Literature Review (Temp Section)}
+%A lit review...
+%
+%\begin{itemize}
+%	\item surveys related research
+%	\item summarizes related research
+%	\item links to related research
+%\end{itemize}
+%
+%Gives an indication that I know what is out there, show a sufficient depth of knowledge in the field, and provide context for my research within the broader fields surrounding it.
+%
+%i.e. the purpose is to...
+%
+%\begin{itemize}
+%	\item define terms / describe theories
+%	\item \textbf{justify decisions made}
+%	\item what am I building on
+%	\item view of alternate approaches / related work
+%\end{itemize}
+%
+%Organise sections by theme. Compartmentalise and synthesise, bringing views and insights together into what is used in the project (good to indicate where in the report it is used). 
+%
+%Short-ish literature study (20-30\% of manuscript). One to two references for each issue. I must choose well-accredited references. Peer review journal papers and conference papers are preferable. Web pages, forums, tutorials and datasheets are \textit{okay} but not ideal.
+%Use reference spreadsheet? Key points, authors, date, title/citation, notes, abstract/relevant snippets.
+%
+%Topics to cover in this literature review:
+%
+%\begin{itemize}
+%	\item Classification
+%	\item Nearest Neighbour (na{\"i}ve benchmark method)
+%	\item Multilayer Perceptron (step towards deep learning)
+%	\item The concept of 'deep' neural networks - usefulness is using perceptron + convolutional stuff
+%	\item Optimization (backpropagation really)
+%	\item the MSTAR data set
+%	\item image processing (should I be rescaling up or down?)
+%	\item direction for expansion (going deeper)
+%\end{itemize}
+%
+%Also need to write a progress report
 
-\begin{itemize}
-	\item surveys related research
-	\item summarizes related research
-	\item links to related research
-\end{itemize}
-
-Gives an indication that I know what is out there, show a sufficient depth of knowledge in the field, and provide context for my research within the broader fields surrounding it.
-
-i.e. the purpose is to...
-
-\begin{itemize}
-	\item define terms / describe theories
-	\item \textbf{justify decisions made}
-	\item what am I building on
-	\item view of alternate approaches / related work
-\end{itemize}
-
-Organise sections by theme. Compartmentalise and synthesise, bringing views and insights together into what is used in the project (good to indicate where in the report it is used). 
-
-Short-ish literature study (20-30\% of manuscript). One to two references for each issue. I must choose well-accredited references. Peer review journal papers and conference papers are preferable. Web pages, forums, tutorials and datasheets are \textit{okay} but not ideal.
-Use reference spreadsheet? Key points, authors, date, title/citation, notes, abstract/relevant snippets.
-
-Topics to cover in this literature review:
-
-\begin{itemize}
-	\item Classification
-	\item Nearest Neighbour (na{\"i}ve benchmark method)
-	\item Multilayer Perceptron (step towards deep learning)
-	\item The concept of 'deep' neural networks - usefulness is using perceptron + convolutional stuff
-	\item Optimization (backpropagation really)
-	\item the MSTAR data set
-	\item image processing (should I be rescaling up or down?)
-	\item direction for expansion (going deeper)
-\end{itemize}
-
-Also need to write a progress report
+\section{Synthetic Aperture Radar}
+\subsection{Description}
+SAR is used to create images of objects, such as vehicles (as in this report), or landscapes. The images are constructed by sending a radar signal from a moving platform, and the time taken for the signal to return to the antenna denotes the size of the aperture. The aperture can be physical, with a large antenna, or synthetic in the case of a moving aperture. Larger apertures allow for higher image resolution. SAR images consist of magnitude and phase data, from which elevation data can be calculated. The classification of 2D SAR images, the type dealt with in this report, requires only the magnitude data to be preserved.
+\subsection{Relevance}
+The dataset chosen for this report is comprised of SAR imagery. Understanding the nature of the format allows the decision to strip the data of phase information and keep only magnitude data to be made. 
 
 \section{The MSTAR Dataset}
 \subsection{Description}
-The MSTAR public mixed targets dataset contains X-band synthetic aperture radar (SAR) image chips of multiple targets. Each image has a resolution of 1 foot, and is captured in spotlight mode. Information pertaining to each target, including its elevation, depression angle, and target type is contained in a header section of each file. The header is followed by magnitude and phase data of the SAR imagery. Only the magnitude data shall be considered, to reduce the complexity of this study to that of image-based target recognition. \cite{Schumacher_atrof}.
-The MSTAR dataset has been referenced in multiple publications, and is a popular choice of SAR image chips for machine learning endeavours. 
+The MSTAR public mixed targets dataset contains X-band synthetic aperture radar (SAR) image chips of multiple targets. Each image has a resolution of 1 foot, and is captured in spotlight mode. Information pertaining to each target, including its elevation, depression angle, and target type is contained in a header section of each file. The header is followed by magnitude and phase data of the SAR imagery. Because the SAR images are 2D, only the magnitude data needs to be considered. Each point represents the brightness of a pixel, reducing the complexity of this study to that of image-based target recognition. \cite{Schumacher_atrof}. Each class of targets has between 195 and 274 instances, with class images ranging in sizes from 48x48 pixels to 198x198 pixels. The targets in each class are rotated between 0\degree and 360\degree.
+
 \subsection{Relevance}
-The MSTAR dataset was suggested for this study by A. Mishra. It provides a generic SAR image chip dataset on which any classification methods can conceivably be run, with minimal setup and hassle. The number of files available is enough to test any classifier sufficiently .
+The MSTAR dataset was suggested for this study by A. Mishra. It provides a generic SAR image chip dataset on which any classification method can be run. The dataset is comparatively small, with 195-274 images per class, and thus is suitable for machine learning on a consumer-grade desktop computer with reasonable classification time. The rotation factor present in each image introduces complications, as Figure~\ref{fig:sar_differences} shows, there is a large disparity in appearance between instances of the same class.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{figures/sar_differences}
+	\label{fig:sar_differences}
+	\caption{Rotational difference between two images of the same class}
+	\centering
+\end{figure}
 
 
 
