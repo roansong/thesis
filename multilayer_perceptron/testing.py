@@ -19,128 +19,7 @@ import sys
 import timeit
 import os
 from collections import OrderedDict
-
-
-def progress_bar(current,total):
-    div = current/total
-    bar_length = 20
-    percentage = 100*div
-    progress = '#'*int(bar_length*div) + ' '*(bar_length-int(bar_length*div))
-    out_str = "Progress: [%s] %.3f%%\r" % (progress,percentage)
-    sys.stdout.write(out_str)
-    sys.stdout.flush()
-    if(current >= total):
-        print("Complete.")
-    
-
-def pinv(M,eps=0.0001):
-    u,s,v = np.linalg.svd(M)
-    u = u.transpose()
-    v = v.transpose()
-    S = np.zeros((v.shape[0],u.shape[0]))
-    S[:len(s),:len(s)] = np.diag(1/s) + eps*np.identity(len(s))
-    return np.dot(v,np.dot(S,u))
-
-def normalise(A):
-    return (A - A.mean(axis=0))/(A.std(axis=0))
-
-def softmax(h):
-    h = np.array(h)
-    if(len(h.shape) == 2):
-        return np.array([np.exp(x)/np.sum(np.exp(x), axis=0) for x in h])
-    elif(len(h.shape) == 1):
-        return np.exp(h)/np.sum(np.exp(h),axis=0)
-    else:
-        return h
-
-def unit(a):
-    return np.divide(a,np.sum(a))
-
-class ELM():
-    A = []
-    R = []
-    t = []
-    w = []
-    X = []
-    
-    elm_class_one =  np.array([[1,5],[1,6],[1,5.5]])
-    elm_class_two =  np.array([[9,2],[8,2],[7.5,2]])
-    elm_class_one_T= np.tile(np.array([1,0]),(len(elm_class_one),1))
-    elm_class_two_T= np.tile(np.array([0,1]),(len(elm_class_two),1))
-    
-    elm_A = np.concatenate((elm_class_one,elm_class_two),axis=0)
-    elm_A = normalise(elm_A)
-    elm_A = np.insert(elm_A,0,1,axis=1)
-    elm_T = np.concatenate((elm_class_one_T,elm_class_two_T),axis=0)
-    elm_X = np.array([[1,7],[2,8],[2,9],[10,1],[8,2],[9,1]])
-    elm_X = normalise(elm_X)
-    def __init__(self,A,t,X,lam=0.01):
-        self.A = np.insert(normalise(A),0,1,axis=1)
-        self.X = normalise(X)
-        self.t = t
-        self.R =  np.random.uniform(-1,1,(self.A.shape[1],t.shape[1]))
-        self.w = np.dot(pinv(np.tanh(np.dot(self.A,self.R)),lam),t)
-        self.h = np.dot(self.X,self.w)
-
-def ELM(B,T,X,lam=0.001):
-    A = np.insert(B,0,1,axis=1)
-    R =  np.random.uniform(-1,1,(A.shape[1],T.shape[1]))
-    Ar = np.tanh(np.dot(A,R))
-    A_pinv = pinv(Ar,lam)
-    w = np.dot(A_pinv,T)
-    h = np.dot(X,w)
-    return (X,softmax(h),np.argmax(h,axis=1))
-
-def one_hot(index,size):
-    lst = [0]*size
-    lst[index] = 1
-    return lst
-
-
-def grad_desc(cost, theta):
-    
-    return theta - (learning_rate*(1) * T.grad(cost, wrt=theta))
-
-
-num_possible_classes = 5
-
-
-# seek to minimize ||Xw - t||^2 (i.e. find least-squares solution)
-# value of w which does this is A_pinv*T
-# A = USV' A_pinv = VS^-1U'
-# seek to minimize lambda||w||^2 as well
-# i.e. (1/n)*||Xw - t||^2 + lam*||w||^2
-# big lambda = small w but more innaccurate
-
-
-
-
-def pad_img(img,IMG_HEIGHT,IMG_WIDTH,IN_HEIGHT,IN_WIDTH):    
-    vpad = np.abs((IMG_HEIGHT - IN_HEIGHT)/2)
-    if not (np.floor(vpad) ==  vpad):
-        tpad = np.floor(vpad)
-        bpad = (vpad + 1)
-    else:
-        tpad = vpad
-        bpad = vpad    
-    hpad = np.abs((IMG_WIDTH - IN_WIDTH)/2)
-    if not (np.floor(hpad) == hpad):
-        lpad = np.floor(hpad)
-        rpad = (hpad + 1)
-    else:
-        lpad = hpad
-        rpad = hpad        
-    tpad = (int)(tpad)
-    bpad = (int)(bpad)
-    lpad = (int)(lpad)
-    rpad = (int)(rpad)
-    npad = ((tpad,bpad),(lpad,rpad))
-    if(IN_HEIGHT > IMG_HEIGHT and IN_WIDTH > IMG_WIDTH):
-        img = img[lpad: (IN_WIDTH - rpad), tpad: (IN_HEIGHT - bpad)]
-    else:
-        img = np.pad(img, pad_width=npad, mode='constant',constant_values=0)
-    return img
-
+import utilities as u
 
 class HiddenLayer():
     def __init__(self,input,n_inputs,n_outputs,weights=None,bias=None,activation=T.tanh,rng=np.random.RandomState(2)):
@@ -188,16 +67,25 @@ class Multilayer_Perceptron():
         self.weights = [self.hidden_layers[-1].weights]
         self.weights.append(self.output_layer.weights)
         self.shape = shape
-    
-    def test(self,learning_rate=0.001, L1_rg=0.0000, L2_rg=0.0001, n_epochs=100, batch_size=30, print_val = True):
-    
+        self.rng = rng
         
+    def test(self,learning_rate=0.001, L1_rg=0.0000, L2_rg=0.0001, n_epochs=100, batch_size=30, print_val = True):
+        print("="*60)
+        print("Multilayer Perceptron.",
+              "Image size: %dpx" %(self.shape[0]),
+              "Hidden layer size: %d"%(self.shape[1]),
+              "Learning rate: %.5f"%(learning_rate),
+              "L1 reg: %.5f"%(L1_rg),
+              "L2 reg: %.5f"%(L2_rg),
+              "Batch size: %d"%(batch_size),
+              sep='\n')
+    
     
         batch_index = T.lscalar('batch_index')
         
-        rng = np.random.RandomState(2)
-        # classifier = Multilayer_Perceptron(input=x,shape=shape,n_classes=5,rng=rng)
-        cost = self.neg_log_likelihood(y) + L1_rg * self.L1 + L2_rg + self.L2
+        rng = self.rng
+
+        cost = self.neg_log_likelihood(y) + L1_rg * self.L1 + L2_rg * self.L2
         correct_classes = self.predicted_class
         
         gradients = [T.grad(cost,param) for param in self.parameters]
@@ -208,8 +96,8 @@ class Multilayer_Perceptron():
         validation_set_y = theano.shared(value=validation_set[1].argmax(axis=1))
         training_set_x = theano.shared(value=training_set[0])
         training_set_y = theano.shared(value=training_set[1].argmax(axis=1))
-        
-    
+        test_set_x = theano.shared(value=test_set[0])
+        test_set_y = theano.shared(value=test_set[1].argmax(axis=1))
         
         validate = theano.function(
             inputs = [batch_index],
@@ -227,6 +115,23 @@ class Multilayer_Perceptron():
             x: training_set_x[batch_index * batch_size: (batch_index+1)*batch_size],
             y: training_set_y[batch_index * batch_size: (batch_index+1)*batch_size]}
             )
+        
+        test_model = theano.function(
+            inputs = [batch_index],
+            outputs = self.errors(y),
+            givens = {
+            x: test_set_x[batch_index * batch_size: (batch_index+1)*batch_size],
+            y: test_set_y[batch_index * batch_size: (batch_index+1)*batch_size]}
+            )
+            
+        test = theano.function(
+        inputs = [],
+        outputs = [self.predicted_class,y],
+        givens = {
+            x: test_set_x,
+            y:test_set_y
+        }
+        ) 
         
         evaluate_train = theano.function(
         inputs = [],
@@ -260,6 +165,8 @@ class Multilayer_Perceptron():
                                         # check every epoch
         
         best_validation_loss = np.inf
+        best_avg_cost = np.inf
+        best_test_err = np.inf
         best_iter = 0
         test_score = 0.
         start_time = timeit.default_timer()
@@ -272,6 +179,7 @@ class Multilayer_Perceptron():
             for minibatch_index in range(training_batches):
         
                 minibatch_avg_cost = train(minibatch_index)
+                
                 # iteration number
                 iter = (epoch - 1) * training_batches + minibatch_index
         
@@ -281,57 +189,105 @@ class Multilayer_Perceptron():
                                             in range(validation_batches)]
                     this_validation_loss = np.mean(validation_losses)
                     loss_arr.append(this_validation_loss)
-        
-                    if print_val and ((iter + 1) % (validation_frequency*50) == 0):
-                        print(
-                            'epoch %i, minibatch %i/%i, validation error %f %%' %
-                            (
-                                epoch,
-                                minibatch_index + 1,
-                                training_batches,
-                                this_validation_loss * 100.
-                            )
-                        )
-        
+                    
+                    # if print_val and ((iter + 1) % (validation_frequency*10) == 0):
+                        
+                        # print(
+                        #     'epoch %i, minibatch %i/%i, validation error %f %%' %
+                        #     (
+                        #         epoch,
+                        #         minibatch_index + 1,
+                        #         training_batches,
+                        #         this_validation_loss * 100.
+                        #     )
+                        # )
+                        # print(minibatch_avg_cost)
                     # if we got the best validation score until now
-                    if this_validation_loss < best_validation_loss:
+                    
+                    # if this_validation_loss < best_validation_loss:
+                    if minibatch_avg_cost < best_avg_cost:
                         #improve patience if loss improvement is good enough
                         if (
-                            this_validation_loss < best_validation_loss *
+                            minibatch_avg_cost < best_avg_cost *
+                            improvement_threshold
+                        ):
+                            patience = max(patience, iter * patience_increase)
+        
+                        best_avg_cost = minibatch_avg_cost
+                    
+        
+                        
+                    if this_validation_loss < best_validation_loss:
+                        if (
+                            minibatch_avg_cost < best_avg_cost *
                             improvement_threshold
                         ):
                             patience = max(patience, iter * patience_increase)
         
                         best_validation_loss = this_validation_loss
-                        best_iter = iter
-        
+                        
+                        
+                        
                         # test it on the test set
-                        # test_losses = [test_model(i) for i
-                        #                 in range(n_test_batches)]
-                        # test_score = np.mean(test_losses)
-        
-                    ##   print(('     epoch %i, minibatch %i/%i, test error of '
-                        #         'best model %f %%') %
+                    test_losses = [test_model(i) for i
+                                    in range(test_batches)]
+                    test_score = np.mean(test_losses)
+    
+                    if(test_score < best_test_err):
+                        
+                
+                        # print(('epoch %i, minibatch %i/%i, test error of %f %%') %
                         #         (epoch, minibatch_index + 1, training_batches,
                         #         test_score * 100.))
-        
+                        self.best_weights = [l.get_value() for l in self.weights]
+                        best_iter = iter
+                        best_test_err = test_score
+                        
                 if patience <= iter:
                     done_looping = True
                     break
         
         end_time = timeit.default_timer()
-        print(('Complete. Final score: %.3f. Best validation score of %.3f %% '
-                'obtained at iteration %i') %
-                (this_validation_loss*100.,best_validation_loss * 100., best_iter + 1),file=sys.stderr)
         
-        print(('The code for file ' +
-                os.path.split(__file__)[1] +
-                ' ran for %.2fm' % ((end_time - start_time) / 60.) +
-                ' with learning_rate of %.5f' % (learning_rate)), file=sys.stderr)
+        
+        
         
         a,b = evaluate_train()
         c,d = evaluate_validation()
-        return (self.shape, best_validation_loss*100, best_iter +1, (end_time-start_time)/60,learning_rate), confusion_matrix(a,b),confusion_matrix(c,d)
+        e,f = test()
+        
+        self.results = (best_validation_loss*100, best_iter +1, (end_time-start_time)/60,learning_rate)
+        self.train_confusion = u.confusion_matrix(a,b,num_classes)
+        self.validation_confusion = u.confusion_matrix(c,d,num_classes)
+        self.test_confusion = u.confusion_matrix(e,f,num_classes)
+        
+        
+        
+        
+        print("Complete.")
+        print("Validation score: %.3f"%(best_validation_loss*100),file=sys.stderr)
+        print("Test score: %.3f"%(best_test_err*100),file=sys.stderr)
+        print("Best iteration: %d"%(best_iter +1),file=sys.stderr)
+        
+        
+        print("Confusion matrices:")
+        print("Training")
+        print(self.train_confusion)
+        print("Validation")
+        print(self.validation_confusion)
+        print("Testing")
+        print(self.test_confusion)
+        print("="*60)
+        
+        
+        
+        
+        
+        print('The code for file ' + os.path.split(__file__)[1] +' ran for %.2fm' % ((end_time - start_time) / 60.), file=sys.stderr)
+        
+        
+        
+        return
 
 class KNN():
     def __init__(self,input,targets):
@@ -453,123 +409,14 @@ class KNN():
    
         
 
-def get_images(w,h,file_list=None,num_classes=5):
-    
-    infile = 'filenames5.txt'
-    folder = 'tiffs5/'
-    abspath = 'C:/Users/Roan Song/Desktop/thesis/'
-    
-    if(not file_list):
-        dt = np.dtype([('filename','|S16'),('labels',np.int32,(num_classes,))])
-        infile = 'filenames5.txt'
-        filedata = np.loadtxt(infile,dtype=dt)
-        file_list = [a.decode('UTF-8') for a in filedata['filename']]
-        file_list.sort(key=lambda x:x[-7:])
-    
-    suffixes = OrderedDict()
-    
-    for f in file_list:
-        suffixes[f[-7:]] = suffixes.get(f[-7:], 0) + 1
-    
-    ind = 0
-    for i in suffixes:    
-        suffixes[i] = {"count":suffixes[i],"label":one_hot(ind,num_classes)}
-        ind += 1    
-    
-    
-    img_arr = np.zeros((len(file_list),h*w))
-    target_arr = np.zeros((len(file_list),num_classes))
-    i = 0
-    for fname in file_list:
-        img = mpimg.imread(abspath + folder + fname)
-        IN_HEIGHT = img.shape[0]
-        IN_WIDTH = img.shape[1]
-        
-        img = pad_img(img,h,w,IN_HEIGHT,IN_WIDTH)
-        oneD = img.reshape(h * w)
-        oneD = normalise(oneD)
-        img_arr[i] = oneD  
-        target_arr[i] = suffixes[fname[-7:]]["label"]
-         
-        i+=1 
-        
-    
-    
-    
-    
-    
-        
-        
-    return img_arr,target_arr,suffixes
-
-
-IMG_WIDTH = 100
-IMG_HEIGHT = 100
-
-batch_size = 30
-num_classes=5
-learning_rate=0.001     
-L1_rg = 0.00
-L2_rg = 0.0001
 
 
 
-dt = np.dtype([('filename','|S16'),('labels',np.int32,(num_classes,))])
-infile = 'filenames5.txt'
-filedata = np.loadtxt(infile,dtype=dt)
-filenames = [a.decode('UTF-8') for a in filedata['filename']]
-filenames.sort(key=lambda x:x[-7:])
 
 
 
-data,targets,suffixes = get_images(w=IMG_WIDTH,h=IMG_HEIGHT,file_list = filenames)
-
-training_size = int(len(data)*0.75)
-per_class = training_size//num_classes
-training_size = per_class*num_classes
-
-training_data = np.zeros((num_classes*per_class,len(data[0])))
-training_labels = np.zeros((num_classes*per_class,num_classes))
-training_set = (training_data,training_labels)
-validation_set = [[],[]]
-
-i = 0
-ind = 0
-next_ind = suffixes[filenames[i][-7:]]['count']
-temp = per_class
-while i < len(data):
-    if(i < temp):
-        training_data[ind] = data[i]
-        training_labels[ind] = targets[i]
-        i += 1
-        ind += 1
-    
-        
-    else:
-        validation_set[0].append(data[i:next_ind])
-        validation_set[1].append(targets[i:next_ind])
-        
-        i += suffixes[filenames[i][-7:]]['count'] - per_class
-        if(i >= len(data)):
-            validation_set[0] = np.concatenate(validation_set[0])
-            validation_set[1] = np.concatenate(validation_set[1])
-            break
-        next_ind += suffixes[filenames[i][-7:]]['count']
-        temp = i + per_class
-
-training_batches   =  training_size//batch_size 
-validation_batches =  len(validation_set[0])//batch_size
 
 
-
-def confusion_matrix(pred,target):
-    
-
-    confusion_matrix = np.zeros((num_classes,num_classes))
-    for guess in range(len(pred)):
-        confusion_matrix[target[guess]][pred[guess]] += 1
-    
-    return confusion_matrix
 
 
 def reverseImgShow(weights,num_classes):
@@ -588,7 +435,7 @@ def reverseImgShow(weights,num_classes):
 
 
 def gen_sets(data,targets,train,val,test):
-    train,val,test = unit([train,val,test])
+    train,val,test = u.unit([train,val,test])
     
     training_set   = np.zeros((int(len(data)*train),2))
     validation_set = np.zeros((int(len(data)*val  ),2))
@@ -626,8 +473,6 @@ def load_KNN(data,targets,indices=None):
 
 
 
-training_set, validation_set, test_set,indices = gen_sets(data,targets,50,25,25)
-
 
 def testKNN(training_set,validation_set,test):
     #  KNN has no validation step, so the training and validation sets are combined
@@ -650,13 +495,14 @@ def testKNN(training_set,validation_set,test):
     
     print(best_k)
     
-    
+    predicted_classes = np.zeros((len(test_set[0])))
     start_time = timeit.default_timer()
     correct = 0
     results = []
     for i in range(len(test_set[0])):
         a = k.run(test_set[0][i],test_set[1][i],best_k)
         results.append(a)
+        predicted_classes[i] = a[0]
         if(a[1]):
             correct +=1
         print("%s %d/%d (%d) correct"%((a,),correct,i+1,len(test_set[0])))
@@ -664,20 +510,56 @@ def testKNN(training_set,validation_set,test):
     end_time = timeit.default_timer()
     print("%.4fm testing with optimal K" % ((end_time-start_time)/60.))
     
-    return results
+    knn_conf = u.confusion_matrix(predicted_classes,target,num_classes)
+    print(knn_conf)
+    return results, knn_conf
+
+IMG_WIDTH = 100
+IMG_HEIGHT = 100
+
+batch_size = 30
+num_classes=5
+learning_rate=0.001     
+L1_rg = 0.00
+L2_rg = 0.0001
 
 
 
-# results = []
-# 
-# l = [0.00001,0.0001,0.001,0.01]
-# s = [10,50,100,250,500,1000]
-# # results.append(test(learning_rate = 0.01, shape = (10000,s),print_val = True))
-# # results.append(test(learning_rate = 0.00001, shape = (10000,s),print_val = True))
+dt = np.dtype([('filename','|S16'),('labels',np.int32,(num_classes,))])
+infile = 'filenames5.txt'
+filedata = np.loadtxt(infile,dtype=dt)
+filenames = [a.decode('UTF-8') for a in filedata['filename']]
+filenames.sort(key=lambda x:x[-7:])
+
+
+
+data,targets,suffixes = u.get_images(w=IMG_WIDTH,h=IMG_HEIGHT,file_list = filenames)
+
+
+
+
+training_set, validation_set, test_set,indices = gen_sets(data,targets,50,25,25)
+training_batches   =  len(training_set[0])//batch_size 
+validation_batches =  len(validation_set[0])//batch_size
+test_batches       =  len(test_set[0])//batch_size
+
+
 x = T.dmatrix('x')
 y = T.lvector('y')
-classifier = Multilayer_Perceptron(x,(IMG_WIDTH*IMG_HEIGHT,10),num_classes=5,rng=np.random.RandomState(2))
-classifier.test(n_epochs=1000)
+
+
+
+learning_rate = 0.01
+L2 = 0.1
+
+# classifier = Multilayer_Perceptron(x,(IMG_WIDTH*IMG_HEIGHT,50),num_classes=5,rng=np.random.RandomState(2))
+# classifier.test(learning_rate=l,L2_rg=m,n_epochs=2000)
+
+a,conf = testKNN(training_set,validation_set,test_set)
+
+np.save("KNN_results",a)
+np.save("KNN_confusion_matrix",conf)
+
 # 
 # 
 # 
