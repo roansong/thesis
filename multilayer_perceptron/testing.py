@@ -495,14 +495,14 @@ def testKNN(training_set,validation_set,test):
     
     print(best_k)
     
-    predicted_classes = np.zeros((len(test_set[0])))
+    pred = np.zeros((len(test_set[0])))
     start_time = timeit.default_timer()
     correct = 0
     results = []
     for i in range(len(test_set[0])):
         a = k.run(test_set[0][i],test_set[1][i],best_k)
         results.append(a)
-        predicted_classes[i] = a[0]
+        pred[i] = a[0]
         if(a[1]):
             correct +=1
         print("%s %d/%d (%d) correct"%((a,),correct,i+1,len(test_set[0])))
@@ -510,9 +510,9 @@ def testKNN(training_set,validation_set,test):
     end_time = timeit.default_timer()
     print("%.4fm testing with optimal K" % ((end_time-start_time)/60.))
     
-    knn_conf = u.confusion_matrix(predicted_classes,target,num_classes)
-    print(knn_conf)
-    return results, knn_conf
+    k_conf = u.confusion_matrix(pred,ktargets,num_classes=5)
+    
+    return results,k_conf
 
 IMG_WIDTH = 100
 IMG_HEIGHT = 100
@@ -551,27 +551,24 @@ y = T.lvector('y')
 
 learning_rate = 0.01
 L2 = 0.1
+L1 = 0
+size = [50,100,250,1000]
+# for s in size:
+classifier = Multilayer_Perceptron(x,
+                        (IMG_WIDTH*IMG_HEIGHT,10),
+                        num_classes=5,
+                        rng=np.random.RandomState(0)
+                        )
+classifier.test(
+    learning_rate=learning_rate,
+    L2_rg=L2,
+    L1_rg= L1,
+    n_epochs=2000)
 
-# classifier = Multilayer_Perceptron(x,(IMG_WIDTH*IMG_HEIGHT,50),num_classes=5,rng=np.random.RandomState(2))
-# classifier.test(learning_rate=l,L2_rg=m,n_epochs=2000)
 
-a,conf = testKNN(training_set,validation_set,test_set)
 
-np.save("KNN_results",a)
-np.save("KNN_confusion_matrix",conf)
 
-# 
-# 
-# 
-# for i in s:
-#     classifier = init_classifier(x,(IMG_WIDTH*IMG_HEIGHT,i),num_classes=5)
-#     for k in l:
-#         results.append(test(learning_rate = k))
-# 
-# for k in results:
-#     print(k[0])
-#     print(k[1])
-#     print(k[2])
+
 
 
 
@@ -609,8 +606,6 @@ np.save("KNN_confusion_matrix",conf)
 # plt.xticks(np.arange(min(x), max(x)+1, 10))
 # plt.title("First 25 values of K")
 # plt.show()
-
-
 
 
 
