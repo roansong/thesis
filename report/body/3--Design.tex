@@ -1,0 +1,247 @@
+\chapter{Design}
+
+
+\begin{figure}[]
+\centering
+\includegraphics[width=\textwidth]{figures/vee_diagram} % will design own diagram
+\caption{Vee Diagram}
+\label{fig:vee_diagram}
+\centering
+\end{figure}
+
+
+
+\section{Design Context}
+This study is within the scope of an undergraduate level approach to both radar and machine learning, with an emphasis on machine learning; the techniques applied herewith are not limited to radar imagery, but attempts should be made to tailor the design to target recognition applications. With development this study should be adaptable to commercial use, and be helpful to people in the radar department who need assistance with radar target classification. Thus the study should develop an easily extensible framework for radar image classification, or at least guidelines to allow others to integrate with the work covered herein.
+
+
+\section{Feasibility Study / Concept Exploration}
+Does the classification of radar imagery lend itself to deep learning techniques, and if so, will the performance be better or worse than na{\"i}ve classification methods? This is the question that best captures the analysis of the study's feasibility.
+
+Consideration of this question needs to include the format of the data entering the system, the ability of the system to process such data, and the effectiveness of the classification of the data.
+
+The data consists of images of between 2916 (54x54) and 37054 (192x193) pixels in size. Each image contains one target, positioned at the centre of the image. This should allow for effective resizing of images to account for size discrepancies. Each pixel in an image constitutes an input. The computational cost of processing the largest image in the set versus the smallest will be at least 12.7 (37054/2916) times more expensive. Initial thoughts were that processing of such images will be made much more feasible if they can be reduced in size to match the smallest images present in the dataset, or at least be made as small as possible while retaining all of the information needed to classify each target. However, the shadow of each radar target often extends outside the 54x54 pixel range, yet could be necessary in classification. Preserving features inherent to each image is more important if the classifier can handle the largest images in a timely fashion. 
+
+Neural networks have a fixed structure; a collection of input neurons feeding their values through a series of hidden neuron layers before arriving at an output layer of neurons equal in size to the number of classes present in the data. The architecture of the network - the choice of number of hidden layers, the number of neurons in each hidden layer, and the number of neurons in the input layer are all subject to change during the development of the system. The training and operation of the system occurs through the adjustment of inter-neuron weights, with the structure of the system remaining constant.
+
+The choice of size of the input layer is crucial; it must remain constant throughout the training and operation of the network. Since each pixel in an image forms of the input layer's neurons, all of the input images must be processed to contain the same number of pixels before any other work on the network's architecture can begin. 
+
+Once the pre-processing of the input images is complete, the structure of the neural network can be decided. This structure shall be changed and prototyped in order to try to find a good corresponding fit for the data. Having too many hidden layers will greatly increase the time taken by the back-propagation algorithm to optimise the weights of the system, and the likelihood of it settling at a local instead of global minimum increases with the complexity of the system. 
+
+The number of neurons in each hidden layer must also be chosen carefully; too many neurons in each layer will result in much longer optimization time (proportional to the increase in the number of inter-neuron weights created). Having too few neurons in a layer can result in the system being unable to extract the features key to classification, and too many neurons may lead to `overfitting' of the training data, leaving the system with no predictive capability (an inability to classify data not present in the set of training instances).
+
+
+\section{Decomposition and Definition}
+This section is devoted to describing the study in terms of its requirements, operation, and implementation. An accompaniment explaining the verification and validity of each subsection will be in the next section.
+\subsection{Concept of Operations}
+Radar target classification is an inexact science; interpreting a radar image and comparing it to a known case is not as straightforward in all cases as one might expect. Weather conditions, environmental clutter, and image resolution all obscure the target to varying degrees, making intuitive classification ineffective. Computer-based classification through analysis of multiple targets and the application of deep learning techniques should in theory allow distorted images to be classified after the computer is trained to recognise features pertaining to each class. Na{\"i}ve methods of classification lack predictive power - the ability to 'guess' effectively if the target is obscured or unrecognised. Deep learning methods are the solution that this study proposes.
+
+\subsection{System Requirements}
+% insert user requirements from the PDF I've written up elsewhere
+% emphasis on accuracy, testing time, and training time
+\subsection{High-Level Design}
+For this study, these areas of design need to be focused on:
+
+\begin{itemize}
+	\item Image Processing/Preparation
+	\item Further Dimensionality Reduction
+	\item Na{\"i}ve Classification (Nearest Neighbour as a benchmark)
+	\item Deep Learning Classification (Multilayer Perceptron)
+\end{itemize}
+
+
+
+\subsection{Detailed Design}
+\subsubsection{Image Processing/Preparation}\label{sec:cropping}
+The MSTAR dataset is a compilation of image chips, all of which contain a header, as well as magnitude and phase data. The images are between 54x54 and 192x193 pixels in size, which suggests that some form of image processing should be performed to make sure that all images are the same size. The targets in each image chip are centred, suggesting that cropping each image to a size where the target (and its shadow - useful in classification) are left whole, and as much of the surrounding clutter as possible is removed.
+
+An alternate approach is to retain the data inherent in the environmental clutter and pad the smaller images with zeros, keeping all images in the set at the size of the largest image in the set. While this preserves all of the image chip data, processing larger images leads to longer training and classification times.
+
+A compromise is to keep the ensure that all images are the size of the largest image in the set, and somehow reduce the clutter present in each image. Because the targets are substantially brighter than their surroundings, using some form of thresholding (setting values lower than a specified threshold to zero) should prove to be effective in lessening the impact of the clutter, if not completely removing it.
+
+\subsubsection{Dimensionality Reduction}
+Each pixel in an image is taken as an feature, forming a feature vector with a length equal to the total number of pixels in the image. The image cropping mentioned in section \ref{sec:cropping} is very effective at reducing the size of this feature vector. If a 128x128 image is cropped to 64x64, the feature vector's length is reduced by factor of 4. This can be reduced further through the application of dimensionality reduction techniques, such as Principal Component Analysis, Locally-Linear Embedding, Sum of Means and non-linear methods, all of which are outside the scope of this report. 
+
+\subsubsection{Nearest Neighbour Design}
+\begin{figure}
+\centering
+\includegraphics[width=\textwidth]{figures/nearest-neighbour}
+\label{fig:nn}
+\caption{Nearest Neighbour Classification Flow Diagram}
+\centering
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{figures/KNN}
+	\label{fig:knn}
+	\caption{K-Nearest Neighbour Classification Flow Diagram}
+	\centering
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{figures/k_values}
+	\label{fig:knn_values}
+	\caption{K-Nearest Neighbour Optimising for `K' Flow Diagram}
+	\centering
+\end{figure}
+
+
+
+The high-level design is shown in Figure~\ref{fig:nn}. Its principles of operation are covered in Section~\ref{lit:nn}. To implement this classifier, the following is needed:
+
+\begin{itemize}
+	\item Access to the dataset
+	\item A choice of input image
+	\item A method to calculate and sum the pixel-wise distances
+	\item A variable storing the smallest distance and tentative classification
+	\item A method displaying the chosen class and whether or not it is correct
+\end{itemize}
+
+\subsubsection{K-Nearest Neighbour Design}
+While similar to the Nearest Neigbour design, 
+KNN introduces its own complexities, most notably when optimising for K. The high-level design is shown in Figure~\ref{fig:knn}, its principles of operation are covered in Section~\ref{lit:knn}. The method of finding the best K value for a given dataset is shown in Figure~\ref{fig:knn_values}.
+
+
+
+
+\subsubsection{Multilayer Perceptron Design}
+
+Implementation of a multilayer perceptron in software can be divided into discrete sections as follows:
+\begin{itemize}
+	\item
+	
+	
+	
+	
+\end{itemize}
+
+
+\subsection{Software Development and Implementation}
+
+
+
+
+-----
+The software present in this study has been made \href{http://github.com/roansong}{available on Github}
+
+\section{Integration and Recomposition}
+\subsection{Software Development and Implementation}
+
+\subsubsection{Inline Testing}
+While implementing the software for this report, I ran into some early issues that resulted from insufficient planning. After taking a step back, it was decided that more steady progress would be made by implementing rigorous inline testing, i.e. incrementally testing the code after every slight modification, instead of only testing after the addition of a major feature and then trying to iron out any latent bugs. This approach leads to much simpler debugging.
+
+\subsubsection{The Multilayer Perceptron}
+
+%TODO: System Description
+
+%TODO: add code corresponding to each area of the diagram
+
+ In a process outlined in Figure~\ref{fig:multi_input}, the input image is converted to an array of unsigned 8-bit integers (ranging from 0 to 255). The elements of the array are `unitised' by subtracting the mean of the array from each and then dividing each element by the standard deviation of the array. This ensures that the processed values lie centred around zero, and mostly between -1 and 1. Unsigned integers are no longer suited to represent this data, so 32-bit floating point numbers (floats) are used. %WHY ARE THEY UNSUITABLE?
+ 
+ Once each pixel has been unitised, they form the input layer of the neural network, with each pixel representing a neuron in the input layer shown in Figure~\ref{fig:multi}. 
+ 
+ Each of these input layer neurons has a random weight applied, and is then fed into the neurons that form the first hidden layer. Every neuron in the input layer contributes to every neuron in the next layer. At each neuron in the first hidden layer, the `net' value is formed by summing all of the values present at its input (i.e. all the weighted values passed along from the input layer). An activation function is applied to this net value to compress the range of values. There are many different activation functions that can be used, and for this study I narrowed down the choice to either the logistic function $ \frac{1}{1 + e^{-net}} $ or the hyperbolic tangent function $\frac{e^{net} - e^{-net}}{e^{net} + e^{-net}} $. The logistic function produces an output between 0 and 1, while the hyperbolic tangent function's output is between -1 and 1. I decided to use the hyperbolic tangent function, because the logistic function has a tendency to incur long training times if its values lie very close to 0, while the hyperbolic tangent function tends to move towards its extreme values more quickly.  
+ 
+ The activation function, when applied to the net of the neuron, becomes the output of the neuron, feeding through to every neuron in the next layer with weights applied, repeating the same process until the output layer. This is shown in Figure~\ref{fig:multi_neuron} and more closely in Figure~\ref{fig:multi_neuron_close}.
+ 
+ \begin{figure}[!h]
+ 	
+ 	\centering
+ 	\includegraphics[width=\textwidth]{figures/multilayer_perceptron_neuron}
+ 	\centering
+ 	\caption{A Neuron in the Network}
+ 	\label{fig:multi_neuron}
+ \end{figure}
+
+\begin{figure}[!h]
+	
+	\centering
+	\includegraphics[width=\textwidth]{figures/multilayer_perceptron_neuron2}
+	\centering
+	\caption{The Internal Workings of a Neuron}
+	\label{fig:multi_neuron_close}
+\end{figure}
+ 
+ 
+ The output layer has as many neurons as there are classes. The output layer is typically a logistic regression layer, which has a softmax function applied to its outputs. This results in outputs that sum to 1. The neuron with the highest value is taken to be the network's prediction. An example output would look something like:
+ \[ [0.25, 0.2, 0.1, 0.05, 0.4] \] There are five classes, and the fifth class has the highest value, thus the neural network has classified the input as belonging to that fifth class. Given that the maximum possible value for an output would be 1, 0.9 would show a large confidence in the classification. A value close to 0 shows strong disagreement, and something like 0.3 would show moderately low confidence.
+ 
+ To train the network, stochastic gradient descent is used, as described in Section~\ref{lit:grad_desc}. 
+
+\begin{figure}[!h]
+	
+	\centering
+	\includegraphics[width=\textwidth]{figures/multilayer_perceptron}
+	\centering
+	\caption{Multilayer Perceptron Overview}
+	\label{fig:multi}
+\end{figure}
+
+
+\begin{figure}[!h]
+	
+	\centering
+	\includegraphics[width=\textwidth]{figures/multilayer_perceptron_input}
+	\centering
+	\caption{Multilayer Perceptron Input Layer}
+	\label{fig:multi_input}
+\end{figure}
+
+
+\subsubsection{Algorithm Testing}
+For each classifier, their effectiveness on the MSTAR dataset must be tested and catalogued, beginning with the Nearest Neighbour implementation. Doing the Nearest Neighbour classification first establishes a benchmark against which further methods can be tested. The na{\"i}ve nature of the Nearest Neighbour classifier means that it is not optimised for any particular dataset. It shows the efficacy of a generic algorithm applied to the MSTAR dataset.
+
+For the effectiveness of any algorithm to be tested, correct and incorrect outputs must be defined. The MSTAR dataset includes target labels in a header section of each file, but since the operations are conducted on files with their header and phase data stripped away it merely adds computational complexity to find the corresponding header for each file and then parse it to extract data about each target. 
+To simplify classification, a variant of a one-hot vector denoting the classes is attached to each target. The vector consists of a series of numbers, equal in length to the number of classes in the dataset. A `1' denotes that the instance is a member of the class corresponding to that entry in the vector, and the rest of the numbers are 0, showing that the instance is not in those classes. A file is created listing all of the filenames to be tested during the run of the algorithm. An example file with ten entries and two classes would look as follows:\\
+
+\begin{center}
+\begin{tabular}{c}
+HB03333.003.tiff 1 0 \\
+HB03334.003.tiff 1 0 \\
+HB03335.003.tiff 1 0 \\
+HB03337.003.tiff 1 0 \\
+HB03338.003.tiff 1 0 \\
+HB14931.025.tiff 0 1 \\
+HB14932.025.tiff 0 1 \\
+HB14933.025.tiff 0 1 \\
+HB14934.025.tiff 0 1 \\
+HB14935.025.tiff 0 1 \\
+
+
+\end{tabular}
+\end{center}
+
+\subsubsection{Testing During Development}
+The simplest way to find a classifier's efficacy is to test it on a wide variety of classes and on as many test instances as possible. To provide interim results, during the iterative phase of classifier development, only a subset of the dataset's images are used. This compromises the final accuracy of the classifier (it may perform differently on the full dataset), but brings with it the ability to test and train classifiers more quickly, due to the lower computational overheads. During the development this testing method allows for simple decisions regarding the direction of classifier implementation or optimisation to be made. In process of verifying the classifiers, the full dataset must be used to give an accurate picture of the classifier's performance and real-world implementation. 
+
+\subsection{Subsystem Verification}
+The chosen method for verifying a classifier's efficacy once it is considered to be sufficiently optimised is simple; The classifier is tested on the dataset with a number of test instances as in Section~\ref{lit:loocv}. For the KNN, fully testing it entails removing one instance from the dataset, training the classifier on the remaining points, and using the removed instance as a test case. Once this has been done, the instance is replaced, another is taken, and the process is repeated until every instance in the dataset has been tested. The system's performance is based on the number of correct classifications made during the process. This is known as Leave-One-Out Cross Validation (LOOCV).
+
+
+\subsection{System Verification and Deployment}
+To confirm the results of each classifier, it is important to have a set of training instances on which the system can be trained. The system is then tested on another set of points whose classes are known. Once this has been tested and confirmed to have a desirable level of classification accuracy, the system will be ready for testing on previously unseen, real-world cases. 
+
+This is accomplished by dividing a set of known data points into a training set, a validation set, and a testing set. For example: 80\% of the data points will be used to train the system, 10\% to validate the model, which will then be tested on the remaining 10\%. The process of cross-validation entails selecting a different training/test split each time (either systematically or at random) and performing the process again. This concept can be extended to where the system is trained on all but one of the instances and then tested against it, which is known as LOOCV ("Leave One Out" Cross-Validation). The system is tweaked until it reaches the level of classification required. Cross-Validation is an important tool for eliminating "overfitting" of the system to the training data. Mixing up the training and test cases ensures that the classifier is left with some ability to generalise, and not just repeat what it has been shown.
+
+\subsection{System Validation}
+%TODO: This section has to cover the system-level validation stuff, so not just confirming the results of each classifier, but compiling results and seeing if the whole thing actually achieved the aims of the study. 
+\subsection{Operations and Maintenance}
+%TODO: I'm pretty sure this should detail the real-world implementation of the system
+\subsection{Changes and Upgrades}
+% Optional stuff, really. Can replace with plans, future developments, etc.
+\subsection{Retirement / Replacement}
+% Another optional section.
+
+
+
+
+
+
+
+
+
+
+
+

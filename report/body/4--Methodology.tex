@@ -1,0 +1,42 @@
+\chapter{Methodology}
+
+\section{Data Processing}
+The first step is to get to grips with the data - processing the data set in a way that makes sense to use, and allows different classification methods to be implemented easily on it.
+
+The MSTAR dataset contains eight different targets. The dataset is sorted by depression angle, and by `scene'. All of the targets have data corresponding to  15\degree~and 17\degree~elevation angles, for a total of 4459 images.
+
+For unsupervised learning, we want to have each target in the dataset labelled with corresponding information, most notably its class. This is done using a one-hot array (i.e. [1 0 0], [0 1 0] for 1 and 2, respectively) relating to each target. The MSTAR dataset stores the information of each target in a header section of each file. This is inconvenient when reading in image files directly, so the header is discarded and images are classed according to their file extension. The file extensions and the classes they correspond to can be found in Table~\ref{tab:input_data}.
+
+
+\section{Dimensionality Reduction}
+An image can be viewed as a collection of pixels, comprising a feature vector. If the size of this vector can be reduced while retaining enough information for classification, we can greatly increase our training and classification speeds. Simply selecting every other pixel (or one in five) would greatly reduce the dimensionality of the data but may remove features that are key to classification, thus having a negative impact on the results.
+
+
+\section{K-Nearest Neighbour Classification}
+The steps necessary to implement the NN on the MSTAR dataset are as follows:\\
+
+\begin{itemize}
+\item Convert the raw data + header MSTAR files into .tiff images
+\item figure out how to read and display these images in matlab
+\item write a pixel-by-pixel comparison method
+\item test the method by comparing one image to itself and others
+\item collate a set of mixed radar targets for testing
+\item extract data from each image/filename to help with seeing if the classification is correct
+\item TEST
+\item collect results!
+\end{itemize}
+
+
+
+
+The KNN classifier works by predicting the class of an instance based on its relative distance to nearby instances. The K nearest instances (the ``neighbours'' after which the classifier is named) are used, and the most common class amongst them is selected as the predicted class. K is always an odd number, to prevent ties. A measure of confidence in the prediction can be taken as the ratio of the most occurring class to the total number of neighbours under consideration. K can be optimised for each dataset
+
+\subsection{Implementation}
+\subsubsection{The algorithm}
+Given a training dataset of known instances and targets, and an input instance X, the squared difference between X and each instance in the dataset is calculated. The K closest instances (neighbours) are selected, and the class predicted is the most commonly occurring class within the selection of neighbours. The time taken to predict a class is linearly proportional to the size of the training dataset $(O(n))$, and exponentially proportional to the size of each instance $(O(n^2))$. A 100x100 image has 10,000 points of comparison; 100 times more than a 10x10px image. Reducing the image size through cropping or dimensionality reduction can thus have a desirable effect on computation time.
+
+\subsubsection{Optimising for K}
+Optimal K values are found by performing leave-one-out cross-validation (LOOCV) and finding which value of k gives the greatest prediction accuracy across all cases. To find this value of k using the previous algorithm is a very time-consuming process. Because this optimisation uses only the training set, the process can be sped up significantly. A matrix containing the squared distances between each instance is constructed. An example of such a matrix is shown in Figure~\ref{D2}. Each row represents the squared distances between the instance corresponding to that row, and every other instance. This leads to the matrix being mirrored along its leading diagonal, which speeds up the construction of the matrix by not having to recalculate those values. All of the diagonals of the matrix are zero; they represent the distance between an instance and itself. To optimise for K, each row is taken in turn, sorted in ascending order, removing the first element (the zero self-term), and calculating the predicted class and confidence.
+
+
+

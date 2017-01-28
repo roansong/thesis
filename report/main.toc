@@ -12,84 +12,80 @@
 \contentsline {section}{\numberline {1.4}Scope and Limitations}{3}{section.1.4}
 \contentsline {subsection}{\numberline {1.4.1}Focus}{3}{subsection.1.4.1}
 \contentsline {subsection}{\numberline {1.4.2}Scope}{3}{subsection.1.4.2}
-\contentsline {subsubsection}{Within project scope}{3}{section*.7}
-\contentsline {subsubsection}{Outside project scope}{3}{section*.8}
-\contentsline {subsection}{\numberline {1.4.3}Limitations}{3}{subsection.1.4.3}
-\contentsline {section}{\numberline {1.5}Report Overview}{3}{section.1.5}
-\contentsline {chapter}{\numberline {2}Literature Review}{4}{chapter.2}
-\contentsline {section}{\numberline {2.1}Synthetic Aperture Radar}{4}{section.2.1}
-\contentsline {subsection}{\numberline {2.1.1}Description}{4}{subsection.2.1.1}
-\contentsline {subsection}{\numberline {2.1.2}Relevance}{4}{subsection.2.1.2}
-\contentsline {section}{\numberline {2.2}The MSTAR Dataset}{5}{section.2.2}
-\contentsline {subsection}{\numberline {2.2.1}Description}{5}{subsection.2.2.1}
-\contentsline {subsection}{\numberline {2.2.2}Relevance}{5}{subsection.2.2.2}
-\contentsline {section}{\numberline {2.3}Classification}{6}{section.2.3}
-\contentsline {subsection}{\numberline {2.3.1}Nearest-Neighbour Classification}{6}{subsection.2.3.1}
-\contentsline {subsubsection}{Description}{6}{section*.9}
-\contentsline {subsubsection}{Relevance}{7}{section*.10}
-\contentsline {section}{\numberline {2.4}Deep Learning}{7}{section.2.4}
-\contentsline {subsection}{\numberline {2.4.1}Neural Networks}{8}{subsection.2.4.1}
-\contentsline {subsubsection}{Description}{8}{section*.11}
-\contentsline {subsubsection}{Relevance}{8}{section*.12}
-\contentsline {subsection}{\numberline {2.4.2}Multilayer Perceptron}{9}{subsection.2.4.2}
-\contentsline {subsubsection}{Description}{9}{section*.13}
-\contentsline {subsubsection}{Relevance}{9}{section*.14}
-\contentsline {section}{\numberline {2.5}Optimization and Training}{9}{section.2.5}
-\contentsline {subsection}{\numberline {2.5.1}Back-propagation}{10}{subsection.2.5.1}
-\contentsline {subsubsection}{Description}{10}{section*.15}
-\contentsline {subsubsection}{Relevance}{10}{section*.16}
-\contentsline {subsection}{\numberline {2.5.2}Hyper-parameters}{11}{subsection.2.5.2}
-\contentsline {subsubsection}{Description}{11}{section*.17}
-\contentsline {subsubsection}{Relevance}{11}{section*.18}
-\contentsline {section}{\numberline {2.6}Performance Evaluation}{11}{section.2.6}
-\contentsline {subsection}{\numberline {2.6.1}Separability Index}{11}{subsection.2.6.1}
-\contentsline {subsection}{\numberline {2.6.2}Training, Validation, and Testing}{11}{subsection.2.6.2}
-\contentsline {subsection}{\numberline {2.6.3}The Confusion Matrix}{13}{subsection.2.6.3}
-\contentsline {section}{\numberline {2.7}Hidden Layers}{13}{section.2.7}
-\contentsline {section}{\numberline {2.8}Logistic Regression}{13}{section.2.8}
-\contentsline {section}{\numberline {2.9}Dimensionality Reduction}{13}{section.2.9}
-\contentsline {subsection}{\numberline {2.9.1}PCA}{13}{subsection.2.9.1}
-\contentsline {chapter}{\numberline {3}Methodology}{14}{chapter.3}
-\contentsline {section}{\numberline {3.1}K-Nearest Neighbour Classification}{14}{section.3.1}
-\contentsline {subsection}{\numberline {3.1.1}Implementation}{15}{subsection.3.1.1}
-\contentsline {subsubsection}{The algorithm}{15}{section*.19}
-\contentsline {subsubsection}{Optimising for K}{15}{section*.20}
-\contentsline {paragraph}{}{16}{section*.21}
-\contentsline {section}{\numberline {3.2}Data Processing}{16}{section.3.2}
-\contentsline {section}{\numberline {3.3}Dimensionality Reduction}{17}{section.3.3}
-\contentsline {chapter}{\numberline {4}Design}{18}{chapter.4}
-\contentsline {section}{\numberline {4.1}Design Context}{18}{section.4.1}
-\contentsline {section}{\numberline {4.2}Feasibility Study / Concept Exploration}{18}{section.4.2}
-\contentsline {section}{\numberline {4.3}Decomposition and Definition}{20}{section.4.3}
-\contentsline {subsection}{\numberline {4.3.1}Concept of Operations}{20}{subsection.4.3.1}
-\contentsline {subsection}{\numberline {4.3.2}System Requirements}{21}{subsection.4.3.2}
-\contentsline {subsection}{\numberline {4.3.3}High-Level Design}{21}{subsection.4.3.3}
-\contentsline {subsection}{\numberline {4.3.4}Detailed Design}{21}{subsection.4.3.4}
-\contentsline {subsubsection}{Image Processing/Preparation}{21}{section*.22}
-\contentsline {subsubsection}{Dimensionality Reduction}{22}{section*.23}
-\contentsline {subsubsection}{Nearest Neighbour Design}{22}{section*.24}
-\contentsline {subsubsection}{Multilayer Perceptron Design}{24}{section*.25}
-\contentsline {subsection}{\numberline {4.3.5}Software Development and Implementation}{24}{subsection.4.3.5}
-\contentsline {section}{\numberline {4.4}Integration and Recomposition}{24}{section.4.4}
-\contentsline {subsection}{\numberline {4.4.1}Software Development and Implementation}{24}{subsection.4.4.1}
-\contentsline {subsubsection}{Inline Testing}{24}{section*.26}
-\contentsline {subsubsection}{The Multilayer Perceptron}{24}{section*.27}
-\contentsline {subsubsection}{Algorithm Testing}{27}{section*.28}
-\contentsline {subsubsection}{Testing During Development}{29}{section*.29}
-\contentsline {subsection}{\numberline {4.4.2}Subsystem Verification}{29}{subsection.4.4.2}
-\contentsline {subsection}{\numberline {4.4.3}System Verification and Deployment}{30}{subsection.4.4.3}
-\contentsline {subsection}{\numberline {4.4.4}System Validation}{30}{subsection.4.4.4}
-\contentsline {subsection}{\numberline {4.4.5}Operations and Maintenance}{30}{subsection.4.4.5}
-\contentsline {subsection}{\numberline {4.4.6}Changes and Upgrades}{30}{subsection.4.4.6}
-\contentsline {subsection}{\numberline {4.4.7}Retirement / Replacement}{30}{subsection.4.4.7}
-\contentsline {chapter}{\numberline {5}Results}{31}{chapter.5}
-\contentsline {section}{\numberline {5.1}KNN Results}{31}{section.5.1}
-\contentsline {section}{\numberline {5.2}Multilayer Perceptron Initial Results}{31}{section.5.2}
-\contentsline {subsection}{\numberline {5.2.1}Analysis}{33}{subsection.5.2.1}
-\contentsline {subsection}{\numberline {5.2.2}Performance Metrics}{33}{subsection.5.2.2}
-\contentsline {chapter}{\numberline {6}Conclusion}{37}{chapter.6}
-\contentsline {chapter}{References}{38}{chapter*.30}
-\contentsline {chapter}{\numberline {A}Progress Report}{39}{appendix.A}
-\contentsline {section}{\numberline {A.1}Literature Review}{39}{section.A.1}
-\contentsline {section}{\numberline {A.2}Implementation}{39}{section.A.2}
-\contentsline {section}{\numberline {A.3}Areas of Focus}{40}{section.A.3}
+\contentsline {subsection}{\numberline {1.4.3}Limitations}{4}{subsection.1.4.3}
+\contentsline {section}{\numberline {1.5}Report Overview}{4}{section.1.5}
+\contentsline {chapter}{\numberline {2}Literature Review}{5}{chapter.2}
+\contentsline {section}{\numberline {2.1}Synthetic Aperture Radar}{5}{section.2.1}
+\contentsline {subsection}{\numberline {2.1.1}Description}{5}{subsection.2.1.1}
+\contentsline {subsection}{\numberline {2.1.2}Relevance}{5}{subsection.2.1.2}
+\contentsline {section}{\numberline {2.2}The MSTAR Dataset}{6}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}Description}{6}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}Relevance}{7}{subsection.2.2.2}
+\contentsline {section}{\numberline {2.3}Classification}{7}{section.2.3}
+\contentsline {subsection}{\numberline {2.3.1}Nearest-Neighbour Classification}{7}{subsection.2.3.1}
+\contentsline {subsubsection}{Description}{7}{section*.7}
+\contentsline {subsubsection}{Relevance}{8}{section*.8}
+\contentsline {section}{\numberline {2.4}K-Nearest-Neighbour Classification}{9}{section.2.4}
+\contentsline {subsubsection}{Description}{9}{section*.9}
+\contentsline {subsubsection}{Relevance}{9}{section*.10}
+\contentsline {section}{\numberline {2.5}Deep Learning}{9}{section.2.5}
+\contentsline {subsection}{\numberline {2.5.1}Neural Networks}{9}{subsection.2.5.1}
+\contentsline {subsubsection}{Description}{9}{section*.11}
+\contentsline {subsubsection}{Relevance}{10}{section*.12}
+\contentsline {subsection}{\numberline {2.5.2}Multilayer Perceptron}{10}{subsection.2.5.2}
+\contentsline {subsubsection}{Description}{10}{section*.13}
+\contentsline {subsubsection}{Relevance}{11}{section*.14}
+\contentsline {section}{\numberline {2.6}Optimization and Training}{11}{section.2.6}
+\contentsline {subsection}{\numberline {2.6.1}Back-propagation}{12}{subsection.2.6.1}
+\contentsline {subsubsection}{Description}{12}{section*.15}
+\contentsline {subsubsection}{Relevance}{12}{section*.16}
+\contentsline {subsection}{\numberline {2.6.2}Hyper-parameters}{13}{subsection.2.6.2}
+\contentsline {subsubsection}{Description}{13}{section*.17}
+\contentsline {subsubsection}{Relevance}{13}{section*.18}
+\contentsline {subsection}{\numberline {2.6.3}Training, Validation, and Testing}{13}{subsection.2.6.3}
+\contentsline {section}{\numberline {2.7}Performance Metrics}{15}{section.2.7}
+\contentsline {subsection}{\numberline {2.7.1}The Confusion Matrix}{15}{subsection.2.7.1}
+\contentsline {chapter}{\numberline {3}Design}{16}{chapter.3}
+\contentsline {section}{\numberline {3.1}Design Context}{16}{section.3.1}
+\contentsline {section}{\numberline {3.2}Feasibility Study / Concept Exploration}{16}{section.3.2}
+\contentsline {section}{\numberline {3.3}Decomposition and Definition}{18}{section.3.3}
+\contentsline {subsection}{\numberline {3.3.1}Concept of Operations}{19}{subsection.3.3.1}
+\contentsline {subsection}{\numberline {3.3.2}System Requirements}{19}{subsection.3.3.2}
+\contentsline {subsection}{\numberline {3.3.3}High-Level Design}{19}{subsection.3.3.3}
+\contentsline {subsection}{\numberline {3.3.4}Detailed Design}{19}{subsection.3.3.4}
+\contentsline {subsubsection}{Image Processing/Preparation}{19}{section*.19}
+\contentsline {subsubsection}{Dimensionality Reduction}{20}{section*.20}
+\contentsline {subsubsection}{Nearest Neighbour Design}{20}{section*.21}
+\contentsline {subsubsection}{K-Nearest Neighbour Design}{24}{section*.22}
+\contentsline {subsubsection}{Multilayer Perceptron Design}{24}{section*.23}
+\contentsline {subsection}{\numberline {3.3.5}Software Development and Implementation}{24}{subsection.3.3.5}
+\contentsline {section}{\numberline {3.4}Integration and Recomposition}{24}{section.3.4}
+\contentsline {subsection}{\numberline {3.4.1}Software Development and Implementation}{24}{subsection.3.4.1}
+\contentsline {subsubsection}{Inline Testing}{24}{section*.24}
+\contentsline {subsubsection}{The Multilayer Perceptron}{25}{section*.25}
+\contentsline {subsubsection}{Algorithm Testing}{27}{section*.26}
+\contentsline {subsubsection}{Testing During Development}{29}{section*.27}
+\contentsline {subsection}{\numberline {3.4.2}Subsystem Verification}{29}{subsection.3.4.2}
+\contentsline {subsection}{\numberline {3.4.3}System Verification and Deployment}{30}{subsection.3.4.3}
+\contentsline {subsection}{\numberline {3.4.4}System Validation}{30}{subsection.3.4.4}
+\contentsline {subsection}{\numberline {3.4.5}Operations and Maintenance}{30}{subsection.3.4.5}
+\contentsline {subsection}{\numberline {3.4.6}Changes and Upgrades}{30}{subsection.3.4.6}
+\contentsline {subsection}{\numberline {3.4.7}Retirement / Replacement}{30}{subsection.3.4.7}
+\contentsline {chapter}{\numberline {4}Methodology}{31}{chapter.4}
+\contentsline {section}{\numberline {4.1}Data Processing}{31}{section.4.1}
+\contentsline {section}{\numberline {4.2}Dimensionality Reduction}{32}{section.4.2}
+\contentsline {section}{\numberline {4.3}K-Nearest Neighbour Classification}{32}{section.4.3}
+\contentsline {subsection}{\numberline {4.3.1}Implementation}{33}{subsection.4.3.1}
+\contentsline {subsubsection}{The algorithm}{33}{section*.28}
+\contentsline {subsubsection}{Optimising for K}{33}{section*.29}
+\contentsline {chapter}{\numberline {5}Results}{34}{chapter.5}
+\contentsline {section}{\numberline {5.1}KNN Results}{34}{section.5.1}
+\contentsline {section}{\numberline {5.2}Multilayer Perceptron Initial Results}{34}{section.5.2}
+\contentsline {subsection}{\numberline {5.2.1}Analysis}{36}{subsection.5.2.1}
+\contentsline {subsection}{\numberline {5.2.2}Performance Metrics}{37}{subsection.5.2.2}
+\contentsline {chapter}{\numberline {6}Conclusion}{40}{chapter.6}
+\contentsline {chapter}{References}{41}{chapter*.30}
+\contentsline {chapter}{\numberline {A}Progress Report}{42}{appendix.A}
+\contentsline {section}{\numberline {A.1}Literature Review}{42}{section.A.1}
+\contentsline {section}{\numberline {A.2}Implementation}{42}{section.A.2}
+\contentsline {section}{\numberline {A.3}Areas of Focus}{43}{section.A.3}

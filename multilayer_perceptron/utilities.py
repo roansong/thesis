@@ -2,6 +2,8 @@ import numpy as np
 import theano.tensor as T
 from collections import OrderedDict
 import matplotlib.image as mpimg
+import sys
+import timeit
 def progress_bar(current,total):
     div = current/total
     bar_length = 20
@@ -84,15 +86,17 @@ def confusion_matrix(pred,target,num_classes):
     return confusion_matrix
     
     
-def get_images(w,h,file_list=None,num_classes=5):
+def get_images(w,h,file_list=None,num_classes=8,threshold=False):
     
-    infile = 'filenames5.txt'
-    folder = 'tiffs5/'
+    infile = 'filenames82.txt'
+    folder = 'tiffs82/'
     abspath = 'C:/Users/Roan Song/Desktop/thesis/'
+    rng = np.random.RandomState(0)
+    
     
     if(not file_list):
         dt = np.dtype([('filename','|S16'),('labels',np.int32,(num_classes,))])
-        infile = 'filenames5.txt'
+        infile = 'filenames8.txt'
         filedata = np.loadtxt(infile,dtype=dt)
         file_list = [a.decode('UTF-8') for a in filedata['filename']]
         file_list.sort(key=lambda x:x[-7:])
@@ -107,7 +111,7 @@ def get_images(w,h,file_list=None,num_classes=5):
         suffixes[i] = {"count":suffixes[i],"label":one_hot(ind,num_classes)}
         ind += 1    
     
-    
+    processing_time = 0
     img_arr = np.zeros((len(file_list),h*w))
     target_arr = np.zeros((len(file_list),num_classes))
     i = 0
@@ -118,9 +122,25 @@ def get_images(w,h,file_list=None,num_classes=5):
         
         img = pad_img(img,h,w,IN_HEIGHT,IN_WIDTH)
         oneD = img.reshape(h * w)
+        start = timeit.default_timer()
+        if(threshold):
+            below_thresh = oneD < np.mean(oneD)
+            oneD[below_thresh] = 0
+        
+        processing_time += timeit.default_timer() - start
+        
+        
+        
         oneD = normalise(oneD)
+        # oneD += rng.normal(0,2,oneD.shape)
+        
         img_arr[i] = oneD  
         target_arr[i] = suffixes[fname[-7:]]["label"]
          
         i+=1 
+        
+    print(processing_time)
     return img_arr,target_arr,suffixes
+    
+    
+    # forfiles /m *.026 /c "cmd /c mstar2tiff -i @file -o tiffs/@file.tif -e"
