@@ -42,16 +42,23 @@
 
 \section{Synthetic Aperture Radar}
 \subsection{Description}
-SAR is used to create images of objects, such as vehicles (as in this report), or landscapes. The images are constructed by sending a radar signal from a moving platform, and the time taken for the signal to return to the antenna denotes the size of the aperture. The aperture can be physical, with a large antenna, or synthetic in the case of a moving aperture. Larger apertures allow for higher image resolution. SAR images consist of magnitude and phase data, from which elevation data can be calculated. The classification of 2D SAR images, the type dealt with in this report, requires only the magnitude data to be preserved.
+SAR is used to create images of objects, such as vehicles (as in this report), or landscapes. The images are constructed by sending a radar signal from a moving platform, and the time taken for the signal to return to the antenna denotes the size of the aperture. The aperture can be physical, with a large antenna, or synthetic in the case of a moving aperture. Larger apertures allow for higher image resolution. SAR images consist of magnitude and phase data, from which elevation data can be calculated. \cite{curlander1991synthetic} The classification of 2D SAR images, the type dealt with in this report, requires only the magnitude data to be preserved.
 \subsection{Relevance}
-The dataset chosen for this report is comprised of SAR imagery. Understanding the nature of the format allows the decision to strip the data of phase information and keep only magnitude data to be made. 
+The dataset chosen for this report is comprised of SAR imagery. Understanding the nature of this format allows the decision to strip the data of phase information and keep only magnitude data to be made. 
 
 \section{The MSTAR Dataset}
 \subsection{Description}
-The MSTAR public mixed targets dataset contains X-band synthetic aperture radar (SAR) image chips of multiple targets. Each image has a resolution of 1 foot, and is captured in spotlight mode. Information pertaining to each target, including its elevation, depression angle, and target type is contained in a header section of each file. The header is followed by magnitude and phase data of the SAR imagery. Because the SAR images are 2D, only the magnitude data needs to be considered. Each point represents the brightness of a pixel, reducing the complexity of this study to that of image-based target recognition. \cite{Schumacher_atrof}. Each class of targets has between 195 and 274 instances, with class images ranging in sizes from 48x48 pixels to 198x198 pixels. The targets in each class are rotated between 0\degree and 360\degree.
+The MSTAR Public Mixed Targets dataset is provided by the U.S. Airforce on the Sensor Data Management System (SDMS) site\cite{MSTAR}. The dataset contains X-band synthetic aperture radar (SAR) image chips of 8 different targets. Each image has a resolution of 1 foot, and is captured in spotlight mode. 
 
-\subsection{Relevance}
-The MSTAR dataset was suggested for this study by A. Mishra. It provides a generic SAR image chip dataset on which any classification method can be run. The dataset is comparatively small, with 195-274 images per class, and thus is suitable for machine learning on a consumer-grade desktop computer with reasonable classification time. The rotation factor present in each image introduces complications, as Figure~\ref{fig:sar_differences} shows, there is a large disparity in appearance between instances of the same class.
+The target in each image is centered.
+
+The targets in each class are rotated between 0\degree and 360\degree, with images given along the entire path of rotation. This gives a comprehensive view of each target. As Figure~\ref{fig:sar_differences} shows, there is a large disparity in appearance between instances of the same class.
+
+Targets are grouped by elevation angle. For each elevation angle there are between 195 and 274 images per class. Two elevation angles, 15\degree and 17\degree were chosen, as they were the two elevation angles for which each class had images (some classes had 45\degree, but were ignored). Over 8 classes there is a total of 4459 images to consider.
+
+Information pertaining to each target, including its elevation, depression angle, and target type is contained in a header section of each file. The header is followed by magnitude and phase data of the SAR imagery. The SDMS provides tools for converting the raw data into TIFF and JPEG image formats. TIFF is an uncompressed image format, suffering none of the loss that the JPEG format has. It is thus the one used in this report. Converting from the raw data to an image file reduces the complexity of this study to that of image-based target recognition. The phase data present in the original file is safely ignored. \cite{Schumacher_atrof}. 
+
+The targets vary in size from 54x54 to 192x193, although images within each class are uniform in size.
 
 \begin{figure}
 	\centering
@@ -60,6 +67,12 @@ The MSTAR dataset was suggested for this study by A. Mishra. It provides a gener
 	\caption{Rotational difference between two images of the same class}
 	\centering
 \end{figure}
+
+
+\subsection{Relevance}
+The MSTAR dataset was suggested for this study by A. Mishra. It provides a generic SAR image chip dataset on which any classification method can be run. The dataset is comparatively small, with 195-274 images per class, and thus is suitable for machine learning on a consumer-grade desktop computer with reasonable classification time. The rotation factor present in each image introduces complications, but the images themselves are centered, which is very convenient. 
+
+
 
 
 
@@ -73,16 +86,21 @@ When given an input, the classifier compares this input to the training data set
 \[ d_2(a,b) = (a - b)^2  \]
  Each pixel usually has some relation to the pixels near to it, so there is the possibility for a better definition of 'distance' between images to be made\cite{IMED, Michie94machinelearning}.
  
-The nearest neighbour classifier has been shown to provide high classification rates (85+\%) through sufficient image processing and classifier development. A caveat of the success, however, is the inclusion of image chip 'clutter' present in each image affecting the success of clarification. 
-Images in the training dataset have similar clutter, and there is a non-negligible contribution to the success of the classification.\cite{Schumacher_atrof}
+The nearest neighbour classifier has been shown to provide MSTAR classification rates (82-87\%) through sufficient image processing and classifier development. SAR images are filled with 'clutter' surrounding the target, which was noted as affecting the success of classification\cite{Schumacher_atrof}.
 
 \subsubsection{Relevance}
 The nearest-neighbour classifier is used in this study as an example of a na{\"i}ve classifier. Results of this classifier provide a good benchmark against which subsequent classifier performance can easily be measured. The success of other parties in classifying the MSTAR targets using nearest neighbour methods lays a convincing foundation for future development. There is undoubtedly room for improvement, beginning with the elimination of clutter's effect on classification.
 
+\section{K-Nearest-Neighbour Classification}\label{lit:knn}
+\subsubsection{Description}
+The K-Nearest-Neighbour (KNN) classifier is an extension of the Nearest Neighbour classifier where, instead of selecting the single closest neighbour from the dataset to the input case, the `K' nearest neighbours are selected, and the class most prevalent amongst the neighbours is taken as the predicted class. K is always an odd-valued integer, to prevent ties from occurring. 
+
+\subsubsection{Relevance}
+KNN is a more robust form of Nearest Neighbour classification because larger values of K ignore outliers in the data. This regularisation effect can be optimised by choosing the best-performing value of K for a specific dataset.
 
 \section{Deep Learning}
 
-The objective of this study is to test the performance of deep learning-based classifiers on SAR image chip data. The success of na{\"i}ve methods has already been proven\cite{Schumacher_atrof}, but lack the predictive power of a truly intelligent classifier. Neural networks and the application of deep learning are key to extracting features from the data to further improve classification rates.
+The objective of this study is to test the performance of deep learning-based classifiers on SAR image chip data. The success of na{\"i}ve methods has already been proven\cite{Schumacher_atrof}, but lack the predictive power of a more sophisticated classifier. Neural networks and the application of deep learning are key to extracting features from the data to further improve classification rates.
 
 \subsection{Neural Networks}
 \subsubsection{Description}
@@ -104,11 +122,14 @@ The motivation behind using neural networks is simple; instead of specifying bas
 
 \subsection{Multilayer Perceptron}
 \subsubsection{Description}
-A multilayer perceptron is an extension of the simple perceptron network. The initial design was an input layer, an output layer, and a hidden layer of neurons between. The basic perceptron was deemed unsuitable for complex classification tasks, as its input-output relationship could be reduced (via back-propagation) to a set of linear combinations. This means that is can only correctly classify data that is perfectly linearly separable, which limits its practical applications significantly.
+A multilayer perceptron is a neural network consisting of an input layer, one or more hidden layers, and an output layer. The input layer is mapped directly from an input instance; one feature per link. In the case of images, each pixel is a feature. The hidden layer neurons have non-linear activation function applied to their inputs, forming their outputs. Typically sigmoid (output range: 0 to 1) or hyperbolic tangent (output range: -1 to 1) are used. The output layer has neurons representing each class and is typically a logistic regression layer; a softmax function is applied to its outputs, making the sum of the layer's neurons' outputs equal to 1. The neuron with the highest output value denotes the predicted class.
 
-The multilayer perceptron used two or more hidden neuron layers, with non-linear activation functions at each neuron. This makes a multilayer perceptron an example of a deep neural network. The depth allows for more complex feature detection, and ultimately better performance in complex classification tasks. The multilayer perceptron becomes difficult to optimise as the number of hidden layers grows, because the effect of each neuron on the output, and the effects of previous neurons on \textbf{that} neuron become progressively and recursively difficult to compute.
+Each neuron in every layer is linked to every neuron in the layer that follows it. Each neuron has a randomly chosen weight applied to its output when the classifier is initialised. These weights are subsequently optimised through back-propagation as the classifier is trained. This allows the network to develop relationships between neurons, eventually mapping an input to the output of the classifier with as little error as possible.
+
+A single hidden layer is often sufficient for classification tasks, but more layers can be added as desired. Hidden layer 'depth' allows for more complex feature detection,a nd each layer can be made to serve a purpose as in convolutional neural networks (outside the scope of this report). The multilayer perceptron becomes difficult to optimise as the number of hidden layers grows, because the effect of each neuron on the output, and the effects of previous neurons become progressively more difficult to compute.
+
 \subsubsection{Relevance}
-Implementing a multilayer perceptron is a valuable exercise, as it provides an example of a deep neural network with a fairly straightforward implementation. Training time becomes a significant factor when using a deep neural network due to the time taken to complete back-propagation optimisation, so using a multilayer perceptron will force the development of more efficient methods of data pre-processing to speed up the training as much as possible.
+Implementing a multilayer perceptron is the main focus of this report, as it provides an example of a deep neural network with a fairly simple implementation. Training time becomes a significant factor when using a deep neural network due to the time taken to complete back-propagation optimisation, so using a multilayer perceptron will likely force the development of more efficient methods of data pre-processing to speed up the training as much as possible.
 
 \section{Optimization and Training}
 A classifier is only operating efficiently when it is tuned to the data it is attempting to classify. Deep neural networks are initialised with random weights between their neurons, and at first use will perform worse on average than na{\"ive} classification methods. Through optimisation of these inter-neuron weights, however, the potential of deep neural networks can be reached, and classification results are expected to significantly improve. Tuning the classifier to the dataset is crucial, but optimising too heavily may result in \textit{overfitting} of the data, leaving the classifier with no predictive power on unseen data.
@@ -132,18 +153,34 @@ Back-propagation is a popular and successful technique, well-suited to neural ne
 \subsubsection{Description}
 Hyper-parameters are parameters that, when changed, modify the structure or operation of the neural network, without changing its core mechanics. Hyper-parameters under consideration in this project are:
 \begin{itemize}
-	\item Image size (100px vs 1000px)
+	\item K in the KNN (\ref{lit:KNN})
+	\item Input Image size (100px vs 1000px)
 	\item Learning Rate
 	\item Network Shape (hidden layer size, and number of layers)
-	\item Choice of activation function
-	\item Weight initialisations % (sqrt(6)?)
+	\item L2 regularisation on inter-neuron weights
+	\item Training, Validation and Testing ratios
 \end{itemize}
 \subsubsection{Relevance}
+Optimising hyper-parameters is incredibly important when optimising a classifier. Sub-optimal hyper-parameters such as a learning rate that is too high could prevent an otherwise functional classifier from converging onto the optimal choice of inter-neuron weights and its classification accuracy could suffer. 
+
+%\section{Data Pre-processing}
+%\subsection{Description}
+%Using unprocessed data can be 
+%\subsection{Relevance}
+%
+%
+%\subsection{Resizing}
+%
+%\subsection{Thresholding}
+%\subsection{Reshaping}
+%\subsection{Normalisation}
+
+%
+%\subsection{Dimensionality Reduction}
+%When dealing with images, the number of pixels grows in proportion to the size of the image. Since every pixel has a weight linking it to the first layer of the neural network, and these weights in turn need to be tuned, the computation power required to train the model is proportional to the size of the input. To reduce computational overhead, it is desirable to reduce the input size, without compromising classification accuracy. This can be done using \textit{dimensionality reduction}.
 
 
-\section{Performance Evaluation}
-\subsection{Separability Index}\label{lit:SI}
-Thornton's Separability Index (SI) is used as a metric to show how separable the data is into its different classes, i.e. the confidence level with which distinct classes can be identified with no overlap. Perfectly separable data would have an SI of 1, or 100%.
+
 
 \subsection{Training, Validation, and Testing}\label{lit:loocv}
 Successful classification of a dataset is divided into three distinct steps:
@@ -158,19 +195,15 @@ Training is the process of fitting a classifier - it involves running multiple i
 
 Once the training is complete, having achieved the desired level of classification accuracy, the chosen model can be tested on another dataset (typically a  set of real-world instances) to see how it performs, providing the testing accuracy. The classifier is no longer tuned, and can be presented with a variety of inputs to simulate its real-world performance.
 
-A dataset is typically split into three sections. 50\% training, 25\% validation, and 25\% testing is a reasonable starting point, and the proportions can be seen as a hyperparameter to be optimised. If the training set is too small, there is a risk that the model will not be able to successfully extract the features required for classification, and its testing accuracy will be low. If the validation or test sets are too small, the model validation and testing might not be thorough enough to cover all reasonable use cases.
-% HOW MANY IMAGES IN MSTAR
+A dataset is typically split into three sections. 50\% training, 25\% validation, and 25\% testing is a reasonable starting point, and the proportions can be seen as a hyper-parameter to be optimised. If the training set is too small, there is a risk that the model will not be able to successfully extract the features required for classification, and its testing accuracy will be low. If the validation or test sets are too small, the model validation and testing might not be representative of the classifier's performance on a larger test set.
 
+\section{Performance Metrics}
 \subsection{The Confusion Matrix}
 %http://www.dataschool.io/simple-guide-to-confusion-matrix-terminology/
 % CHECK OUT ROC ANALYSIS AND COHEN's KAPPA
-Confusion matrices are useful tools for evaluating classifier performance. They can show the accuracy, misclassification rate, true/false positive rates, specificity, precision, and prevalence. They clearly show the number of correctly classified classes along the matrix's diagonal, and also shows how many of the incorrect classifications were attributed to which classes. 
-
-\section{Hidden Layers}
-\section{Logistic Regression}
+Confusion matrices are useful tools for evaluating classifier performance. They can show the accuracy, misclassification rate, true/false positive rates, specificity, precision, and prevalence. They clearly show the number of correctly classified classes along the matrix's diagonal, and also shows how many of the incorrect classifications were attributed to which classes. The numbers can be changed to show the percent values of each; i.e. the classification accuracy of each class and how what percent of mis-classifications went to each class.
 
 
-\section{Dimensionality Reduction}
-When dealing with images, the number of pixels grows in proportion to the size of the image. Since every pixel has a weight linking it to the first layer of the neural network, and these weights in turn need to be tuned, the computation power required to train the model is proportional to the size of the input. To reduce computational overhead, it is desirable to reduce the input size, without compromising classification accuracy. This can be done using \textit{dimensionality reduction}.
-\subsection{PCA}\label{lit:PCA}
+
+
 

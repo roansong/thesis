@@ -3,7 +3,7 @@
 %7593 as of 21/10
 %5763
 
-This thesis aims to asses the effectiveness of deep learning techniques in the classification of radar imagery. Deep learning relies on the use of neural networks; interconnected layers of nodes sharing information and undergoing non-linear transformations that, through training and optimisation, can automatically detect and extract features from a dataset. By training a model to classify known instances, it gains predictive power, which can then be tested and used on instances not previously encountered by the model, with varying degrees of accuracy. In the specific case of this thesis, the instances are radar images from the MSTAR dataset.
+This thesis aims to assess the effectiveness of deep learning techniques in the classification of radar imagery. Deep learning relies on the use of neural networks; interconnected layers of nodes sharing information and undergoing non-linear transformations that, through training and optimisation, can detect and extract features from a dataset without human supervision. Training a classifier on a known set of instances allows it to build a predictive model that can then be tested on unseen data, with varying degrees of accuracy. In the specific case of this report, the instances are radar images from the MSTAR dataset.
 
 %The better the optimisation and training of the model, the greater its predictive power.
 
@@ -13,27 +13,64 @@ This thesis aims to asses the effectiveness of deep learning techniques in the c
 %5998
 
 \section{Background}
-As processing power has become more readily available over the years, the field of machine learning has seen many innovations. Deep learning techniques were once considered only theoretically viable due to the limits of computing power when the concepts were developed, but are now being used to great effect in commercial ventures, including image classification and facial recognition applications. Their success lies in the ability of neural networks to train themselves under human supervision,  extracting features from a dataset that are not always intuitive in a human sense, and in many cases providing greater accuracy in classification than humans can achieve, in a fraction of the time (cite some medical science paper here). This accuracy and speed of classification lends itself to the field of target acquisition and recognition; recognising and classifying a target based on its radar signature, to allow for human action to be taken. Na{\"i}ve classification methods have already been proven somewhat effective (REALLY???), and the aim of this study is to assess the possible application of deep learning techniques in this field.
+The desire to mimic human brain function has driven the development of artificial intelligence (AI) and deep learning. The human brain can be viewed as a series of interconnected neurons, firing when undergoing different stimuli. This view led to the foundation of modern deep learning techniques in the 1940s, using multiple layers of artificial neurons. Due to hardware limitations, this approach saw neither success nor widespread adoption. The 21\textsuperscript{st} century has seen renewed interest in the field due to increased computational capabilities. While the complexity of the human brain is currently beyond accurate emulation, the deep learning techniques used to approximate it have found their uses in commercial classification problems.
 
 \section{Motivation}
 
-Deep learning techniques have been proven effective in many different fields. They promote fast classification suitable for real-time applications; the time taken to train a model is much greater than the time taken to classify a specific instance. Image classification is a complex problem, and simple classification methods are not as effective on feature-rich data such as images, because the classes are typically not linearly separable.
+Deep learning is used commercially in voice and image recognition, recommendation engines, artificial intelligence, and a host of other applications. Deep learning classifiers are characterised by relatively long training times and fast classification, making them suited to real-time applications; the time taken to train a predictive model is much greater than the time taken to classify a specific instance, but it can be done beforehand on known data. Acknowledging the success of deep learning techniques has encouraged this report to test the applicability of deep learning techniques in target acquisition and classification of radar imagery.  
 
 
 \section{Objectives}
 
-The goals of this thesis are to assess the effectiveness of deep learning techniques in classifying radar imagery from the MSTAR dataset. The assessment will compare and contrast different types of classifiers: K-Nearest Neighbours, Multilayer Perceptron (one hidden layer), Multilayer Perceptron (two hidden layers), and a Convolutional Neural Network.
+This report aims to develop two classifiers suitable for use on the MSTAR dataset: 
 
-The performance of each classifier will be assessed in terms of its accuracy, training time, and classification time.
+\begin{enumerate}
+	\item K-Nearest Neighbours classifier, supporting user-selected values of K
+	\item Multilayer Perceptron, supporting multiple hidden layers, where each layer's size and activation function can be specified.
+\end{enumerate}
+
+Each classifier will be compared according to the following performance metrics:
+\begin{itemize}
+	\item Training time
+	\item Training accuracy
+	\item Classification time
+	\item Classification accuracy
+\end{itemize}
+
+The steps to be taken in this report:
+\begin{itemize}
+	\item Understand the format of the MSTAR dataset
+	\item Perform pre-processing of the MSTAR dataset
+	\item Develop the KNN classifier
+	\item Develop the Multilayer Perceptron
+	\item Collect performance data for each classifier
+	\item Compare and contrast each classifier based on their performance metrics
+	\item Establish the merit of deep learning techniques in the context of target recognition
+\end{itemize}
+
+
 
 \section{Scope and Limitations}
 
 \subsection{Focus}
+This focus of this report is to:
+\begin{itemize}
+	\item Review the appropriate academic literature regarding deep learning, and assess the current body of knowledge on the subject to understand where this report will be able to contribute
+	\item Implement KNN and Multilayer Perceptron classifiers in Python
+	\item Implement a training and testing regime for each classifier in Python
+	\item Determine and comment on which classifier is most suitable for the task of radar target recognition
+\end{itemize}
 \subsection{Scope}
-\subsubsection{Within project scope}
-\subsubsection{Outside project scope}
+Within project scope:
+%\begin{itemize}
+%	\item A literature review of the appropriate knowledge pertinent to this report
+%\end{itemize}
+Outside project scope:
+%\begin{itemize}
+%	\item 
+%\end{itemize}
 \subsection{Limitations}
-The MSTAR dataset is comparatively small, with 100-274 images per class.
+All computation will be performed on a desktop computer running Windows 10 Pro with an Intel i5-2500 processor (four cores @ 3.3-3.7GHz), Samsung Evo 850 SSD, and 8GB of DDR3 RAM .
 
 
 

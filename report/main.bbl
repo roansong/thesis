@@ -21,6 +21,16 @@
 \providecommand{\BIBdecl}{\relax}
 \BIBdecl
 
+\bibitem{curlander1991synthetic}
+J.~C. Curlander and R.~N. McDonough, \emph{Synthetic aperture radar}.\hskip 1em
+  plus 0.5em minus 0.4em\relax John Wiley \& Sons New York, NY, USA, 1991.
+
+\bibitem{MSTAR}
+\BIBentryALTinterwordspacing
+U.~A. Force, ``The mstar dataset,'' 2015. [Online]. Available:
+  \url{https://www.sdms.afrl.af.mil/index.php?collection=mstar}
+\BIBentrySTDinterwordspacing
+
 \bibitem{Schumacher_atrof}
 R.~Schumacher and K.~Rosenbach, ``Atr of battlefield targets by sar –
   classification results using the public mstar dataset compared with a dataset
