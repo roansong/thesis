@@ -43,11 +43,11 @@ The following is required:
 
 \begin{itemize}
 	\item Use the MSTAR dataset (Section~\ref{lit:MSTAR})
+	\item Develop a na{\"i}ve classifier to use as a benchmark
 	\item Use deep learning methodology to develop a classifier 
-	\item Develop a Na{\"i}ve classifier
 	\item Indicate how the classifiers can be improved
 	\item Comment on the performance of each classifier
-	\item Report on the effectiveness of deep learning vs na\"ive classifiers
+	\item Report on the suitability of deep learning for target recognition
 \end{itemize}
 
 \subsection{Design Specifications}
@@ -93,7 +93,7 @@ An alternate approach is to retain the data inherent in the environmental clutte
 A compromise is to ensure that all images are the size of the largest image in the set, and somehow reduce the clutter present in each image. Because the targets are substantially brighter than their surroundings, using some form of thresholding (setting values lower than a specified threshold to zero) should prove to be effective in lessening the impact of the clutter, if not completely removing it.
 
 \subsubsection{Dimensionality Reduction}
-Each pixel in an image is taken as an feature, forming a feature vector with a length equal to the total number of pixels in the image. The image cropping mentioned in Section \ref{sec:cropping} is very effective at reducing the size of this feature vector. If a 128x128 image is cropped to 64x64, the feature vector's length is reduced by factor of 4. This can be reduced further through the application of dimensionality reduction techniques, such as Principal Component Analysis, Locally-Linear Embedding, Sum of Means and non-linear methods, all of which are outside the scope of this report. As such, each image will be rescaled and padded with zeros to match the size of the largest image in the MSTAR dataset (192x193). This allows every possible feature in each image to be used, while allowing for dimensionality reduction if desired.
+Each pixel in an image is taken as an feature, forming a feature vector with a length equal to the total number of pixels in the image. The image cropping mentioned in Section \ref{sec:cropping} is very effective at reducing the size of this feature vector. If a 128x128 image is cropped to 64x64, the feature vector's length is reduced by factor of 4. This can be reduced further through the application of dimensionality reduction techniques, such as Principal Component Analysis, Locally-Linear Embedding, Sum of Means and non-linear methods, all of which are outside the scope of this report. As such, each image will be rescaled and padded with zeros to match the size of the largest image in the MSTAR dataset (192x193). This allows every possible feature in each image to be used, while allowing for dimensionality reduction to be implemented at a later stage if desired.
 
 \subsubsection{Nearest Neighbour Design}
 \begin{figure}

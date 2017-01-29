@@ -6,6 +6,7 @@ class KNN():
         # note that inputs and targets are of type numpy.ndarray
         self.data = input
         self.targets = targets
+
      
     
     def initD2(self,filename=None,size=None,indices=None):
@@ -121,22 +122,26 @@ class KNN():
         
         
         
-def load_KNN(data,targets,indices=None,filename=None):
+def load_KNN(data,targets,indices=np.array(False),filename=None):
     k = KNN(data,targets)
-    if(filename):
-        k.D2 =np.load(filename)
+    if(indices.any()):
+        k.initD2(filename=filename,indices=indices)
+    elif(filename):
+        k.D2 = np.load(filename=filename)
     else:
-        k.initD2(filename=None,indices=indices)
+        k.initD2()
     
     print("Square distance matrix initialised")
-    k_arr = np.arange(1,int(len(data)/4),2,dtype="int32")
-    # k_values = k.test(k_arr)
-    k_values = np.load("k_values.npy")
+    k_arr = np.arange(1,int(len(data)/8),2,dtype="int32")
+    k_values = k.test(k_arr)
+    # k_values = np.load("k_values_old.npy")
     k_sorted = sorted(k_values,key=lambda x:x[1])[::-1]
     best_k = k_sorted[0][0]
     print("Best value of K obtained")
     k.best_k = int(best_k)
     k.k_values = k_values
+    print(k.D2.shape)
+    print(best_k)
     return k
 
 

@@ -4,6 +4,42 @@ This section of the report shows the results of the tests performed on the chose
 \section{Preliminary Results}
 The preliminary results were calculated on a subset of the MSTAR dataset; 1291 images spanning 5 classes were selected. Each image was cropped/padded to 100x100 pixels in size and then normalised, forming an input of 10,000 data points. No further processing was performed on the images.
 
+The data was divided as follows: 50\% training, 25\% validation, 25\% testing. Instances are drawn randomly from the dataset without replacement.
+
+\subsection{Nearest Neighbour}
+
+\subsection{K-Nearest Neighbours}
+
+\subsection{Multilayer Perceptron}
+The multilayer perceptron has the largest number of parameters that can be optimised, leading to a varied spread of results. The first parameters to optimise are the learning rate and the number of neurons in the hidden layer(s).
+
+The learning rate controls how strongly the output error affects the shift in weight values every iteration. A smaller learning rate will typically cause the network to take longer to converge to its optimal weights, or get stuck in a local minimum, while a high learning rate can prevent the values from converging, resulting in oscillating values and no optimum being found.
+
+The size of each hidden layer defines the number of connections between neurons. Too few connections can `bottleneck' the classifier, leaving it unable to extract any meaningful features. Too many connections can allow the classifier to extract more features, at the cost of a longer training time spent optimising the larger number of weights. It is predicted that too many connections can also lead to over-fitting of the classifier to the training dataset.
+
+
+
+
+Preliminary results show that learning rate must be set in indirect proportion to the number of hidden neurons to maintain training and classification accuracy.
+
+\subsubsection{Single Hidden Layer}
+
+\subsubsection{Multiple Hidden Layers}
+
+\section{Preliminary Comments}
+Analysis of the preliminary results gives direction to the development of each classifier. 
+
+\subsection{Nearest Neighbour}
+The Nearest Neighbour classifier results are intended to function only as a low benchmark and point of reference, so its design remains unchanged.
+
+\subsection{Multilayer Perceptron}
+
+The required hidden layer size is much smaller than anticipated; a single hidden layer with 10 neurons performs adequately. Optimisation of the weights according to their L2 norm proved crucial in improving predictive accuracy while reducing the cost of the classifier.
+
+\subsection{Data}
+The division of the dataset between training, validation and testing should be changed to 85\% training, 5\% validation, 10\% testing. This is based on the idea that more training data results in a stronger classifier. The validation stage is for verifying the progress of the model and does not need too much data dedicated to it. Testing requires more data than validation - enough to be confidently representative of the contents of the entire dataset.
+
+
 \section{KNN Results}
 The KNN algorithm is simple to execute, but scales poorly with dataset size and image size. Using a dataset of 1291 images, of size 100x100, the largest bottleneck in the procedure is the generation of the squared distance matrix D2, taking 182 minutes (3 hours and 2 minutes) to complete. This was then saved to prevent the need to recalculate it in future. The time taken to calculate the optimal value of K is also proportional to the number of images, taking 379 minutes (6 hours and 19 minutes) when considering all odd values of K up to and including 1291. Plotting these K-values vs the training error obtained for each value is shown in Figure~\ref{fig:k_values}. The time taken to classify a single instance is 0.25m (15s). Testing though the full set of 1291 to obtain the training classification accuracy takes \~1291*0.25 minutes, resulting in a real-world time of 342 minutes (5 hours and 42 minutes). 
 

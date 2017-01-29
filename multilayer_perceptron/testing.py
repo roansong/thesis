@@ -25,7 +25,23 @@ import knn as knn
 t1 = timeit.default_timer()
 
 class HiddenLayer():
+    """
+    This class represents a hidden layer of neurons
+    It takes an array of inputs, applies an activation function to them, and returns the output
+    """
     def __init__(self,input,n_inputs,n_outputs,weights=None,bias=None,activation=T.tanh,rng=np.random.RandomState(2)):
+        """
+        Initialise the hidden layer
+        
+        input      --- a vector containing the input values
+        n_inputs   --- number of neurons feeding into the hidden layer
+        n_outputs  --- number of neurons in the next layer
+        weights    --- weights applied to the inputs and outputs of the hidden layer (default: None)
+        bias       --- bias applied to the output values (default: None)
+        activation --- activation function to be applied to neuron inputs (default: tanh)
+        rng        --- seeded random number generator (default: np.random.RandomState(2))
+        """
+        
         self.input = input
         if(not weights):
             weights = theano.shared(value=rng.uniform(-1,1,(n_inputs,n_outputs)),name = 'weights')
@@ -34,13 +50,23 @@ class HiddenLayer():
             
         self.weights = weights
         self.bias = bias
-        
         output = T.dot(input,self.weights) + self.bias
         self.output = output if activation == None else activation(output) 
         self.parameters = [self.weights,self.bias]
  
 class OutputLayer():
+    """
+    This class is a logistic regression layer for use at the output of a neural network
+    """
     def __init__(self,input,n_inputs,n_outputs):
+        """
+        Initialise the output layer
+        
+        input     --- a vector containing the input values
+        n_inputs  --- number of neurons feeding into the layer
+        n_outputs --- number of classes
+        """
+        
         self.weights = theano.shared(value=np.zeros((n_inputs,n_outputs)),name='weights')
         self.bias = theano.shared(value=np.zeros((n_outputs,)),name='bias')
         self.output = T.nnet.nnet.softmax(T.dot(input,self.weights)+self.bias)
@@ -49,13 +75,33 @@ class OutputLayer():
         self.input = input
     
     def neg_log_likelihood(self,target):
+        """
+        Returns the negative log likelihood between the classifier's output and a target
+        
+        target --- correct output
+        """
         return -T.mean(T.log(self.output)[T.arange(target.shape[0]),target])     
     
-    def errors(self,y):
-        return T.mean(T.neq(self.predicted_class,y))        
+    def errors(self,target):
+        """
+        Returns the average error between the predicted class and the target class
+        
+        target --- correct output
+        """
+        return T.mean(T.neq(self.predicted_class,target))        
 
 class Multilayer_Perceptron():
     def __init__(self,input,shape,num_classes,rng):
+        """
+        A multilayer perceptron class
+        
+        input       --- a vector containing the input values
+        shape       --- a tuple describing the shape of the classifier and its hidden layers
+                        each element in the tuple specifies the number of neurons per layer
+        num_classes --- the number of classes in the dataset
+        rng         --- seeded random number generator
+        """
+        
         
         self.hidden_layers = []
         self.hidden_layers.append(
@@ -92,7 +138,19 @@ class Multilayer_Perceptron():
         self.shape = shape
         self.rng = rng
         
-    def test(self,learning_rate=0.001, L1_rg=0.0000, L2_rg=0.1, n_epochs=100, batch_size=30, print_val = True, quick=True):
+    def test(self,learning_rate=0.01, L1_rg=0.0000, L2_rg=0.1, n_epochs=100, batch_size=30, print_val = True, quick=True):
+        """
+        Test regime for the perceptron, used to train it and store performance metrics
+        
+        learning_rate --- scaling factor for gradient descent (default: 0.01)
+        L1_rg         --- influence of weights' L1 norm on the classifier cost (default: 0.0)
+        L2_rg         --- influence of weights' L2 norm on the classifier cost (default: 0.1)
+        n_epochs      --- number of iterations over the dataset to be done during training (default: 100)
+        batch_size    --- designates the minibatch size for stochastic gradient descent (default: 30)
+        print_val     --- if True, prints the current performance of the model every few epochs (default: False)
+        quick         --- if True, stops the classifier from training further if test error is zero (default: True)
+        """
+        
         start_time = timeit.default_timer()
         # print("="*60)
         # print("Multilayer Perceptron.",
@@ -227,14 +285,14 @@ class Multilayer_Perceptron():
                     this_validation_loss = np.mean(validation_losses)
                     loss_arr.append(this_validation_loss)
                     
-                    if print_val and ((iter + 1) % (validation_frequency*10) == 0):
+                    if print_val and ((iter + 1) % (validation_frequency*100) == 0):
                         
                         print(
                             'epoch %i,  validation err %f %%, test err %f %%' %
                             (
                                 epoch,
                                 this_validation_loss * 100.,
-                                test_score
+                                test_score*100.
                             )
                         )
                         # print(minibatch_avg_cost)
@@ -350,8 +408,7 @@ IMG_HEIGHT = 100
 batch_size = 30
 num_classes=5
 learning_rate=0.001     
-L1_rg = 0.00
-L2_rg = 0.0001
+
 
 
 
@@ -363,12 +420,12 @@ filenames.sort(key=lambda x:x[-7:])
 
 
 
-data,targets,suffixes = u.get_images(w=IMG_WIDTH,h=IMG_HEIGHT,file_list = filenames,threshold = True,noise=False)
+data,targets,suffixes = u.get_images(w=IMG_WIDTH,h=IMG_HEIGHT,file_list = filenames,threshold = True,noise=False,num_classes = num_classes)
 
 
 
 # training_set, validation_set, test_set,indices = u.gen_sets(data,targets,85,5,10)
-training_set, validation_set, test_set,indices = u.gen_sets(data,targets,85,5,10)
+training_set, validation_set, test_set,indices = u.gen_sets(data,targets,50,25,25)
 training_batches   =  len(training_set[0])//batch_size 
 validation_batches =  len(validation_set[0])//batch_size
 test_batches       =  len(test_set[0])//batch_size
@@ -385,46 +442,67 @@ y = T.lvector('y')
 L2 = 0.1
 L1 = 0
 # size = [(IMG_WIDTH*IMG_HEIGHT,10),(IMG_WIDTH*IMG_HEIGHT,10,10),(IMG_WIDTH*IMG_HEIGHT,50),(IMG_WIDTH*IMG_HEIGHT,50,50)]
-size = [(IMG_WIDTH*IMG_HEIGHT,10)]
+size = [(IMG_WIDTH*IMG_HEIGHT,10),
+(IMG_WIDTH*IMG_HEIGHT,10,10)]
 # 
-# for s in size:
-#     # learning_rate = 1/(10**len(s))
-#     classifier = Multilayer_Perceptron(x,
-#                             s,
-#                             num_classes=8,
-#                             rng=np.random.RandomState(1)
-#                             )
-#     # learning_rate = 1/(10*sum(classifier.shape[1:]))
-#     
-#     
-#     classifier.test(
-#         learning_rate=learning_rate,
-#         L2_rg=L2,
-#         L1_rg= L1,
-#         n_epochs=2000,
-#         quick=True)
-#     print(
-#     "Learning rate       : %.5f\n"%(learning_rate)+(
-#     "Hidden Layer Sizes  : %s\n" + 
-#     "Classification Time : %8f\n" +
-#     "Classification Error: %.3f\n" +
-#     "Validation Error    : %.3f\n" +
-#     "Training Time       : %.4f\n" +
-#     "Training Error      : %.3f\n" +
-#     "Training Cost       : %.4f")%
-#     (tuple(classifier.metrics)))
-#     print("="*40)
+for s in size:
+    # learning_rate = 1/(10**len(s))
+    classifier = Multilayer_Perceptron(x,
+                            s,
+                            num_classes=5,
+                            rng=np.random.RandomState(1)
+                            )
+    # learning_rate = 1/(10*sum(classifier.shape[1:]))
+    
+    
+    classifier.test(
+        learning_rate=learning_rate,
+        L2_rg=L2,
+        L1_rg= L1,
+        n_epochs=2000,
+        quick=True)
+    print(
+    "Learning rate       : %.5f\n"%(learning_rate)+(
+    "Hidden Layer Sizes  : %s\n" + 
+    "Classification Time : %8f\n" +
+    "Classification Error: %.3f\n" +
+    "Validation Error    : %.3f\n" +
+    "Training Time       : %.4f\n" +
+    "Training Error      : %.3f\n" +
+    "Training Cost       : %.4f")%
+    (tuple(classifier.metrics)))
+    print("="*40)
 # 
 #     
-start = timeit.default_timer()
-k,r = knn.testKNN(training_set,validation_set,test_set,indices,k=1,filename='100x100.npy')
-mid = timeit.default_timer()
-k2,r2 = knn.testKNN(training_set,validation_set,test_set,indices,k=3,filename='100x100.npy')
-end = timeit.default_timer()
-nn_time = mid-start
-knn_time = end-mid
-print(nn_time)
-print(knn_time)
+# start = timeit.default_timer()
+# k,r = knn.testKNN(training_set,validation_set,test_set,indices,k=1,filename='100x100.npy')
+# mid = timeit.default_timer()
+# k2,r2 = knn.testKNN(training_set,validation_set,test_set,indices,k=3,filename='100x100.npy')
+# end = timeit.default_timer()
+# nn_time = mid-start
+# knn_time = end-mid
+# print(nn_time)
+# print(knn_time)
+# 
+# a = list(zip(*r))[0]
+# b = list(zip(*r))[2]
+# conf1 = u.confusion_matrix(a,b,num_classes)
+# 
+# a = list(zip(*r2))[0]
+# b = list(zip(*r2))[2]
+# conf2 = u.confusion_matrix(a,b,num_classes)
+#  Time an individual run for nn and knn
+
+#  Run two MLPs on the same data here
+
+
+
+
+
+
+
+
+
 
 # print("%.4fm calculating K values" % ((end_time-start_time)/60.))
 # 
@@ -435,7 +513,7 @@ print(knn_time)
 # 
 
 
-
+# 
 # plt.figure(1)
 # plt.subplot(2,1,1)
 # x = k_arr

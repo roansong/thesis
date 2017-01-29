@@ -54,4 +54,9 @@ I.~Russel, ``Definition of a neural network,'' 1996. [Online]. Available:
   \url{http://uhaweb.hartford.edu/compsci/neural-networks-definition.html}
 \BIBentrySTDinterwordspacing
 
+\bibitem{bottou2010large}
+L.~Bottou, ``Large-scale machine learning with stochastic gradient descent,''
+  in \emph{Proceedings of COMPSTAT'2010}.\hskip 1em plus 0.5em minus
+  0.4em\relax Springer, 2010, pp. 177--186.
+
 \end{thebibliography}
