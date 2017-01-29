@@ -86,10 +86,10 @@ def confusion_matrix(pred,target,num_classes):
     return confusion_matrix
     
     
-def get_images(w,h,file_list=None,num_classes=8,threshold=False):
+def get_images(w,h,file_list=None,num_classes=8,threshold=False,noise=False):
     
-    infile = 'filenames82.txt'
-    folder = 'tiffs82/'
+    infile = str(num_classes) +'.txt'
+    folder = 'tiffs'+str(num_classes)+'/'
     abspath = 'C:/Users/Roan Song/Desktop/thesis/'
     rng = np.random.RandomState(0)
     
@@ -116,31 +116,60 @@ def get_images(w,h,file_list=None,num_classes=8,threshold=False):
     target_arr = np.zeros((len(file_list),num_classes))
     i = 0
     for fname in file_list:
+        start = timeit.default_timer()
         img = mpimg.imread(abspath + folder + fname)
         IN_HEIGHT = img.shape[0]
         IN_WIDTH = img.shape[1]
         
         img = pad_img(img,h,w,IN_HEIGHT,IN_WIDTH)
         oneD = img.reshape(h * w)
-        start = timeit.default_timer()
+        
         if(threshold):
             below_thresh = oneD < np.mean(oneD)
             oneD[below_thresh] = 0
         
-        processing_time += timeit.default_timer() - start
+    
         
         
         
         oneD = normalise(oneD)
-        # oneD += rng.normal(0,2,oneD.shape)
+        if(noise):
+            oneD += rng.normal(0,1,oneD.shape)
         
         img_arr[i] = oneD  
         target_arr[i] = suffixes[fname[-7:]]["label"]
          
         i+=1 
-        
+    processing_time = timeit.default_timer() - start    
     print(processing_time)
     return img_arr,target_arr,suffixes
     
+def gen_sets(data,targets,train,val,test):
+    train,val,test = unit([train,val,test])
+    
+    training_set   = np.zeros((int(len(data)*train),2))
+    validation_set = np.zeros((int(len(data)*val  ),2))
+    test_set       = np.zeros((int(len(data)*test ),2))
+    rng = np.random.RandomState(0)
+    indices = np.arange(len(data))
+    
+    temp = rng.choice(indices,size=len(training_set),replace=False)
+    training_indices = temp
+    training_set = (np.vstack(data[temp]),np.vstack(targets[temp]))
+    # training_set = (data[temp],targets[temp])
+    indices = np.delete(indices,temp)
+    
+    temp = rng.choice(indices,size=len(validation_set),replace=False)
+    validation_indices = temp
+    validation_set = (np.vstack(data[temp]),np.vstack(targets[temp]))
+    indices = np.delete(indices,temp)
+    
+    temp = rng.choice(indices,size=len(test_set),replace=False)
+    testing_indices = temp
+    test_set = (np.vstack(data[temp]),np.vstack(targets[temp]))
+    indices = np.delete(indices,temp)
+    
+    return training_set, validation_set, test_set, (training_indices,validation_indices,testing_indices)
+
     
     # forfiles /m *.026 /c "cmd /c mstar2tiff -i @file -o tiffs/@file.tif -e"

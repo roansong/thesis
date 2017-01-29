@@ -46,7 +46,7 @@ SAR is used to create images of objects, such as vehicles (as in this report), o
 \subsection{Relevance}
 The dataset chosen for this report is comprised of SAR imagery. Understanding the nature of this format allows the decision to strip the data of phase information and keep only magnitude data to be made. 
 
-\section{The MSTAR Dataset}
+\section{The MSTAR Dataset}\label{lit:MSTAR}
 \subsection{Description}
 The MSTAR Public Mixed Targets dataset is provided by the U.S. Airforce on the Sensor Data Management System (SDMS) site\cite{MSTAR}. The dataset contains X-band synthetic aperture radar (SAR) image chips of 8 different targets. Each image has a resolution of 1 foot, and is captured in spotlight mode. 
 
@@ -76,10 +76,10 @@ The MSTAR dataset was suggested for this study by A. Mishra. It provides a gener
 
 
 
-\section{Classification}
+\section{Na{\"i}ve Classification}
 
 
-\subsection{Nearest-Neighbour Classification}\label{lit:nn}
+\subsection{Nearest Neighbour Classification}\label{lit:nn}
 \subsubsection{Description}
 The nearest neighbour classifier operates as follows:
 When given an input, the classifier compares this input to the training data set, and finds the one that is closest to the input. For example, if men and women were to be classified by their heights, a given input would be classified as either male or female based on the data point in the training data with the height closest to that of the input. This can be expanded to multiple features/dimensions by taking the Euclidean distance between the input and each instance in the training data set. For images, this amounts to comparing, pixel by pixel, each pixel value, and finding the L2 distance between them. Note that there is no need to apply the square root to the distance; it is a monotonic operation, so it will not affect the ordering of the values, and will introduce additional computational complexity. The equation for calculating the L2 distance is:
@@ -89,11 +89,11 @@ When given an input, the classifier compares this input to the training data set
 The nearest neighbour classifier has been shown to provide MSTAR classification rates (82-87\%) through sufficient image processing and classifier development. SAR images are filled with 'clutter' surrounding the target, which was noted as affecting the success of classification\cite{Schumacher_atrof}.
 
 \subsubsection{Relevance}
-The nearest-neighbour classifier is used in this study as an example of a na{\"i}ve classifier. Results of this classifier provide a good benchmark against which subsequent classifier performance can easily be measured. The success of other parties in classifying the MSTAR targets using nearest neighbour methods lays a convincing foundation for future development. There is undoubtedly room for improvement, beginning with the elimination of clutter's effect on classification.
+The nearest neighbour classifier is used in this study as an example of a na{\"i}ve classifier. Results of this classifier provide a good benchmark against which subsequent classifier performance can easily be measured. The success of other parties in classifying the MSTAR targets using nearest neighbour methods lays a convincing foundation for future development. There is undoubtedly room for improvement, beginning with the elimination of clutter's effect on classification.
 
-\section{K-Nearest-Neighbour Classification}\label{lit:knn}
+\subsection{K-Nearest Neighbour Classification}\label{lit:knn}
 \subsubsection{Description}
-The K-Nearest-Neighbour (KNN) classifier is an extension of the Nearest Neighbour classifier where, instead of selecting the single closest neighbour from the dataset to the input case, the `K' nearest neighbours are selected, and the class most prevalent amongst the neighbours is taken as the predicted class. K is always an odd-valued integer, to prevent ties from occurring. 
+The K-Nearest Neighbour (KNN) classifier is an extension of the Nearest Neighbour classifier where, instead of selecting the single closest neighbour from the dataset to the input case, the `K' nearest neighbours are selected, and the class most prevalent amongst the neighbours is taken as the predicted class. K is always an odd-valued integer, to prevent ties from occurring. 
 
 \subsubsection{Relevance}
 KNN is a more robust form of Nearest Neighbour classification because larger values of K ignore outliers in the data. This regularisation effect can be optimised by choosing the best-performing value of K for a specific dataset.

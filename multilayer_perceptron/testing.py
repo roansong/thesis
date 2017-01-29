@@ -20,6 +20,7 @@ import timeit
 import os
 from collections import OrderedDict
 import utilities as u
+import knn as knn
 
 t1 = timeit.default_timer()
 
@@ -343,243 +344,11 @@ class Multilayer_Perceptron():
         
         return
 
-class KNN():
-    def __init__(self,input,targets):
-        # note that inputs and targets are of type numpy.ndarray
-        self.data = input
-        self.targets = targets
-     
-    
-    def initD2(self,filename=None,size=None,indices=None):
-        if(filename==None):
-            D2 = np.zeros((len(self.data),len(self.data)))
-            for i in range(len(self.data)):
-                for l in range(i,len(self.data)):
-                    cost = 0
-                    if(i != l):
-                        for j in range(len(self.data[i])):
-                            cost += pow(self.data[i][j] - self.data[l][j],2)
-                    D2[i][l] = D2[l][i] = cost      
-            
-                u.progress_bar(i,len(self.data))    
-        else:
-            D2 = np.load(filename)
-            if(indices != None):
-                
-                temp = np.zeros((len(indices),len(indices)))
-                for y in range(len(indices)):
-                    for x in range(len(indices)):
-                        temp[y,x] = D2[indices[y],indices[x]]
-
-                D2 = temp
-                
-            elif(size):
-                D2 = D2[:size,:size]
-            
-        self.D2 = D2
-        
-    def test(self,k_arr):
-        results = []
-        correct = np.zeros((len(k_arr))) 
-             
-        for img in range(len(self.data)):
-            # the 0th item in the list is the image to itself, so it is removed
-            # put K in HERE you knob, instead of recalculating and sorting each time
-            costs = sorted(list(zip(self.D2[img],self.targets.argmax(axis=1))))
-            
-            pred_lst = np.zeros((len(k_arr)))
-            confidence = np.zeros((len(k_arr)))
-            accuracy = np.zeros((len(k_arr)))
-            ind = 0
-            for k in k_arr:
-                
-                
-                pred = list(zip(*costs[:k]))[1][1:]
-            
-                predicted_class = 0
-                max = 0 
-                for i in pred: 
-                    cnt = 0
-                    for l in pred:
-                        
-                        if(i == l):
-                            cnt += 1
-                    if(cnt > max):
-                        max = cnt
-                        predicted_class = i
-                # pred_lst[ind] = predicted_class
-                if(predicted_class == self.targets[img].argmax()):
-                    correct[ind] += 1
-                confidence[ind] += max/k * 100
-                accuracy[ind] = correct[ind]/len(self.data) * 100
-                ind +=1 
-                
-        
-        for x in range(ind):
-            results.append([k_arr[x],correct[x],accuracy[x],confidence[x]])
-        
-        self.results = results  
-        self.pred = list(zip(*costs[:k]))[1][1:]
-        self.costs= list(zip(*costs[:k]))[0][1:]
-        
-        return np.array(results)
-    
-    def run(self,x,y,k):
-        temp = []
-        
-        for img in range(len(self.data)):
-            if(np.equal(self.data[img],x).all()):
-                continue
-            cost2 = 0
-            for px in range(len(self.data[img])):
-                
-                cost2 += pow(self.data[img][px] - x[px],2)
-            temp.append((cost2,self.targets[img].argmax()))
-        
-        temp = sorted(temp)[:]
-        
-        
-        cost = list(zip(*temp[:k]))[0]
-        pred = list(zip(*temp[:k]))[1]
-        
-        max = 0
-        predicted_class = []
-        for i in pred:
-            cnt = 0
-            for l in pred:
-                
-                if(i == l):
-                    cnt += 1
-            if(cnt > max):
-                max = cnt
-                predicted_class = i
-
-        confidence = max/k * 100
-        
-        
-        
-        return  predicted_class, (y.argmax() == predicted_class), y.argmax(),confidence
-
-   
-        
-
-
-
-
-
-
-
-
-
-
-
-def reverseImgShow(weights,num_classes):
-        weights = [np.fliplr(x.get_value().transpose()) for x in weights]
-        weights = weights[::-1]
-        targets = np.diag(np.ones(num_classes))
-        results = []
-        for i in targets:
-            temp = np.dot(i,weights[0])
-            temp = np.dot(temp,weights[1])
-            results.append(temp)
-        results = [x.reshape((IMG_HEIGHT,IMG_WIDTH)).astype('float32') for x in results]
-        return results
-
-
-
-
-def gen_sets(data,targets,train,val,test):
-    train,val,test = u.unit([train,val,test])
-    
-    training_set   = np.zeros((int(len(data)*train),2))
-    validation_set = np.zeros((int(len(data)*val  ),2))
-    test_set       = np.zeros((int(len(data)*test ),2))
-    rng = np.random.RandomState(0)
-    indices = np.arange(len(data))
-    
-    temp = rng.choice(indices,size=len(training_set),replace=False)
-    training_indices = temp
-    training_set = (np.vstack(data[temp]),np.vstack(targets[temp]))
-    # training_set = (data[temp],targets[temp])
-    indices = np.delete(indices,temp)
-    
-    temp = rng.choice(indices,size=len(validation_set),replace=False)
-    validation_indices = temp
-    validation_set = (np.vstack(data[temp]),np.vstack(targets[temp]))
-    indices = np.delete(indices,temp)
-    
-    temp = rng.choice(indices,size=len(test_set),replace=False)
-    testing_indices = temp
-    test_set = (np.vstack(data[temp]),np.vstack(targets[temp]))
-    indices = np.delete(indices,temp)
-    
-    return training_set, validation_set, test_set, (training_indices,validation_indices,testing_indices)
-    
-def load_KNN(data,targets,indices=None):
-    k = KNN(data,targets)
-    # k.initD2(filename=None,indices=indices)
-    k.D2 =np.load("full_classD2100x100.npy")
-    print("Square distance matrix initialised")
-    k_arr = np.arange(1,int(len(data)/4),2,dtype="int32")
-    # k_values = k.test(k_arr)
-    k_values = np.load("full_classk_values.npy")
-    k_sorted = sorted(k_values,key=lambda x:x[1])[::-1]
-    best_k = k_sorted[0][0]
-    print("Best value of K obtained")
-    return k, k_values, int(best_k)
-
-
-
-
-def testKNN(training_set,validation_set,test_set):
-    #  KNN has no validation step, so the training and validation sets are combined
-    kdata = np.concatenate((training_set[0],validation_set[0]))
-    
-    ktargets = np.concatenate((training_set[1],validation_set[1]))
-    k_indices = np.concatenate((indices[0],indices[1]))
-    
-    
-    # 15.7229m calculating K values
-    # 473/528
-    
-    
-    start_time = timeit.default_timer()
-    k, k_values, best_k = load_KNN(kdata,ktargets,indices=k_indices)
-    
-    
-    end_time = timeit.default_timer()
-    print("%.4fm calculating K values" % ((end_time-start_time)/60.))
-    
-    print(best_k)
-    
-    pred = np.zeros((len(test_set[0])))
-    start_time = timeit.default_timer()
-    correct = 0
-    results = []
-    for i in range(len(test_set[0])):
-        a = k.run(test_set[0][i],test_set[1][i],best_k)
-        results.append(a)
-        pred[i] = int(a[0])
-        if(a[1]):
-            correct +=1
-        print("%s %d/%d (%d) correct"%((a,),correct,i+1,len(test_set[0])))
-    
-    end_time = timeit.default_timer()
-    print("%.4fm testing with optimal K" % ((end_time-start_time)/60.))
-    
-    targets = test_set[1].argmax(axis=1)
-    
-    k.conf = u.confusion_matrix(pred,targets,num_classes=8)
-    
-    
-    
-    return k,results
-
-IMG_WIDTH = 194
-IMG_HEIGHT = 194
+IMG_WIDTH = 100
+IMG_HEIGHT = 100
 
 batch_size = 30
-num_classes=8
+num_classes=5
 learning_rate=0.001     
 L1_rg = 0.00
 L2_rg = 0.0001
@@ -587,19 +356,19 @@ L2_rg = 0.0001
 
 
 dt = np.dtype([('filename','|S16'),('labels',np.int32,(num_classes,))])
-infile = 'filenames82.txt'
-filedata = np.loadtxt(infile,dtype=dt)
+infile = str(num_classes)
+filedata = np.loadtxt(infile+'.txt',dtype=dt)
 filenames = [a.decode('UTF-8') for a in filedata['filename']]
 filenames.sort(key=lambda x:x[-7:])
 
 
 
-data,targets,suffixes = u.get_images(w=IMG_WIDTH,h=IMG_HEIGHT,file_list = filenames,threshold = True)
+data,targets,suffixes = u.get_images(w=IMG_WIDTH,h=IMG_HEIGHT,file_list = filenames,threshold = True,noise=False)
 
 
 
-
-training_set, validation_set, test_set,indices = gen_sets(data,targets,85,5,10)
+# training_set, validation_set, test_set,indices = u.gen_sets(data,targets,85,5,10)
+training_set, validation_set, test_set,indices = u.gen_sets(data,targets,85,5,10)
 training_batches   =  len(training_set[0])//batch_size 
 validation_batches =  len(validation_set[0])//batch_size
 test_batches       =  len(test_set[0])//batch_size
@@ -617,37 +386,45 @@ L2 = 0.1
 L1 = 0
 # size = [(IMG_WIDTH*IMG_HEIGHT,10),(IMG_WIDTH*IMG_HEIGHT,10,10),(IMG_WIDTH*IMG_HEIGHT,50),(IMG_WIDTH*IMG_HEIGHT,50,50)]
 size = [(IMG_WIDTH*IMG_HEIGHT,10)]
-
-for s in size:
-    # learning_rate = 1/(10**len(s))
-    classifier = Multilayer_Perceptron(x,
-                            s,
-                            num_classes=8,
-                            rng=np.random.RandomState(1)
-                            )
-    # learning_rate = 1/(10*sum(classifier.shape[1:]))
-    
-    
-    classifier.test(
-        learning_rate=learning_rate,
-        L2_rg=L2,
-        L1_rg= L1,
-        n_epochs=2000,
-        quick=True)
-    print(
-    "Learning rate       : %.5f\n"%(learning_rate)+(
-    "Hidden Layer Sizes  : %s\n" + 
-    "Classification Time : %8f\n" +
-    "Classification Error: %.3f\n" +
-    "Validation Error    : %.3f\n" +
-    "Training Time       : %.4f\n" +
-    "Training Error      : %.3f\n" +
-    "Training Cost       : %.4f")%
-    (tuple(classifier.metrics)))
-    print("="*40)
-
-    
-
+# 
+# for s in size:
+#     # learning_rate = 1/(10**len(s))
+#     classifier = Multilayer_Perceptron(x,
+#                             s,
+#                             num_classes=8,
+#                             rng=np.random.RandomState(1)
+#                             )
+#     # learning_rate = 1/(10*sum(classifier.shape[1:]))
+#     
+#     
+#     classifier.test(
+#         learning_rate=learning_rate,
+#         L2_rg=L2,
+#         L1_rg= L1,
+#         n_epochs=2000,
+#         quick=True)
+#     print(
+#     "Learning rate       : %.5f\n"%(learning_rate)+(
+#     "Hidden Layer Sizes  : %s\n" + 
+#     "Classification Time : %8f\n" +
+#     "Classification Error: %.3f\n" +
+#     "Validation Error    : %.3f\n" +
+#     "Training Time       : %.4f\n" +
+#     "Training Error      : %.3f\n" +
+#     "Training Cost       : %.4f")%
+#     (tuple(classifier.metrics)))
+#     print("="*40)
+# 
+#     
+start = timeit.default_timer()
+k,r = knn.testKNN(training_set,validation_set,test_set,indices,k=1,filename='100x100.npy')
+mid = timeit.default_timer()
+k2,r2 = knn.testKNN(training_set,validation_set,test_set,indices,k=3,filename='100x100.npy')
+end = timeit.default_timer()
+nn_time = mid-start
+knn_time = end-mid
+print(nn_time)
+print(knn_time)
 
 # print("%.4fm calculating K values" % ((end_time-start_time)/60.))
 # 

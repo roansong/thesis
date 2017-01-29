@@ -1,4 +1,4 @@
-\chapter{Methodology}
+\chapter{Methodology}\label{sec:method}
 
 \section{Data Processing}
 The first step is to get to grips with the data - processing the data set in a way that makes sense to use, and allows different classification methods to be implemented easily on it.
@@ -38,5 +38,23 @@ Given a training dataset of known instances and targets, and an input instance X
 \subsubsection{Optimising for K}
 Optimal K values are found by performing leave-one-out cross-validation (LOOCV) and finding which value of k gives the greatest prediction accuracy across all cases. To find this value of k using the previous algorithm is a very time-consuming process. Because this optimisation uses only the training set, the process can be sped up significantly. A matrix containing the squared distances between each instance is constructed. An example of such a matrix is shown in Figure~\ref{D2}. Each row represents the squared distances between the instance corresponding to that row, and every other instance. This leads to the matrix being mirrored along its leading diagonal, which speeds up the construction of the matrix by not having to recalculate those values. All of the diagonals of the matrix are zero; they represent the distance between an instance and itself. To optimise for K, each row is taken in turn, sorted in ascending order, removing the first element (the zero self-term), and calculating the predicted class and confidence.
 
+\section{Multilayer Perceptron}\label{meth:MLP}
+\subsection{Implementation}
+\subsubsection{The wrapper class}
+The wrapper class encapsulates the layers of the Multilayer Perceptron, specifying the the dataset to be used, the size of each layer, and the number of classes.
+
+\subsubsection{The logistic regression layer class}
+
+The logistic regression layer serves as the output layer for the Multilayer Perceptron, providing a convenient way to see the predicted output that corresponds to a given input, and to test the error of this output,given by the negative log likelihood between the predicted output and the target output for the input image.
+
+\subsubsection{The hidden layer class}
+Hidden layers are the fundamental building block for deep neural networks. One or more can be used, connected in series from the input to the output, with each neuron in a layer connecting to every neuron in the next. Each neuron in a hidden layer applies a non-linear activation function to the sum of its inputs to produce an output
+
+\begin{itemize}
+
+	\item Develop an extensible hidden layer class that will be between the input and output, and can connect to more hidden layers en route.
+	\item Collate the important details of each layer (such as the logistic regression layer's predicted class) in the wrapper class for ease of access
+	\item Implement a test method with variable parameters for regularisation
+\end{itemize}
 
 

@@ -36,17 +36,50 @@ This section is devoted to describing the study in terms of its requirements, op
 \subsection{Concept of Operations}
 Radar target classification is an inexact science; interpreting a radar image and comparing it to a known case is not as straightforward in all cases as one might expect. Weather conditions, environmental clutter, and image resolution all obscure the target to varying degrees, making intuitive classification ineffective. Computer-based classification through analysis of multiple targets and the application of deep learning techniques should in theory allow distorted images to be classified after the computer is trained to recognise features pertaining to each class. Na{\"i}ve methods of classification lack predictive power - the ability to 'guess' effectively if the target is obscured or unrecognised. Deep learning methods are the solution that this study proposes.
 
-\subsection{System Requirements}
-% insert user requirements from the PDF I've written up elsewhere
-% emphasis on accuracy, testing time, and training time
-\subsection{High-Level Design}
-For this study, these areas of design need to be focused on:
+\subsection{User Requirements}
+The success of this report is based on the ability to correctly classify and recognise radar targets taken from the supplied dataset using deep learning techniques. 
+
+The following is required:
 
 \begin{itemize}
+	\item Use the MSTAR dataset (Section~\ref{lit:MSTAR})
+	\item Use deep learning methodology to develop a classifier 
+	\item Develop a Na{\"i}ve classifier
+	\item Indicate how the classifiers can be improved
+	\item Comment on the performance of each classifier
+	\item Report on the effectiveness of deep learning vs na\"ive classifiers
+\end{itemize}
+
+\subsection{Design Specifications}
+Expanding upon the user requirements, the following design specifications have been derived:
+
+\subsubsection{The system must be trained on the MSTAR database of radar images}
+The images in the MSTAR dataset have undergone a level of pre-processing, making them suitable for rapid prototyping and development of classifiers.
+
+\subsubsection{The system must have a testing accuracy of above 95\%}
+Correct identification of radar targets is the aim of this entire report, and as such is the most important performance metric to consider.
+
+\subsubsection{The Nearest Neighbour classifier should be used as a benchmark for classifier comparison}
+The NN classifier provides a good example of a na\"ive classifier, and should be beaten by any classifier that is somewhat optimised for the dataset in use. The NN classifier serves as a good benchmark to improve upon, as it gives a lower bound of expected results
+
+\subsubsection{At least two different classifiers should be tested against the Nearest Neighbour classifier}
+The chosen classifiers are the K-Nearest Neighbour classifier optimised to fit the dataset, and the Multilayer Perceptron, which satisfies the need for a deep learning classifier.
+
+\subsubsection{Each classifier must be evaluated and compared}
+The performance metrics to be used  are training time, classification time, and classification accuracy.
+
+\subsection{High-Level Design}
+After analysis of the user requirements, the following areas of design need to be focused on:
+
+\begin{itemize}
+	\item Identification/classification
 	\item Image Processing/Preparation
-	\item Further Dimensionality Reduction
+	\item Dimensionality Reduction
 	\item Na{\"i}ve Classification (Nearest Neighbour as a benchmark)
 	\item Deep Learning Classification (Multilayer Perceptron)
+	\item Obtaining classifier performance metrics
+	\item Classifier comparison
+	\item Classifier optimisation
 \end{itemize}
 
 
@@ -57,10 +90,10 @@ The MSTAR dataset is a compilation of image chips, all of which contain a header
 
 An alternate approach is to retain the data inherent in the environmental clutter and pad the smaller images with zeros, keeping all images in the set at the size of the largest image in the set. While this preserves all of the image chip data, processing larger images leads to longer training and classification times.
 
-A compromise is to keep the ensure that all images are the size of the largest image in the set, and somehow reduce the clutter present in each image. Because the targets are substantially brighter than their surroundings, using some form of thresholding (setting values lower than a specified threshold to zero) should prove to be effective in lessening the impact of the clutter, if not completely removing it.
+A compromise is to ensure that all images are the size of the largest image in the set, and somehow reduce the clutter present in each image. Because the targets are substantially brighter than their surroundings, using some form of thresholding (setting values lower than a specified threshold to zero) should prove to be effective in lessening the impact of the clutter, if not completely removing it.
 
 \subsubsection{Dimensionality Reduction}
-Each pixel in an image is taken as an feature, forming a feature vector with a length equal to the total number of pixels in the image. The image cropping mentioned in section \ref{sec:cropping} is very effective at reducing the size of this feature vector. If a 128x128 image is cropped to 64x64, the feature vector's length is reduced by factor of 4. This can be reduced further through the application of dimensionality reduction techniques, such as Principal Component Analysis, Locally-Linear Embedding, Sum of Means and non-linear methods, all of which are outside the scope of this report. 
+Each pixel in an image is taken as an feature, forming a feature vector with a length equal to the total number of pixels in the image. The image cropping mentioned in Section \ref{sec:cropping} is very effective at reducing the size of this feature vector. If a 128x128 image is cropped to 64x64, the feature vector's length is reduced by factor of 4. This can be reduced further through the application of dimensionality reduction techniques, such as Principal Component Analysis, Locally-Linear Embedding, Sum of Means and non-linear methods, all of which are outside the scope of this report. As such, each image will be rescaled and padded with zeros to match the size of the largest image in the MSTAR dataset (192x193). This allows every possible feature in each image to be used, while allowing for dimensionality reduction if desired.
 
 \subsubsection{Nearest Neighbour Design}
 \begin{figure}
@@ -110,21 +143,32 @@ KNN introduces its own complexities, most notably when optimising for K. The hig
 
 Implementation of a multilayer perceptron in software can be divided into discrete sections as follows:
 \begin{itemize}
-	\item
-	
-	
-	
-	
+	\item Implement a wrapper class for the classifier
+	\item Develop a logistic regression layer class to use at the output
+	\item Develop an extensible hidden layer class
+	\item Collate the important details of each layer in the wrapper class
+	\item Implement a test method
 \end{itemize}
 
 
 \subsection{Software Development and Implementation}
 
+Developing the software for this report is done with the following objectives in mind:
+\begin{itemize}
+	\item Comment code clearly
+	\item Use logical code structure and layout
+	\item Use Python as the chosen programming language
+	\item Use Theano module for deep learning calculations
+	\item Code self-contained classifier classes
+	\item Difficult to generate data should be saved for future use
+	\item Code reusable, adaptable methods
+	\item Make performance metrics readily available
+	\item Test while developing
+	\item Provide a comprehensive `README' for new users
+\end{itemize}
 
-
-
------
-The software present in this study has been made \href{http://github.com/roansong}{available on Github}
+The software implementation will be covered in Section~\ref{sec:method}.
+The software present in this study has been made available on Github at~ \href{http://github.com/roansong}{github.com/roansong}.
 
 \section{Integration and Recomposition}
 \subsection{Software Development and Implementation}
@@ -226,11 +270,29 @@ To confirm the results of each classifier, it is important to have a set of trai
 This is accomplished by dividing a set of known data points into a training set, a validation set, and a testing set. For example: 80\% of the data points will be used to train the system, 10\% to validate the model, which will then be tested on the remaining 10\%. The process of cross-validation entails selecting a different training/test split each time (either systematically or at random) and performing the process again. This concept can be extended to where the system is trained on all but one of the instances and then tested against it, which is known as LOOCV ("Leave One Out" Cross-Validation). The system is tweaked until it reaches the level of classification required. Cross-Validation is an important tool for eliminating "overfitting" of the system to the training data. Mixing up the training and test cases ensures that the classifier is left with some ability to generalise, and not just repeat what it has been shown.
 
 \subsection{System Validation}
-%TODO: This section has to cover the system-level validation stuff, so not just confirming the results of each classifier, but compiling results and seeing if the whole thing actually achieved the aims of the study. 
+If the objectives of the report have been accomplished, the system will be considered valid. The results found during this report have to be collated and analysed within the context of its requirements. This goes beyond confirming the individual results of each classifier and seeing if implementing deep learning techniques are indeed the `smart choice' in the task of radar target recognition. 
+
 \subsection{Operations and Maintenance}
+
+Considering the real-world application of a target recognition system, it should meet certain criteria to ensure ease of use and compatibility with various datasets. Providing adequate documentation to support the system is key. 
+
+The documentation must detail:
+\begin{itemize}
+	\item The operating procedure of the system
+	\item The expected input to the system (dataset and individual instance)
+	\item The output format of the system (predicted class and performance metrics)
+	\item Comprehensive troubleshooting (outside the scope of this report)
+\end{itemize}
+
+
+
 %TODO: I'm pretty sure this should detail the real-world implementation of the system
 \subsection{Changes and Upgrades}
-% Optional stuff, really. Can replace with plans, future developments, etc.
+
+If the system is required to be maintained and expand its scope (by incorporating more, larger, and more complex images into its dataset), the input data will have to undergo pre-processing that is not currently implemented into the system, such as intelligent dimensionality reduction. The system may have to restructure some of its key classification methods and re-optimise hyper-parameters. 
+
+A classification method to consider for real-world use is a Convolutional Neural Network, as it can classify targets without the need for the target to be centered (as in the MSTAR dataset). This would be more suited to real-world applications, although the classification time is longer. This is not trivial, and lies outside the scope of this report.
+
 \subsection{Retirement / Replacement}
 % Another optional section.
 

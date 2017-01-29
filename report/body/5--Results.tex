@@ -1,5 +1,8 @@
 \chapter{Results}
+This section of the report shows the results of the tests performed on the chosen classifiers
 
+\section{Preliminary Results}
+The preliminary results were calculated on a subset of the MSTAR dataset; 1291 images spanning 5 classes were selected. Each image was cropped/padded to 100x100 pixels in size and then normalised, forming an input of 10,000 data points. No further processing was performed on the images.
 
 \section{KNN Results}
 The KNN algorithm is simple to execute, but scales poorly with dataset size and image size. Using a dataset of 1291 images, of size 100x100, the largest bottleneck in the procedure is the generation of the squared distance matrix D2, taking 182 minutes (3 hours and 2 minutes) to complete. This was then saved to prevent the need to recalculate it in future. The time taken to calculate the optimal value of K is also proportional to the number of images, taking 379 minutes (6 hours and 19 minutes) when considering all odd values of K up to and including 1291. Plotting these K-values vs the training error obtained for each value is shown in Figure~\ref{fig:k_values}. The time taken to classify a single instance is 0.25m (15s). Testing though the full set of 1291 to obtain the training classification accuracy takes \~1291*0.25 minutes, resulting in a real-world time of 342 minutes (5 hours and 42 minutes). 
