@@ -1,3 +1,12 @@
+def pinv(M,eps=0.0001):
+    u,s,v = np.linalg.svd(M)
+    u = u.transpose()
+    v = v.transpose()
+    S = np.zeros((v.shape[0],u.shape[0]))
+    S[:len(s),:len(s)] = np.diag(1/s) + eps*np.identity(len(s))
+    return np.dot(v,np.dot(S,u))
+
+
 class ELM():
     A = []
     R = []
@@ -32,6 +41,9 @@ def ELM(B,T,X,lam=0.001):
     w = np.dot(A_pinv,T)
     h = np.dot(X,w)
     return (X,softmax(h),np.argmax(h,axis=1))
+    
+    
+
     
 # seek to minimize ||Xw - t||^2 (i.e. find least-squares solution)
 # value of w which does this is A_pinv*T

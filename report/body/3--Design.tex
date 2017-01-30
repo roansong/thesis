@@ -150,9 +150,8 @@ Implementation of a multilayer perceptron in software can be divided into discre
 	\item Implement a test method
 \end{itemize}
 
-
-\subsection{Software Development and Implementation}
-
+\section{Software Design}
+\subsection{Guidelines}
 Developing the software for this report is done with the following objectives in mind:
 \begin{itemize}
 	\item Comment code clearly
@@ -165,33 +164,69 @@ Developing the software for this report is done with the following objectives in
 	\item Make performance metrics readily available
 	\item Test while developing
 	\item Provide a comprehensive `README' for new users
+	\item The code must be available online at ~\href{http://github.com/roansong}{github.com/roansong}.
 \end{itemize}
 
-The software implementation will be covered in Section~\ref{sec:method}.
-The software present in this study has been made available on Github at~ \href{http://github.com/roansong}{github.com/roansong}.
 
-\section{Integration and Recomposition}
-\subsection{Software Development and Implementation}
+\section{Software Implementation}
+The implementation of the classifiers and techniques discussed in this report will be covered in this section. 
 
 \subsubsection{Inline Testing}
 While implementing the software for this report, I ran into some early issues that resulted from insufficient planning. After taking a step back, it was decided that more steady progress would be made by implementing rigorous inline testing, i.e. incrementally testing the code after every slight modification, instead of only testing after the addition of a major feature and then trying to iron out any latent bugs. This approach leads to much simpler debugging.
 
+\subsubsection{Pre-processing}
+
+In a process outlined in Figure~\ref{fig:multi_input}, the input image is converted to an array of unsigned 8-bit integers (ranging from 0 to 255). The elements of the array are `normalised' by subtracting the mean of the array from each and then dividing each element by the standard deviation of the array. This ensures that the processed values lie centred around zero, and mostly between -1 and 1. Unsigned integers do not provide enough precision to represent this data, so 32-bit floating point numbers (floats) are used. The code for normalisation is shown in Listing~\ref{list:normalise}.
+
+\begin{lstlisting}[language=Python, caption=Normalisation method, captionpos=b, label={list:normalise}]
+def normalise(vector):
+"""
+Normalises a vector so that most of its values lie between -1 and 1
+returns the vector mentioned above
+vector --- the vector to be normalised (type: numpy array)
+"""
+return (vector - vector.mean(axis=0))/(vector.std(axis=0))
+\end{lstlisting}
+
+Two additional methods of processing are made available: thresholding and noise addition. Thresholding is done before normalisation. For each image, pixels with values below the median value of the image are set to zero. This eliminates some of the noisy `clutter' present in radar imagery. Noise addition is used to simulate real-world conditions by adding Gaussian noise to the image after normalisation to somewhat obscure the radar signal. The implementations of thresholding and noise addition are shown in Listings~\ref{list:thresholding} and~\ref{list:noise} respectively. The complete code is shown in Appendix~\ref{list:get_images}
+
+
+\begin{lstlisting}[language=Python, caption=Thresholding, captionpos=b, label={list:thresholding}]
+if(threshold):
+below_thresh = image < numpy.mean(image)
+image[below_thresh] = 0
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=Adding noise to an image, captionpos=b, label={list:noise}]
+if(noise):
+image += numpy.random.normal(0,1,image.shape)
+\end{lstlisting}
+
+
+ 
+
+\subsubsection{Allocation of Data}
+
+Three different sets of data are needed to train a classifier. The training set, validation set, and testing set. Each set contains instances of data (in this case image vectors) and targets denoting the class each instance belongs to. Each set is filled with random images from the original dataset without replacement, with the size of the three sets being determined by a set of three numbers. The numbers do not have to correspond exactly to the number of images in each set - they represent ratios between the sizes. The code to generate the three sets, as well as a tuple of indices showing which instances from the original dataset are in each set is shown in Appendix~\ref{list:gen_sets}.
+
+\subsubsection{K-Nearest Neighbours}
+Developing a standalone Nearest Neighbour classifier and a separate K-Nearest Neighbour classifier is redundant; the NN can be obtained by setting K equal to 1 in the KNN. Only KNN needs to be implemented.
+
+KNN operates by loading a dataset of input instances and targets, and calculating the squared distances between the input instance and every instance in the dataset. Each distance result is appended to a list. After every distance has been calculated, the list is sorted in ascending order, and the K lowest instances are taken. It is important to keep track of the target output associated with each input. These instances with the smallest squared distances are the `neighbours' from which KNN derives its name. The most common class amongst the neighbours is taken as the predicted class. The ratio between the number of neighbours in agreement and K can be used to give a measure of confidence in the prediction.
+
+To optimize K for the dataset, a different approach must be taken. It is inefficient to test every instance in the dataset against every other instance for every possible value of K. Instead, these distances are calculated only once. A squared distance array (D2) is formed by taking every instance in turn and calculating its distance to every other instance, with the knowledge that the distance from an instance A to instance B will be the same as from B to A. This halves the number of calculations necessary to calculate D2. D2 is symmetric along its diagonal, and all of its diagonals are equal to zero. This is because the distance from any instance to itself will always be zero. \\
+
+Each row in D2 provides the squared distances between the instance corresponding to that row and every other instance in the data set. Sorting these distances in ascending order for every row gives the nearest neighbours to each instance. Removing the first instance in each sorted row removes the self-contribution factor of an instance to itself. Chosen values of K can be tested much more efficiently, going row by row and taking the first K instances, seeing if the majority of those K neighbours predicts the correct output, and tallying up a score for each value of K. The value of K with the highest score once every row has been visited is the value of K best optimised for the dataset. The complete KNN code is shown in Appendix~\ref{list:knn}.
+
 \subsubsection{The Multilayer Perceptron}
 
-%TODO: System Description
+Once each pixel has been processed, they can be sent to the input layer of the neural network, with each pixel representing a neuron as shown in Figure~\ref{fig:multi_input}.
+ 
+Each of these input layer neurons has a random weight applied, and is then fed into the neurons that form the first hidden layer. Every neuron in the input layer contributes to every neuron in the next layer. At each neuron in the first hidden layer, the `net' value is formed by summing all of the values present at its input (i.e. all the weighted values passed along from the input layer). An activation function is applied to this net value to compress the range of values. There are many different activation functions that can be used, and for this study I narrowed down the choice to either the logistic function $ \frac{1}{1 + e^{-net}} $ or the hyperbolic tangent function $\frac{e^{net} - e^{-net}}{e^{net} + e^{-net}} $. The logistic function produces an output between 0 and 1, while the hyperbolic tangent function's output is between -1 and 1. I decided to use the hyperbolic tangent function, because the logistic function has a tendency to incur long training times if its values lie very close to 0, while the hyperbolic tangent function tends to move towards its extreme values more quickly.  
 
-%TODO: add code corresponding to each area of the diagram
-
- In a process outlined in Figure~\ref{fig:multi_input}, the input image is converted to an array of unsigned 8-bit integers (ranging from 0 to 255). The elements of the array are `unitised' by subtracting the mean of the array from each and then dividing each element by the standard deviation of the array. This ensures that the processed values lie centred around zero, and mostly between -1 and 1. Unsigned integers are no longer suited to represent this data, so 32-bit floating point numbers (floats) are used. %WHY ARE THEY UNSUITABLE?
- 
- Once each pixel has been unitised, they form the input layer of the neural network, with each pixel representing a neuron in the input layer shown in Figure~\ref{fig:multi}. 
- 
- Each of these input layer neurons has a random weight applied, and is then fed into the neurons that form the first hidden layer. Every neuron in the input layer contributes to every neuron in the next layer. At each neuron in the first hidden layer, the `net' value is formed by summing all of the values present at its input (i.e. all the weighted values passed along from the input layer). An activation function is applied to this net value to compress the range of values. There are many different activation functions that can be used, and for this study I narrowed down the choice to either the logistic function $ \frac{1}{1 + e^{-net}} $ or the hyperbolic tangent function $\frac{e^{net} - e^{-net}}{e^{net} + e^{-net}} $. The logistic function produces an output between 0 and 1, while the hyperbolic tangent function's output is between -1 and 1. I decided to use the hyperbolic tangent function, because the logistic function has a tendency to incur long training times if its values lie very close to 0, while the hyperbolic tangent function tends to move towards its extreme values more quickly.  
- 
- The activation function, when applied to the net of the neuron, becomes the output of the neuron, feeding through to every neuron in the next layer with weights applied, repeating the same process until the output layer. This is shown in Figure~\ref{fig:multi_neuron} and more closely in Figure~\ref{fig:multi_neuron_close}.
+The activation function, when applied to the net of the neuron, becomes the output of the neuron, feeding through to every neuron in the next layer with weights applied, repeating the same process until the output layer. This is shown in Figure~\ref{fig:multi_neuron} and more closely in Figure~\ref{fig:multi_neuron_close}. 
  
  \begin{figure}[!h]
- 	
  	\centering
  	\includegraphics[width=\textwidth]{figures/multilayer_perceptron_neuron}
  	\centering
@@ -200,7 +235,6 @@ While implementing the software for this report, I ran into some early issues th
  \end{figure}
 
 \begin{figure}[!h]
-	
 	\centering
 	\includegraphics[width=\textwidth]{figures/multilayer_perceptron_neuron2}
 	\centering
@@ -209,10 +243,17 @@ While implementing the software for this report, I ran into some early issues th
 \end{figure}
  
  
- The output layer has as many neurons as there are classes. The output layer is typically a logistic regression layer, which has a softmax function applied to its outputs. This results in outputs that sum to 1. The neuron with the highest value is taken to be the network's prediction. An example output would look something like:
- \[ [0.25, 0.2, 0.1, 0.05, 0.4] \] There are five classes, and the fifth class has the highest value, thus the neural network has classified the input as belonging to that fifth class. Given that the maximum possible value for an output would be 1, 0.9 would show a large confidence in the classification. A value close to 0 shows strong disagreement, and something like 0.3 would show moderately low confidence.
+The output layer has as many neurons as there are classes. The output layer is a logistic regression layer, which has a softmax function applied to its outputs. This results in outputs that sum to 1, with larger values being strongly emphasised. This correlates nicely with the one-hot vectors used to label classes\cite{dunne1997pairing}. The neuron with the highest value is taken to be the network's prediction. An example output would be:
+ \[ [0.25, 0.2, 0.1, 0.05, 0.4] \] 
+There are five classes, and the fifth class has the highest value, thus the neural network has classified the input as belonging to that fifth class. Given that the maximum possible value for an output would be 1, 0.9 would show a large confidence in the classification. A value close to 0 shows strong disagreement, while 0.3 would show moderately low confidence.
  
- To train the network, stochastic gradient descent is used, as described in Section~\ref{lit:grad_desc}. 
+To train the network, stochastic gradient descent is used, as described in Section~\ref{lit:grad_desc}. The gradient of the cost function with respect to the weights and biases of each layer is calculated and the weights and biases are updated proportionally to the learning rate. This is shown in Listing~\ref{list:grad_desc}, and is easily achieved through the use of Theano (covered in Section~\ref{lit:theano}).
+
+\begin{lstlisting}[language=Python, caption=Implementing Gradient Descent, captionpos=b, label={list:grad_desc}]
+gradients = [T.grad(cost,param) for param in self.parameters]
+updates = [(param, param - learning_rate*gparam) for param, gparam in zip(parameters,gradients)]
+\end{lstlisting}
+
 
 \begin{figure}[!h]
 	
@@ -259,6 +300,8 @@ HB14935.025.tiff 0 1 \\
 
 \subsubsection{Testing During Development}
 The simplest way to find a classifier's efficacy is to test it on a wide variety of classes and on as many test instances as possible. To provide interim results, during the iterative phase of classifier development, only a subset of the dataset's images are used. This compromises the final accuracy of the classifier (it may perform differently on the full dataset), but brings with it the ability to test and train classifiers more quickly, due to the lower computational overheads. During the development this testing method allows for simple decisions regarding the direction of classifier implementation or optimisation to be made. In process of verifying the classifiers, the full dataset must be used to give an accurate picture of the classifier's performance and real-world implementation. 
+
+\section{Integration and Recomposition}
 
 \subsection{Subsystem Verification}
 The chosen method for verifying a classifier's efficacy once it is considered to be sufficiently optimised is simple; The classifier is tested on the dataset with a number of test instances as in Section~\ref{lit:loocv}. For the KNN, fully testing it entails removing one instance from the dataset, training the classifier on the remaining points, and using the removed instance as a test case. Once this has been done, the instance is replaced, another is taken, and the process is repeated until every instance in the dataset has been tested. The system's performance is based on the number of correct classifications made during the process. This is known as Leave-One-Out Cross Validation (LOOCV).

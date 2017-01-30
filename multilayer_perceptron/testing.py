@@ -255,7 +255,7 @@ class Multilayer_Perceptron():
                                         # considered significant
         validation_frequency = min(training_batches, patience // 2)
                                         # go through this many
-                                        # minibatche before checking the network
+                                        # minibatches before checking the network
                                         # on the validation set; in this case we
                                         # check every epoch
         
@@ -402,8 +402,8 @@ class Multilayer_Perceptron():
         
         return
 
-IMG_WIDTH = 100
-IMG_HEIGHT = 100
+IMG_WIDTH = 50
+IMG_HEIGHT = 50
 
 batch_size = 30
 num_classes=5
@@ -420,7 +420,7 @@ filenames.sort(key=lambda x:x[-7:])
 
 
 
-data,targets,suffixes = u.get_images(w=IMG_WIDTH,h=IMG_HEIGHT,file_list = filenames,threshold = True,noise=False,num_classes = num_classes)
+data,targets,suffixes = u.get_images(w=IMG_WIDTH,h=IMG_HEIGHT,file_list = filenames,threshold = False,noise=False,num_classes = num_classes)
 
 
 
@@ -445,52 +445,53 @@ L1 = 0
 size = [(IMG_WIDTH*IMG_HEIGHT,10),
 (IMG_WIDTH*IMG_HEIGHT,10,10)]
 # 
-for s in size:
-    # learning_rate = 1/(10**len(s))
-    classifier = Multilayer_Perceptron(x,
-                            s,
-                            num_classes=5,
-                            rng=np.random.RandomState(1)
-                            )
-    # learning_rate = 1/(10*sum(classifier.shape[1:]))
-    
-    
-    classifier.test(
-        learning_rate=learning_rate,
-        L2_rg=L2,
-        L1_rg= L1,
-        n_epochs=2000,
-        quick=True)
-    print(
-    "Learning rate       : %.5f\n"%(learning_rate)+(
-    "Hidden Layer Sizes  : %s\n" + 
-    "Classification Time : %8f\n" +
-    "Classification Error: %.3f\n" +
-    "Validation Error    : %.3f\n" +
-    "Training Time       : %.4f\n" +
-    "Training Error      : %.3f\n" +
-    "Training Cost       : %.4f")%
-    (tuple(classifier.metrics)))
-    print("="*40)
+# for s in size:
+#     # learning_rate = 1/(10**len(s))
+#     classifier = Multilayer_Perceptron(x,
+#                             s,
+#                             num_classes=5,
+#                             rng=np.random.RandomState(1)
+#                             )
+#     # learning_rate = 1/(10*sum(classifier.shape[1:]))
+#     
+#     
+#     classifier.test(
+#         learning_rate=learning_rate,
+#         L2_rg=L2,
+#         L1_rg= L1,
+#         n_epochs=2000,
+#         print_val=True,
+#         quick=True)
+#     print(
+#     "Learning rate       : %.5f\n"%(learning_rate)+(
+#     "Hidden Layer Sizes  : %s\n" + 
+#     "Classification Time : %8f\n" +
+#     "Classification Error: %.3f\n" +
+#     "Validation Error    : %.3f\n" +
+#     "Training Time       : %.4f\n" +
+#     "Training Error      : %.3f\n" +
+#     "Training Cost       : %.4f")%
+#     (tuple(classifier.metrics)))
+#     print("="*40)
 # 
 #     
-# start = timeit.default_timer()
-# k,r = knn.testKNN(training_set,validation_set,test_set,indices,k=1,filename='100x100.npy')
-# mid = timeit.default_timer()
-# k2,r2 = knn.testKNN(training_set,validation_set,test_set,indices,k=3,filename='100x100.npy')
-# end = timeit.default_timer()
-# nn_time = mid-start
-# knn_time = end-mid
-# print(nn_time)
-# print(knn_time)
-# 
-# a = list(zip(*r))[0]
-# b = list(zip(*r))[2]
-# conf1 = u.confusion_matrix(a,b,num_classes)
-# 
-# a = list(zip(*r2))[0]
-# b = list(zip(*r2))[2]
-# conf2 = u.confusion_matrix(a,b,num_classes)
+start = timeit.default_timer()
+k,r = knn.testKNN(training_set,validation_set,test_set,indices,k=1,filename=None)
+mid = timeit.default_timer()
+k2,r2 = knn.testKNN(training_set,validation_set,test_set,indices,k=3,filename=None)
+end = timeit.default_timer()
+nn_time = mid-start
+knn_time = end-mid
+print(nn_time)
+print(knn_time)
+
+a = list(zip(*r))[0]
+b = list(zip(*r))[2]
+conf1 = u.confusion_matrix(a,b,num_classes)
+
+a = list(zip(*r2))[0]
+b = list(zip(*r2))[2]
+conf2 = u.confusion_matrix(a,b,num_classes)
 #  Time an individual run for nn and knn
 
 #  Run two MLPs on the same data here

@@ -59,4 +59,10 @@ L.~Bottou, ``Large-scale machine learning with stochastic gradient descent,''
   in \emph{Proceedings of COMPSTAT'2010}.\hskip 1em plus 0.5em minus
   0.4em\relax Springer, 2010, pp. 177--186.
 
+\bibitem{dunne1997pairing}
+R.~A. Dunne and N.~A. Campbell, ``On the pairing of the softmax activation and
+  cross-entropy penalty functions and the derivation of the softmax activation
+  function,'' in \emph{Proc. 8th Aust. Conf. on the Neural Networks, Melbourne,
+  181}, vol. 185, 1997.
+
 \end{thebibliography}

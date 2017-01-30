@@ -16,3 +16,374 @@ The next avenue of development is to process the MSTAR image chip data to facili
 
 I also need to finish my implementation of the multilayer perceptron, specifically the application of the back-propagation algorithm to optimise the network.
 
+\chapter{Image Loading and Processing}
+\begin{lstlisting}[language=Python, caption=Loading and Processing Images, captionpos=b, label={list:get_images}]
+def get_images(w,h,file_list=None,num_classes=8,threshold=False,noise=False):
+	"""
+	Load images from a file, crop/pad them to a specific size, with 
+	some pre-processing options. returns an array of image vectors, 
+	an array of target vectors, and a dictionary linking the 
+	suffixes of each file to their respective target vector and the 
+	count of each class within the dataset.
+
+	w           --- desired width of the images
+	h           --- desire height of the images
+	file_list   --- if specified, list of files to read image data 
+			from, otherwise uses default (default: None)
+	num_classes --- number of classes into which images can be 
+			classified
+	threshold   --- if True, set values under the median of each 
+					image to zero (default: False)
+	noise       --- if True, add Gaussian noise to each image 
+					(default: False)
+	"""
+	infile = str(num_classes) +'.txt'
+	folder = 'tiffs'+str(num_classes)+'/'
+	abspath = 'C:/Users/Roan Song/Desktop/thesis/'
+	rng = np.random.RandomState(0)
+	
+	if(not file_list):
+		dt = np.dtype([('filename','|S16'),
+		('labels',np.int32,(num_classes,))])
+		infile = 'filenames8.txt'
+		filedata = np.loadtxt(infile,dtype=dt)
+		file_list = [a.decode('UTF-8') 
+		for a in filedata['filename']]
+		file_list.sort(key=lambda x:x[-7:])
+	
+	suffixes = OrderedDict()
+	
+	for f in file_list:
+		suffixes[f[-7:]] = suffixes.get(f[-7:], 0) + 1
+	
+	ind = 0
+	for i in suffixes:    
+		suffixes[i] = {"count":suffixes[i],
+		"label":one_hot(ind,num_classes)}
+		ind += 1    
+	
+	img_arr = np.zeros((len(file_list),h*w))
+	target_arr = np.zeros((len(file_list),num_classes))
+	i = 0
+	for fname in file_list:	
+		img = mpimg.imread(abspath + folder + fname)
+		IN_HEIGHT = img.shape[0]
+		IN_WIDTH = img.shape[1]
+		
+		img = pad_img(img,h,w,IN_HEIGHT,IN_WIDTH)
+		image = img.reshape(h * w)
+		
+		if(threshold):
+			below_thresh = image < np.mean(image)
+			image[below_thresh] = 0
+		
+		image = normalise(image)
+		
+		if(noise):
+			image += rng.normal(0,1,image.shape)
+		
+		img_arr[i] = image  
+		target_arr[i] = suffixes[fname[-7:]]["label"]		
+		i+=1 
+			
+	return img_arr,target_arr,suffixes
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[language=Python, caption=Generating sets, captionpos=b, label={list:gen_sets}]
+def gen_sets(data,targets,train,val,test):
+	"""
+	Generate training, validation and test subsets from a given 
+	dataset. Returns the three sets and the indices of the 
+	original dataset which correspond to them
+	
+	data    --- full dataset to be split
+	targets --- targets component of the dataset
+	train   --- proportion allocated to the training set
+	val     --- proportion allocated to the validation set
+	test    --- proportion allocated to the test set
+	
+	Note: train, val and test do not have to sum to 1. 
+	The unit function is applied to them, ensuring that they sum to 1.
+	"""
+	
+	train,val,test = unit([train,val,test])
+	
+	training_set   = np.zeros((int(len(data)*train),2))
+	validation_set = np.zeros((int(len(data)*val  ),2))
+	test_set       = np.zeros((int(len(data)*test ),2))
+	rng = np.random.RandomState(0)
+	indices = np.arange(len(data))
+	
+	temp = rng.choice(indices,size=len(training_set),replace=False)
+	training_indices = temp
+	training_set = (np.vstack(data[temp]),np.vstack(targets[temp]))
+	# training_set = (data[temp],targets[temp])
+	indices = np.delete(indices,temp)
+	
+	temp = rng.choice(indices,size=len(validation_set),replace=False)
+	validation_indices = temp
+	validation_set = (np.vstack(data[temp]),np.vstack(targets[temp]))
+	indices = np.delete(indices,temp)
+	
+	temp = rng.choice(indices,size=len(test_set),replace=False)
+	testing_indices = temp
+	test_set = (np.vstack(data[temp]),np.vstack(targets[temp]))
+	indices = np.delete(indices,temp)
+	
+	return training_set, validation_set, test_set, 
+	(training_indices,validation_indices,testing_indices)
+\end{lstlisting}
+
+\chapter{K-Nearest Neighbours}
+\begin{lstlisting}[language=Python, caption=K Nearest Neighbours, captionpos=b, label={list:knn}]
+class KNN():
+	"""
+	A K-Nearest Neighbours classifier
+	"""
+	def __init__(self,input,targets):
+		""" 
+		Initialisation method
+		input   --- the dataset to be compared to
+		targets --- the correct classes corresponding to each instance in the dataset
+		"""
+		self.data = input
+		self.targets = targets
+	
+	def initD2(self,filename=None,size=None,indices=None):
+		"""
+		Method to initialise the squared distance array of the classifer
+		This array stores the distances between every instance and every other instance
+		
+		filename --- a file from which the squared distance array can be imported (default: None)
+		size     --- a size to which the squared distance array is to be cropped  (default: None)
+		indices  --- indices of the dataset to be considered when creating the squared distance array (default: None)
+		"""
+		if(filename==None):
+			D2 = np.zeros((len(self.data),len(self.data)))
+			for i in range(len(self.data)):
+				for l in range(i,len(self.data)):
+					cost = 0
+					if(i != l):
+						for j in range(len(self.data[i])):
+							cost += pow(self.data[i][j] - self.data[l][j],2)
+					D2[i][l] = D2[l][i] = cost      
+		
+				u.progress_bar(i,len(self.data))    
+		else:
+			D2 = np.load(filename)
+			if(indices != None):
+		
+				temp = np.zeros((len(indices),len(indices)))
+				for y in range(len(indices)):
+					for x in range(len(indices)):
+						temp[y,x] = D2[indices[y],indices[x]]
+		
+				D2 = temp
+		
+			elif(size):
+				D2 = D2[:size,:size]
+		
+		self.D2 = D2
+	
+	def test(self,k_arr):
+		"""
+		A method to test different values of K on the dataset
+		returns an array of the results
+		
+		k_arr --- an array of K values to be tested
+		"""
+		results = []
+		correct = np.zeros((len(k_arr))) 
+		
+		for img in range(len(self.data)):
+			costs = sorted(list(zip(self.D2[img],self.targets.argmax(axis=1))))
+			pred_lst = np.zeros((len(k_arr)))
+			confidence = np.zeros((len(k_arr)))
+			accuracy = np.zeros((len(k_arr)))
+			ind = 0
+			for k in k_arr:
+				pred = list(zip(*costs[:k]))[1][1:]
+				predicted_class = 0
+				max = 0 
+				for i in pred: 
+					cnt = 0
+					for l in pred:
+						if(i == l):
+							cnt += 1
+					if(cnt > max):
+						max = cnt
+						predicted_class = i
+		
+				if(predicted_class == self.targets[img].argmax()):
+					correct[ind] += 1
+				confidence[ind] += max/k * 100
+				accuracy[ind] = correct[ind]/len(self.data) * 100
+				ind +=1 
+		
+		
+		for x in range(ind):
+			results.append([k_arr[x],correct[x],accuracy[x],confidence[x]])
+		
+		self.results = results  
+		self.pred = list(zip(*costs[:k]))[1][1:]
+		self.costs= list(zip(*costs[:k]))[0][1:]
+		
+		return np.array(results)
+	
+	def run(self,x,k,y=None):
+		"""
+		A method to test a single instance against the dataset
+		returns the predicted class, whether or not it is correct, 
+		the correct class, and a measure of confidence in the prediction
+		
+		x --- the input instance
+		k --- the value of k determining how many neighbours to consider
+		y --- the correct output if it is known (default: None)
+		"""
+		temp = []
+		
+		for img in range(len(self.data)):
+			if(np.equal(self.data[img],x).all()):
+				continue
+			cost2 = 0
+			for px in range(len(self.data[img])):
+				cost2 += pow(self.data[img][px] - x[px],2)
+			temp.append((cost2,self.targets[img].argmax()))
+		temp = sorted(temp)
+		cost = list(zip(*temp[:k]))[0]
+		pred = list(zip(*temp[:k]))[1] 
+		max = 0
+		predicted_class = []
+		for i in pred:
+			cnt = 0
+			for l in pred:	
+				if(i == l):
+				cnt += 1
+			if(cnt > max):
+				max = cnt
+				predicted_class = i
+		confidence = max/k * 100
+		if(y):
+		
+			return  predicted_class, (y.argmax() == predicted_class), y.argmax(), confidence
+		else:
+			return predicted_class, confidence
+
+\end{lstlisting}
+\chapter{Multilayer Perceptron}
+\begin{lstlisting}[language=Python, caption=Multilayer Perceptron, captionpos=b, label={list:mlp}]
+class Multilayer_Perceptron():
+def __init__(self,input,shape,num_classes,rng):
+	"""
+	A multilayer perceptron class
+	
+	input       --- a vector containing the input values
+	shape       --- a tuple describing the shape of the classifier and its hidden layers
+	each element in the tuple specifies the number of neurons per layer
+	num_classes --- the number of classes in the dataset
+	rng         --- seeded random number generator
+	"""
+
+	self.hidden_layers = []
+	self.hidden_layers.append(
+	HiddenLayer(input=input,n_inputs=shape[0],n_outputs=shape[1],activation=None,rng=rng))
+	for i in range(2,len(shape)):
+		self.hidden_layers.append(
+	HiddenLayer(input=self.hidden_layers[-1].output,n_inputs=shape[i-1],n_outputs=shape[i],activation=None,rng=rng)
+	
+	)
+	
+	self.output_layer = OutputLayer(self.hidden_layers[-1].output,shape[-1],num_classes)
+	self.L1 = abs(self.output_layer.weights).sum()
+	self.L2 = (self.output_layer.weights**2).sum()
+	self.parameters = self.output_layer.parameters
+	for a in self.hidden_layers:
+		self.L1 += abs(a.weights).sum()
+		self.L2 += (a.weights**2).sum()
+		self.parameters += a.parameters
+	
+	
+	
+	self.neg_log_likelihood = self.output_layer.neg_log_likelihood
+	
+	
+	
+	self.input = input
+	self.errors = self.output_layer.errors
+	self.predicted_class = self.output_layer.predicted_class
+	self.weights = [a.weights for a in self.hidden_layers]
+	self.weights.append(self.output_layer.weights)
+	self.shape = shape
+	self.rng = rng
+\end{lstlisting}
+
+\newpage
+\begin{lstlisting}[language=Python, caption=Hidden Layer, captionpos=b, label={list:mlp_hidden}]
+class HiddenLayer():
+	"""
+	This class represents a hidden layer of neurons
+	It takes an array of inputs, applies an activation function to them, and returns the output
+	"""
+	def __init__(self,input,n_inputs,n_outputs,weights=None,bias=None,activation=T.tanh,rng=np.random.RandomState(2)):
+		"""
+		Initialise the hidden layer
+		
+		input      --- a vector containing the input values
+		n_inputs   --- number of neurons feeding into the hidden layer
+		n_outputs  --- number of neurons in the next layer
+		weights    --- weights applied to the inputs and outputs of the hidden layer (default: None)
+		bias       --- bias applied to the output values (default: None)
+		activation --- activation function to be applied to neuron inputs (default: tanh)
+		rng        --- seeded random number generator (default: np.random.RandomState(2))
+		"""
+		
+		self.input = input
+		if(not weights):
+		weights = theano.shared(value=rng.uniform(-1,1,(n_inputs,n_outputs)),name = 'weights')
+		if(not bias):
+		bias = theano.shared(value=np.zeros((n_outputs,)),name='bias')
+		
+		self.weights = weights
+		self.bias = bias
+		output = T.dot(input,self.weights) + self.bias
+		self.output = output if activation == None else activation(output) 
+		self.parameters = [self.weights,self.bias]
+\end{lstlisting}
+\newpage
+\begin{lstlisting}[language=Python, caption=Output Layer, captionpos=b, label={list:mlp_output}]
+class OutputLayer():
+	"""
+	This class is a logistic regression layer for use at the output of a neural network
+	"""
+	def __init__(self,input,n_inputs,n_outputs):
+		"""
+		Initialise the output layer
+		
+		input     --- a vector containing the input values
+		n_inputs  --- number of neurons feeding into the layer
+		n_outputs --- number of classes
+		"""
+		
+		self.weights = theano.shared(value=np.zeros((n_inputs,n_outputs)),name='weights')
+		self.bias = theano.shared(value=np.zeros((n_outputs,)),name='bias')
+		self.output = T.nnet.nnet.softmax(T.dot(input,self.weights)+self.bias)
+		self.predicted_class = T.argmax(self.output,axis=1)
+		self.parameters = [self.weights,self.bias]
+		self.input = input
+	
+	def neg_log_likelihood(self,target):
+		"""
+		Returns the negative log likelihood between the classifier's output and a target
+		
+		target --- correct output
+		"""
+		return -T.mean(T.log(self.output)[T.arange(target.shape[0]),target])     
+	
+	def errors(self,target):
+		"""
+		Returns the average error between the predicted class and the target class
+		
+		target --- correct output
+		"""
+		return T.mean(T.neq(self.predicted_class,target))     
+\end{lstlisting}

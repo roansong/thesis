@@ -134,8 +134,15 @@ Implementing a multilayer perceptron is the main focus of this report, as it pro
 \section{Optimization and Training}
 A classifier is only operating efficiently when it is tuned to the data it is attempting to classify. Deep neural networks are initialised with random weights between their neurons, and at first use will perform worse on average than na{\"ive} classification methods. Through optimisation of these inter-neuron weights, however, the potential of deep neural networks can be reached, and classification results are expected to significantly improve. Tuning the classifier to the dataset is crucial, but optimising too heavily may result in \textit{overfitting} of the data, leaving the classifier with no predictive power on unseen data.
 
+\subsection{Theano}\label{lit:theano}
+\subsubsection{Description}
+Theano is a Python module geared towards machine learning applications. It can be used to create generic functions acting on `TensorVariables' that act as placeholders for future parameters. C code of these functions is dynamically generated and compiled, resulting in much faster computation times than the Python interpreter can achieve. An additional benefit to using Theano is that it computes computational graphs for each compiled function, allowing easy calculation of derivatives with respect to parameters involved in its computation.
+
+\subsubsection{Relevance}
+The calculation of derivatives is essential for implementing the back-propagation algorithm used to train a Multilayer Perceptron.
+
 % backprop is low-level optimisation, core to the operation
-\subsection{Back-propagation}
+\subsection{Back-propagation}\label{lit:back_prop}
 \subsubsection{Description}
 Back-propagation is a system by which the effects of weights between neurons is adjusted through an iterative process. The base case is that of a single input, single output system. 
 %I need to put some diagrams in here
@@ -148,7 +155,7 @@ One of the key issues with back-propagation is its computational complexity. Wit
 \subsubsection{Relevance}
 Back-propagation is a popular and successful technique, well-suited to neural networks with only a few layers. With enough time, it can help to optimise much larger networks, and potentially improve classification accuracy by a large margin. It alleviates the concern of trying to find the perfect network from the offset; it allows any network to be tuned to be better than it currently is.
 
-\subsection{Gradient Descent}
+\subsection{Gradient Descent}\label{lit:grad_desc}
 \subsubsection{Description}
 If the computational graph of a classifier's cost can be calculated, each parameter that contributes to the cost to be adjusted according to its contribution, with the aim of reducing the overall cost. The degree to which each parameter is adjusted is scaled by the \textit{learning rate}. High learning rates lead to rapid change of parameter values, which can result in faster convergence to the optimal values, but can also end up in oscillation around these values if the adjustment is too large. Smaller learning rates can take longer to converge more safely, but can also result in local optimums being converged to, instead of the best possible set of values.
 
