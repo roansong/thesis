@@ -69,10 +69,7 @@ class KNN():
             accuracy = np.zeros((len(k_arr)))
             ind = 0
             for k in k_arr:
-                
-                
-                pred = list(zip(*costs[:k]))[1][1:]
-            
+                pred = list(zip(*costs[:k+1]))[1][1:]
                 predicted_class = 0
                 max = 0 
                 for i in pred: 
@@ -126,6 +123,7 @@ class KNN():
         pred = list(zip(*temp[:k]))[1] 
         max = 0
         predicted_class = []
+
         for i in pred:
             cnt = 0
             for l in pred:
@@ -136,7 +134,7 @@ class KNN():
                 max = cnt
                 predicted_class = i
         confidence = max/k * 100
-        if(y):
+        if(y.any()):
         
             return  predicted_class, (y.argmax() == predicted_class), y.argmax(), confidence
         else:
@@ -164,7 +162,7 @@ def load_KNN(data,targets,indices=np.array(False),filename=None):
         k.initD2()
     
     print("Square distance matrix initialised")
-    k_arr = np.arange(1,int(len(data)/8),2,dtype="int32")
+    k_arr = np.arange(1,int(len(data)/4),2,dtype="int32")
     k_values = k.test(k_arr)
     # k_values = np.load("k_values_old.npy")
     k_sorted = sorted(k_values,key=lambda x:x[1])[::-1]
@@ -172,8 +170,6 @@ def load_KNN(data,targets,indices=np.array(False),filename=None):
     print("Best value of K obtained")
     k.best_k = int(best_k)
     k.k_values = k_values
-    print(k.D2.shape)
-    print(best_k)
     return k
 
 
@@ -221,7 +217,7 @@ def testKNN(training_set,validation_set,test_set,indices,k=None,filename=None):
     correct = 0
     results = []
     for i in range(len(test_set[0])):
-        temp = classifier.run(test_set[0][i],test_set[1][i],k)
+        temp = classifier.run(test_set[0][i],k, y=test_set[1][i])
         results.append(temp)
         pred[i] = int(temp[0])
         if(temp[1]):

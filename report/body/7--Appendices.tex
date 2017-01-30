@@ -1,21 +1,4 @@
 \appendix
-\chapter{Progress Report}
-
-As of the 16th of September, certain progress has been made in three areas of the report, namely the Literature Review, Methodology, and Implementation.
-
-
-\section{Literature Review}
-The Literature Review has been somewhat written; the core topics of most relevance to the study have been covered, but the level of detail for each topic varies, and I feel it may be insufficient. This is a section that I feel needs further refinement and content, that will be added as the development of this study touches on more topics.
-
-\section{Implementation}
-I have implemented a working nearest neighbour classification system, but it is quite slow. I have implemented the first few stages of a multilayer perceptron with two hidden layers, and am currently busy with the implementation of a back-propagation algorithm to optimise the network.
-
-
-\section{Areas of Focus}
-The next avenue of development is to process the MSTAR image chip data to facilitate quicker classification. Until now I have been using only a subset of the MSTAR data (70 image chips), but this is not feasible in the final product, as it does not include sufficient training data. The time taken to process this subset is non-negligible, and something must be done to improve the training time. The idea is to process the images in such a way that the resolution of each image, and therefore the number of pixels to process, can be reduced while retaining all the crucial data contained in each image. This will include removing the clutter surrounding each target, and may involve clustering algorithms to preserve important areas of data.
-
-I also need to finish my implementation of the multilayer perceptron, specifically the application of the back-propagation algorithm to optimise the network.
-
 \chapter{Image Loading and Processing}
 \begin{lstlisting}[language=Python, caption=Loading and Processing Images, captionpos=b, label={list:get_images}]
 def get_images(w,h,file_list=None,num_classes=8,threshold=False,noise=False):

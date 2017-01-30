@@ -1,16 +1,5 @@
 \chapter{Introduction}
-
-%7593 as of 21/10
-%5763
-
 This thesis aims to assess the effectiveness of deep learning techniques in the classification of radar imagery. Deep learning relies on the use of neural networks; interconnected layers of nodes sharing information and undergoing non-linear transformations that, through training and optimisation, can detect and extract features from a dataset without human supervision. Training a classifier on a known set of instances allows it to build a predictive model that can then be tested on unseen data, with varying degrees of accuracy. In the specific case of this report, the instances are radar images from the MSTAR dataset.
-
-%The better the optimisation and training of the model, the greater its predictive power.
-
-
-
-
-%5998
 
 \section{Background}
 The desire to mimic human brain function has driven the development of artificial intelligence (AI) and deep learning. The human brain can be viewed as a series of interconnected neurons, firing when undergoing different stimuli. This view led to the foundation of modern deep learning techniques in the 1940s, using multiple layers of artificial neurons. Due to hardware limitations, this approach saw neither success nor widespread adoption. The 21\textsuperscript{st} century has seen renewed interest in the field due to increased computational capabilities. While the complexity of the human brain is currently beyond accurate emulation, the deep learning techniques used to approximate it have found their uses in commercial classification problems.
@@ -60,23 +49,33 @@ This focus of this report is to:
 	\item Implement a training and testing regime for each classifier in Python
 	\item Determine and comment on which classifier is most suitable for the task of radar target recognition
 \end{itemize}
-\subsection{Scope XX}
+
+\subsection{Scope}
 Within project scope:
-%\begin{itemize}
-%	\item A literature review of the appropriate knowledge pertinent to this report
-%\end{itemize}
+\begin{itemize}
+	\item A literature review of the appropriate knowledge pertinent to this report
+	\item Implementation of a K-Nearest Neighbour classifier
+	\item Implementation of a Multilayer Perceptron classifier	
+	\item Optimising the aforementioned classifiers
+	\item Implementation of all of the code in Python 
+	\item Comparing and contrasting the performance of each classifier
+	\item Assessment of the viability of deep learning in target recognition
+	
+\end{itemize}
 Outside project scope:
-%\begin{itemize}
-%	\item 
-%\end{itemize}
-\subsection{Limitations XX}
+\begin{itemize}
+	\item very deep neural networks, such as the convolutional neural network
+	\item complex dimensionality reduction of input images
+\end{itemize}
+\subsection{Limitations}
 All computation will be performed on a desktop computer running Windows 10 Pro with an Intel i5-2500 processor (four cores @ 3.3-3.7GHz), Samsung Evo 850 SSD, and 8GB of DDR3 RAM .
 
 
 
 
-\section{Report Overview XX}
+\section{Report Overview}
 
+This report will begin with a review of the academic literature pertaining to the field of deep learning and radar target recognition. This will be followed by a large design section, emphasising the importance of planning before implementation. This section decomposes the problem introduced by the report into achievable requirements and specifications, and details how each step will be validated and verified. The design section encompasses the software design and implementation, with examples of code given throughout. The report continues into a section that presents preliminary and final results for discussion. It shows how changes were made between stages of implementation, to achieve the final results. The report is concluded with a brief summary of the results, and recommendations for further development.
 
 % State objective and brief overview
 % Lead-in to background and motivation

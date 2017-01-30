@@ -140,7 +140,8 @@ class Multilayer_Perceptron():
         
     def test(self,learning_rate=0.01, L1_rg=0.0000, L2_rg=0.1, n_epochs=100, batch_size=30, print_val = True, quick=True):
         """
-        Test regime for the perceptron, used to train it and store performance metrics
+        Test regime for the perceptron, used to train it and store performance metrics.
+        Some parts are modified from a deeplearning.net tutorial
         
         learning_rate --- scaling factor for gradient descent (default: 0.01)
         L1_rg         --- influence of weights' L1 norm on the classifier cost (default: 0.0)
@@ -152,26 +153,13 @@ class Multilayer_Perceptron():
         """
         
         start_time = timeit.default_timer()
-        # print("="*60)
-        # print("Multilayer Perceptron.",
-        #       "Image size: %dpx" %(self.shape[0]),
-        #       "Hidden layer sizes: %s"%(self.shape[1:],),
-        #       "Learning rate: %.5f"%(learning_rate),
-        #       "L1 reg: %.5f"%(L1_rg),
-        #       "L2 reg: %.5f"%(L2_rg),
-        #       "Batch size: %d"%(batch_size),
-        #       sep='\n')
-    
-    
         batch_index = T.lscalar('batch_index')
-        
         rng = self.rng
-
+        
         cost = self.neg_log_likelihood(y) + L1_rg * self.L1 + L2_rg * self.L2
         correct_classes = self.predicted_class
         
         gradients = [T.grad(cost,param) for param in self.parameters]
-        
         updates = [(param, param - learning_rate*gparam) for param, gparam in zip(self.parameters,gradients)]
         
         validation_set_x = theano.shared(value=validation_set[0])
@@ -244,21 +232,13 @@ class Multilayer_Perceptron():
             y:validation_set_y
         }
         )
-        
-        
-        
-        patience = 1000  # look as this many examples regardless
-        patience_increase = 2  # wait this much longer when a new best is
-                                # found
+ 
+        patience = 1000
+        patience_increase = 2
         improvement_threshold = 0.999
-        improvement_threshold2 = 0.99  # a relative improvement of this much is
-                                        # considered significant
+        improvement_threshold2 = 0.99
         validation_frequency = min(training_batches, patience // 2)
-                                        # go through this many
-                                        # minibatches before checking the network
-                                        # on the validation set; in this case we
-                                        # check every epoch
-        
+ 
         best_validation_loss = np.inf
         best_avg_cost = np.inf
         best_test_err = np.inf
@@ -275,10 +255,9 @@ class Multilayer_Perceptron():
         
                 minibatch_avg_cost = train(minibatch_index)
                 
-                # iteration number
                 iter = (epoch - 1) * training_batches + minibatch_index
         
-                if print_val and ((iter + 1) % validation_frequency == 0):
+                if ((iter + 1) % validation_frequency == 0):
                     # compute zero-one loss on validation set
                     validation_losses = [validate(i) for i
                                             in range(validation_batches)]
@@ -295,12 +274,8 @@ class Multilayer_Perceptron():
                                 test_score*100.
                             )
                         )
-                        # print(minibatch_avg_cost)
-                    # if we got the best validation score until now
-                    
-                    # if this_validation_loss < best_validation_loss:
+
                     if minibatch_avg_cost < best_avg_cost:
-                        # improve patience if loss improvement is good enough
                         if (
                             minibatch_avg_cost < best_avg_cost *
                             improvement_threshold2
@@ -308,9 +283,7 @@ class Multilayer_Perceptron():
                             patience = max(patience, iter * patience_increase)
         
                         best_avg_cost = minibatch_avg_cost
-                    
-        
-                        
+
                     if this_validation_loss < best_validation_loss:
                         if (
                             this_validation_loss < best_validation_loss *
@@ -320,9 +293,6 @@ class Multilayer_Perceptron():
         
                         best_validation_loss = this_validation_loss
                         
-                        
-                        
-                        # test it on the test set
                     test_losses = [test_model(i) for i
                                     in range(test_batches)]
                     test_score = np.mean(test_losses)
@@ -333,6 +303,7 @@ class Multilayer_Perceptron():
                         self.best_weights = [l.get_value() for l in self.weights]
                         best_iter = iter
                         best_test_err = test_score
+                
                 if patience <= iter:
                     done_looping = True
                     break    
@@ -395,19 +366,19 @@ class Multilayer_Perceptron():
         metrics[2] = best_test_err*100
         metrics[3] = best_validation_loss*100
         metrics[4] = end_time - start_time
-        metrics[5] = 100*(1 - (np.diag(self.train_confusion).sum()/len(training_set[0])))
+        metrics[5] = 100 - (np.diag(self.train_confusion).sum()/num_classes)
         metrics[6] = minibatch_avg_cost
         
         self.metrics = metrics
         
         return
 
-IMG_WIDTH = 50
-IMG_HEIGHT = 50
+IMG_WIDTH = 194
+IMG_HEIGHT = 194
 
 batch_size = 30
-num_classes=5
-learning_rate=0.001     
+num_classes=8
+learning_rate=0.01     
 
 
 
@@ -420,12 +391,11 @@ filenames.sort(key=lambda x:x[-7:])
 
 
 
-data,targets,suffixes = u.get_images(w=IMG_WIDTH,h=IMG_HEIGHT,file_list = filenames,threshold = False,noise=False,num_classes = num_classes)
-
+data,targets,suffixes = u.get_images(w=IMG_WIDTH,h=IMG_HEIGHT,file_list = filenames,threshold = True,noise=True,num_classes = num_classes)
 
 
 # training_set, validation_set, test_set,indices = u.gen_sets(data,targets,85,5,10)
-training_set, validation_set, test_set,indices = u.gen_sets(data,targets,50,25,25)
+training_set, validation_set, test_set,indices = u.gen_sets(data,targets,85,5,10)
 training_batches   =  len(training_set[0])//batch_size 
 validation_batches =  len(validation_set[0])//batch_size
 test_batches       =  len(test_set[0])//batch_size
@@ -442,58 +412,83 @@ y = T.lvector('y')
 L2 = 0.1
 L1 = 0
 # size = [(IMG_WIDTH*IMG_HEIGHT,10),(IMG_WIDTH*IMG_HEIGHT,10,10),(IMG_WIDTH*IMG_HEIGHT,50),(IMG_WIDTH*IMG_HEIGHT,50,50)]
-size = [(IMG_WIDTH*IMG_HEIGHT,10),
-(IMG_WIDTH*IMG_HEIGHT,10,10)]
-# 
-# for s in size:
-#     # learning_rate = 1/(10**len(s))
-#     classifier = Multilayer_Perceptron(x,
-#                             s,
-#                             num_classes=5,
-#                             rng=np.random.RandomState(1)
-#                             )
-#     # learning_rate = 1/(10*sum(classifier.shape[1:]))
-#     
-#     
-#     classifier.test(
-#         learning_rate=learning_rate,
-#         L2_rg=L2,
-#         L1_rg= L1,
-#         n_epochs=2000,
-#         print_val=True,
-#         quick=True)
-#     print(
-#     "Learning rate       : %.5f\n"%(learning_rate)+(
-#     "Hidden Layer Sizes  : %s\n" + 
-#     "Classification Time : %8f\n" +
-#     "Classification Error: %.3f\n" +
-#     "Validation Error    : %.3f\n" +
-#     "Training Time       : %.4f\n" +
-#     "Training Error      : %.3f\n" +
-#     "Training Cost       : %.4f")%
-#     (tuple(classifier.metrics)))
-#     print("="*40)
-# 
-#     
-start = timeit.default_timer()
-k,r = knn.testKNN(training_set,validation_set,test_set,indices,k=1,filename=None)
-mid = timeit.default_timer()
-k2,r2 = knn.testKNN(training_set,validation_set,test_set,indices,k=3,filename=None)
-end = timeit.default_timer()
-nn_time = mid-start
-knn_time = end-mid
-print(nn_time)
-print(knn_time)
+# size = [(IMG_WIDTH*IMG_HEIGHT,5),
+# (IMG_WIDTH*IMG_HEIGHT,10),
+# (IMG_WIDTH*IMG_HEIGHT,20),
+# (IMG_WIDTH*IMG_HEIGHT,5,1),
+# (IMG_WIDTH*IMG_HEIGHT,5,5),
+# (IMG_WIDTH*IMG_HEIGHT,10,5),
+# (IMG_WIDTH*IMG_HEIGHT,10,10),
+# (IMG_WIDTH*IMG_HEIGHT,5,5,5),
+# (IMG_WIDTH*IMG_HEIGHT,10,10,10)
+# ]
 
-a = list(zip(*r))[0]
-b = list(zip(*r))[2]
-conf1 = u.confusion_matrix(a,b,num_classes)
+size = [(IMG_WIDTH*IMG_HEIGHT,5,5)]
+# 
+for s in size:
+    # learning_rate = 1/(10**len(s))
+    classifier = Multilayer_Perceptron(x,
+                            s,
+                            num_classes=num_classes,
+                            rng=np.random.RandomState(1)
+                            )
+    # learning_rate = 1/(10*sum(classifier.shape[1:]))
+    
+    
+    classifier.test(
+        learning_rate=learning_rate,
+        L2_rg=L2,
+        L1_rg= L1,
+        n_epochs=2000,
+        print_val=False,
+        quick=True)
+    print(
+    "Learning rate       : %.5f\n"%(learning_rate)+(
+    "Hidden Layer Sizes  : %s\n" + 
+    "Classification Time : %8f\n" +
+    "Classification Error: %.3f\n" +
+    "Validation Error    : %.3f\n" +
+    "Training Time       : %.4f\n" +
+    "Training Error      : %.3f\n" +
+    "Training Cost       : %.4f")%
+    (tuple(classifier.metrics)))
+    print("="*40)
+    print(classifier.train_confusion)
+    print(classifier.validation_confusion)
+    print(classifier.test_confusion)
+# 
+#   
+# start = timeit.default_timer()
+# kdata = np.concatenate((training_set[0],validation_set[0]))
+# ktargets = np.concatenate((training_set[1],validation_set[1]))
+# k_indices = np.concatenate((indices[0],indices[1]))
+# k3 = knn.KNN(kdata,ktargets)
+# start = timeit.default_timer()
+# k3.run(test_set[0][0],k=1,y=test_set[1][0])
+# end = timeit.default_timer()
+# print(end - start)
 
-a = list(zip(*r2))[0]
-b = list(zip(*r2))[2]
-conf2 = u.confusion_matrix(a,b,num_classes)
+
+
+# start = timeit.default_timer()
+# k,r = knn.testKNN(training_set,validation_set,test_set,indices,k=1,filename="100x100.npy")
+# mid = timeit.default_timer()
+# # k2,r2 = knn.testKNN(training_set,validation_set,test_set,indices,k=3,filename=None)
+# end = timeit.default_timer()
+# nn_time = mid-start
+# # knn_time = end-mid
+# print(nn_time)
+# print(knn_time)
+# 
+# a = list(zip(*r))[0]
+# b = list(zip(*r))[2]
+# conf1 = u.confusion_matrix(a,b,num_classes)
+# 
+# a = list(zip(*r2))[0]
+# b = list(zip(*r2))[2]
+# conf2 = u.confusion_matrix(a,b,num_classes)
 #  Time an individual run for nn and knn
-
+# 
 #  Run two MLPs on the same data here
 
 
@@ -515,6 +510,8 @@ conf2 = u.confusion_matrix(a,b,num_classes)
 
 
 # 
+# k_arr = np.arange(1,240,2)
+# k_err = np.ones((len(k3.k_values)))*100 - list(zip(*k3.k_values))[2]
 # plt.figure(1)
 # plt.subplot(2,1,1)
 # x = k_arr
@@ -522,7 +519,7 @@ conf2 = u.confusion_matrix(a,b,num_classes)
 # plt.axis([min(x), max(x)+1, 0, 100])
 # plt.xlabel("K")
 # plt.ylabel("Error")
-# plt.title("All values of K up to 1291")
+# plt.title("Values of K up to 239")
 # plt.plot(x,y)
 # plt.subplot(2,1,2)
 # x = k_arr[:25]
@@ -531,7 +528,7 @@ conf2 = u.confusion_matrix(a,b,num_classes)
 # plt.axis([min(x), max(x), 0, 100])
 # plt.ylabel("Error")
 # plt.xlabel("K")
-# plt.xticks(np.arange(min(x), max(x)+1, 10))
+# plt.xticks(np.arange(min(x), max(x)+1, 4))
 # plt.title("First 25 values of K")
 # plt.show()
 
