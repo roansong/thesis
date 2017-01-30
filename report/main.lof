@@ -2,18 +2,17 @@
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {2.1}{\ignorespaces Rotational difference between two images of the same class}}{7}{figure.2.1}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Vee Diagram}}{17}{figure.3.1}
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Nearest Neighbour Classification Flow Diagram}}{21}{figure.3.2}
-\contentsline {figure}{\numberline {3.3}{\ignorespaces K-Nearest Neighbour Classification Flow Diagram}}{22}{figure.3.3}
-\contentsline {figure}{\numberline {3.4}{\ignorespaces K-Nearest Neighbour Optimising for `K' Flow Diagram}}{23}{figure.3.4}
-\contentsline {figure}{\numberline {3.5}{\ignorespaces A Neuron in the Network}}{26}{figure.3.5}
-\contentsline {figure}{\numberline {3.6}{\ignorespaces The Internal Workings of a Neuron}}{26}{figure.3.6}
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Multilayer Perceptron Overview}}{27}{figure.3.7}
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Multilayer Perceptron Input Layer}}{28}{figure.3.8}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Vee Diagram}}{18}{figure.3.1}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Nearest Neighbour Classification Flow Diagram}}{24}{figure.3.2}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces K-Nearest Neighbour Classification Flow Diagram}}{25}{figure.3.3}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces K-Nearest Neighbour Optimising for `K' Flow Diagram}}{26}{figure.3.4}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces A Neuron in the Network}}{33}{figure.3.5}
+\contentsline {figure}{\numberline {3.6}{\ignorespaces The Internal Workings of a Neuron}}{33}{figure.3.6}
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Multilayer Perceptron Overview}}{38}{figure.3.7}
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Multilayer Perceptron Input Layer}}{39}{figure.3.8}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Optimising for K}}{44}{figure.4.1}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {5.1}{\ignorespaces Optimising for K}}{35}{figure.5.1}
-\contentsline {figure}{\numberline {5.2}{\ignorespaces Average Cost Over Time}}{38}{figure.5.2}
-\contentsline {figure}{\numberline {5.3}{\ignorespaces Actual Cost Within an Iteration}}{39}{figure.5.3}
 \addvspace {10\p@ }
 \addvspace {10\p@ }

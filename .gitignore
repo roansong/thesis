@@ -1,3 +1,10 @@
 *.log
 *.npy
 report/main.log
+*.toc
+report/main.out
+*.log
+*.pyc
+report/main.aux
+*.lof
+report/main.lot

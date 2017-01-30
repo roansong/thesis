@@ -3,7 +3,7 @@
 
 \begin{figure}[]
 \centering
-\includegraphics[width=\textwidth]{figures/vee_diagram} % will design own diagram
+\includegraphics[width=\textwidth]{figures/vee_diagram}
 \caption{Vee Diagram}
 \label{fig:vee_diagram}
 \centering
@@ -36,21 +36,21 @@ This section is devoted to describing the study in terms of its requirements, op
 \subsection{Concept of Operations}
 Radar target classification is an inexact science; interpreting a radar image and comparing it to a known case is not as straightforward in all cases as one might expect. Weather conditions, environmental clutter, and image resolution all obscure the target to varying degrees, making intuitive classification ineffective. Computer-based classification through analysis of multiple targets and the application of deep learning techniques should in theory allow distorted images to be classified after the computer is trained to recognise features pertaining to each class. Na{\"i}ve methods of classification lack predictive power - the ability to 'guess' effectively if the target is obscured or unrecognised. Deep learning methods are the solution that this study proposes.
 
-\subsection{User Requirements}
+\subsection{User Requirements}\label{sec:user_req}
 The success of this report is based on the ability to correctly classify and recognise radar targets taken from the supplied dataset using deep learning techniques. 
 
 The following is required:
 
 \begin{itemize}
 	\item Use the MSTAR dataset (Section~\ref{lit:MSTAR})
+	\item Develop a na{\"i}ve classifier to use as a benchmark
 	\item Use deep learning methodology to develop a classifier 
-	\item Develop a Na{\"i}ve classifier
 	\item Indicate how the classifiers can be improved
 	\item Comment on the performance of each classifier
-	\item Report on the effectiveness of deep learning vs na\"ive classifiers
+	\item Report on the suitability of deep learning for target recognition
 \end{itemize}
 
-\subsection{Design Specifications}
+\subsection{Design Specifications}\label{sec:design_spec}
 Expanding upon the user requirements, the following design specifications have been derived:
 
 \subsubsection{The system must be trained on the MSTAR database of radar images}
@@ -58,6 +58,12 @@ The images in the MSTAR dataset have undergone a level of pre-processing, making
 
 \subsubsection{The system must have a testing accuracy of above 95\%}
 Correct identification of radar targets is the aim of this entire report, and as such is the most important performance metric to consider.
+
+\subsubsection{The system must be resistant to noise}
+Real-world conditions are not optimal; the classifier must be robust enough to handle the addition of Gaussian white noise to the dataset, without losing more than 1\% classification accuracy.
+
+\subsubsection{The system must have a training time of less than 10 hours}
+Training time is taken as being freely available, but any classifier that takes longer than 10 hours to train on the MSTAR dataset will not be worth considering.
 
 \subsubsection{The Nearest Neighbour classifier should be used as a benchmark for classifier comparison}
 The NN classifier provides a good example of a na\"ive classifier, and should be beaten by any classifier that is somewhat optimised for the dataset in use. The NN classifier serves as a good benchmark to improve upon, as it gives a lower bound of expected results
@@ -93,7 +99,7 @@ An alternate approach is to retain the data inherent in the environmental clutte
 A compromise is to ensure that all images are the size of the largest image in the set, and somehow reduce the clutter present in each image. Because the targets are substantially brighter than their surroundings, using some form of thresholding (setting values lower than a specified threshold to zero) should prove to be effective in lessening the impact of the clutter, if not completely removing it.
 
 \subsubsection{Dimensionality Reduction}
-Each pixel in an image is taken as an feature, forming a feature vector with a length equal to the total number of pixels in the image. The image cropping mentioned in Section \ref{sec:cropping} is very effective at reducing the size of this feature vector. If a 128x128 image is cropped to 64x64, the feature vector's length is reduced by factor of 4. This can be reduced further through the application of dimensionality reduction techniques, such as Principal Component Analysis, Locally-Linear Embedding, Sum of Means and non-linear methods, all of which are outside the scope of this report. As such, each image will be rescaled and padded with zeros to match the size of the largest image in the MSTAR dataset (192x193). This allows every possible feature in each image to be used, while allowing for dimensionality reduction if desired.
+Each pixel in an image is taken as an feature, forming a feature vector with a length equal to the total number of pixels in the image. The image cropping mentioned in Section \ref{sec:cropping} is very effective at reducing the size of this feature vector. If a 128x128 image is cropped to 64x64, the feature vector's length is reduced by factor of 4. This can be reduced further through the application of dimensionality reduction techniques, such as Principal Component Analysis, Locally-Linear Embedding, Sum of Means and non-linear methods, all of which are outside the scope of this report. As such, each image will be rescaled and padded with zeros to match the size of the largest image in the MSTAR dataset (192x193). This allows every possible feature in each image to be used, while allowing for dimensionality reduction to be implemented at a later stage if desired.
 
 \subsubsection{Nearest Neighbour Design}
 \begin{figure}
@@ -136,9 +142,6 @@ The high-level design is shown in Figure~\ref{fig:nn}. Its principles of operati
 While similar to the Nearest Neigbour design, 
 KNN introduces its own complexities, most notably when optimising for K. The high-level design is shown in Figure~\ref{fig:knn}, its principles of operation are covered in Section~\ref{lit:knn}. The method of finding the best K value for a given dataset is shown in Figure~\ref{fig:knn_values}.
 
-
-
-
 \subsubsection{Multilayer Perceptron Design}
 
 Implementation of a multilayer perceptron in software can be divided into discrete sections as follows:
@@ -150,9 +153,8 @@ Implementation of a multilayer perceptron in software can be divided into discre
 	\item Implement a test method
 \end{itemize}
 
-
-\subsection{Software Development and Implementation}
-
+\section{Software Design}
+\subsection{Guidelines}
 Developing the software for this report is done with the following objectives in mind:
 \begin{itemize}
 	\item Comment code clearly
@@ -165,33 +167,86 @@ Developing the software for this report is done with the following objectives in
 	\item Make performance metrics readily available
 	\item Test while developing
 	\item Provide a comprehensive `README' for new users
+	\item The code must be available online at ~\href{http://github.com/roansong}{github.com/roansong}.
 \end{itemize}
 
-The software implementation will be covered in Section~\ref{sec:method}.
-The software present in this study has been made available on Github at~ \href{http://github.com/roansong}{github.com/roansong}.
+\subsection{Testing and Optimisation}
+\subsubsection{Testing}
+Each classifier has unique testing methods, but the performance metrics on which there are compared are the same. The metrics we are interested in are:
+\begin{itemize}
+	\item Time taken to classify a single instance
+	\item Time taken to train the classifier
+	\item Classification accuracy of the classifier
+\end{itemize}
 
-\section{Integration and Recomposition}
-\subsection{Software Development and Implementation}
+\subsubsection{Optimisation}
+Where possible, each classifier must be optimised to improve its classification accuracy and classification time. Training time is considered acceptable if it is less than ten hours, as specified in Section~\ref{sec:user_req}. \\
+
+The K-Nearest Neighbour classifier must be optimised to find the value of K that best fits the dataset.
+The Multilayer Perceptron must be optimised for its learning rate, L1 regularisation, L2 regularisation, hidden layer size, and number of hidden layers.
 
 \subsubsection{Inline Testing}
 While implementing the software for this report, I ran into some early issues that resulted from insufficient planning. After taking a step back, it was decided that more steady progress would be made by implementing rigorous inline testing, i.e. incrementally testing the code after every slight modification, instead of only testing after the addition of a major feature and then trying to iron out any latent bugs. This approach leads to much simpler debugging.
 
+
+\section{Software Implementation}
+The implementation of the classifiers and techniques discussed in this report will be covered in this section. 
+
+
+
+\subsubsection{Image Pre-processing}
+
+In a process outlined in Figure~\ref{fig:multi_input}, the input image is converted to an array of unsigned 8-bit integers (ranging from 0 to 255). The elements of the array are `normalised' by subtracting the mean of the array from each and then dividing each element by the standard deviation of the array. This ensures that the processed values lie centred around zero, and mostly between -1 and 1. Unsigned integers do not provide enough precision to represent this data, so 32-bit floating point numbers (floats) are used. The code for normalisation is shown in Listing~\ref{list:normalise}.
+
+\begin{lstlisting}[language=Python, caption=Normalisation method, captionpos=b, label={list:normalise}]
+def normalise(vector):
+"""
+Normalises a vector so that most of its values lie between -1 and 1
+returns the vector mentioned above
+vector --- the vector to be normalised (type: numpy array)
+"""
+return (vector - vector.mean(axis=0))/(vector.std(axis=0))
+\end{lstlisting}
+
+Two additional methods of processing are made available: thresholding and noise addition. Thresholding is done before normalisation. For each image, pixels with values below the median value of the image are set to zero. This eliminates some of the noisy `clutter' present in radar imagery. Noise addition is used to simulate real-world conditions by adding Gaussian noise to the image after normalisation to somewhat obscure the radar signal. The implementations of thresholding and noise addition are shown in Listings~\ref{list:thresholding} and~\ref{list:noise} respectively. The complete code is shown in Appendix~\ref{list:get_images}
+
+
+\begin{lstlisting}[language=Python, caption=Thresholding, captionpos=b, label={list:thresholding}]
+if(threshold):
+below_thresh = image < numpy.mean(image)
+image[below_thresh] = 0
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=Adding noise to an image, captionpos=b, label={list:noise}]
+if(noise):
+image += numpy.random.normal(0,1,image.shape)
+\end{lstlisting}
+
+
+ 
+
+\subsubsection{Allocation of Data}
+
+Three different sets of data are needed to train a classifier. The training set, validation set, and testing set. Each set contains instances of data (in this case image vectors) and targets denoting the class each instance belongs to. Each set is filled with random images from the original dataset without replacement, with the size of the three sets being determined by a set of three numbers. The numbers do not have to correspond exactly to the number of images in each set - they represent ratios between the sizes. The code to generate the three sets, as well as a tuple of indices showing which instances from the original dataset are in each set is shown in Appendix~\ref{list:gen_sets}.
+
+\subsubsection{K-Nearest Neighbours}\label{sec:best_k}
+Developing a standalone Nearest Neighbour classifier and a separate K-Nearest Neighbour classifier is redundant; the NN can be obtained by setting K equal to 1 in the KNN. Only KNN needs to be implemented.
+
+KNN operates by loading a dataset of input instances and targets, and calculating the squared distances between the input instance and every instance in the dataset. Each distance result is appended to a list. After every distance has been calculated, the list is sorted in ascending order, and the K lowest instances are taken. It is important to keep track of the target output associated with each input. These instances with the smallest squared distances are the `neighbours' from which KNN derives its name. The most common class amongst the neighbours is taken as the predicted class. The ratio between the number of neighbours in agreement and K can be used to give a measure of confidence in the prediction.
+
+To optimize K for the dataset, a different approach must be taken. It is inefficient to test every instance in the dataset against every other instance for every possible value of K. Instead, these distances are calculated only once. A squared distance array (D2) is formed by taking every instance in turn and calculating its distance to every other instance, with the knowledge that the distance from an instance A to instance B will be the same as from B to A. This halves the number of calculations necessary to calculate D2. D2 is symmetric along its diagonal, and all of its diagonals are equal to zero. This is because the distance from any instance to itself will always be zero. \\
+
+Each row in D2 provides the squared distances between the instance corresponding to that row and every other instance in the data set. Sorting these distances in ascending order for every row gives the nearest neighbours to each instance. Removing the first instance in each sorted row removes the self-contribution factor of an instance to itself. Chosen values of K can be tested much more efficiently, going row by row and taking the first K instances, seeing if the majority of those K neighbours predicts the correct output, and tallying up a score for each value of K. The value of K with the highest score once every row has been visited is the value of K best optimised for the dataset. The complete KNN code is shown in Appendix~\ref{list:knn}.
+
 \subsubsection{The Multilayer Perceptron}
 
-%TODO: System Description
+Once each pixel has been processed, they can be sent to the input layer of the neural network, with each pixel representing a neuron as shown in Figure~\ref{fig:multi_input}.
+ 
+Each of these input layer neurons has a random weight applied, and is then fed into the neurons that form the first hidden layer. Every neuron in the input layer contributes to every neuron in the next layer. At each neuron in the first hidden layer, the `net' value is formed by summing all of the values present at its input (i.e. all the weighted values passed along from the input layer). An activation function is applied to this net value to compress the range of values. There are many different activation functions that can be used, and for this study I narrowed down the choice to either the logistic function $ \frac{1}{1 + e^{-net}} $ or the hyperbolic tangent function $\frac{e^{net} - e^{-net}}{e^{net} + e^{-net}} $. The logistic function produces an output between 0 and 1, while the hyperbolic tangent function's output is between -1 and 1. I decided to use the hyperbolic tangent function, because the logistic function has a tendency to incur long training times if its values lie very close to 0, while the hyperbolic tangent function tends to move towards its extreme values more quickly.  
 
-%TODO: add code corresponding to each area of the diagram
-
- In a process outlined in Figure~\ref{fig:multi_input}, the input image is converted to an array of unsigned 8-bit integers (ranging from 0 to 255). The elements of the array are `unitised' by subtracting the mean of the array from each and then dividing each element by the standard deviation of the array. This ensures that the processed values lie centred around zero, and mostly between -1 and 1. Unsigned integers are no longer suited to represent this data, so 32-bit floating point numbers (floats) are used. %WHY ARE THEY UNSUITABLE?
- 
- Once each pixel has been unitised, they form the input layer of the neural network, with each pixel representing a neuron in the input layer shown in Figure~\ref{fig:multi}. 
- 
- Each of these input layer neurons has a random weight applied, and is then fed into the neurons that form the first hidden layer. Every neuron in the input layer contributes to every neuron in the next layer. At each neuron in the first hidden layer, the `net' value is formed by summing all of the values present at its input (i.e. all the weighted values passed along from the input layer). An activation function is applied to this net value to compress the range of values. There are many different activation functions that can be used, and for this study I narrowed down the choice to either the logistic function $ \frac{1}{1 + e^{-net}} $ or the hyperbolic tangent function $\frac{e^{net} - e^{-net}}{e^{net} + e^{-net}} $. The logistic function produces an output between 0 and 1, while the hyperbolic tangent function's output is between -1 and 1. I decided to use the hyperbolic tangent function, because the logistic function has a tendency to incur long training times if its values lie very close to 0, while the hyperbolic tangent function tends to move towards its extreme values more quickly.  
- 
- The activation function, when applied to the net of the neuron, becomes the output of the neuron, feeding through to every neuron in the next layer with weights applied, repeating the same process until the output layer. This is shown in Figure~\ref{fig:multi_neuron} and more closely in Figure~\ref{fig:multi_neuron_close}.
+The activation function, when applied to the net of the neuron, becomes the output of the neuron, feeding through to every neuron in the next layer with weights applied, repeating the same process until the output layer. This is shown in Figure~\ref{fig:multi_neuron} and more closely in Figure~\ref{fig:multi_neuron_close}. 
  
  \begin{figure}[!h]
- 	
  	\centering
  	\includegraphics[width=\textwidth]{figures/multilayer_perceptron_neuron}
  	\centering
@@ -200,7 +255,6 @@ While implementing the software for this report, I ran into some early issues th
  \end{figure}
 
 \begin{figure}[!h]
-	
 	\centering
 	\includegraphics[width=\textwidth]{figures/multilayer_perceptron_neuron2}
 	\centering
@@ -209,10 +263,74 @@ While implementing the software for this report, I ran into some early issues th
 \end{figure}
  
  
- The output layer has as many neurons as there are classes. The output layer is typically a logistic regression layer, which has a softmax function applied to its outputs. This results in outputs that sum to 1. The neuron with the highest value is taken to be the network's prediction. An example output would look something like:
- \[ [0.25, 0.2, 0.1, 0.05, 0.4] \] There are five classes, and the fifth class has the highest value, thus the neural network has classified the input as belonging to that fifth class. Given that the maximum possible value for an output would be 1, 0.9 would show a large confidence in the classification. A value close to 0 shows strong disagreement, and something like 0.3 would show moderately low confidence.
+The output layer has as many neurons as there are classes. The output layer is a logistic regression layer, which has a softmax function applied to its outputs. This results in outputs that sum to 1, with larger values being strongly emphasised. This correlates nicely with the one-hot vectors used to label classes\cite{dunne1997pairing}. The neuron with the highest value is taken to be the network's prediction. An example output would be:
+ \[ [0.25, 0.2, 0.1, 0.05, 0.4] \] 
+There are five classes, and the fifth class has the highest value, thus the neural network has classified the input as belonging to that fifth class. Given that the maximum possible value for an output would be 1, 0.9 would show a large confidence in the classification. A value close to 0 shows strong disagreement, while 0.3 would show moderately low confidence.
  
- To train the network, stochastic gradient descent is used, as described in Section~\ref{lit:grad_desc}. 
+To train the network, stochastic gradient descent is used, as described in Section~\ref{lit:grad_desc}. The gradient of the cost function with respect to the weights and biases of each layer is calculated and the weights and biases are updated proportionally to the learning rate. This is shown in Listing~\ref{list:grad_desc}, and is easily achieved through the use of Theano (covered in Section~\ref{lit:theano}).
+
+\begin{lstlisting}[language=Python, caption=Implementing Gradient Descent, captionpos=b, label={list:grad_desc}]
+gradients = [T.grad(cost,param) for param in self.parameters]
+updates = [(param, param - learning_rate*gparam) for param, gparam in zip(parameters,gradients)]
+\end{lstlisting}
+
+
+\subsubsection{Training and Testing}
+The first step is to get to grips with the data - processing the data set in a way that makes sense to use, and allows different classification methods to be implemented easily on it.
+
+The MSTAR dataset contains eight different targets. The dataset is sorted by depression angle, and by `scene'. All of the targets have data corresponding to  15\degree~and 17\degree~elevation angles, for a total of 4459 images. The MSTAR dataset stores the information of each target in a header section of each file. This is inconvenient when reading in image files directly, so the header is discarded and images are classed according to their file extension. The file extensions and the classes they correspond to can be found in Table~\ref{tab:input_data}. To simplify classification, a variant of a one-hot vector denoting the classes is attached to each target. The vector consists of a series of numbers, equal in length to the number of classes in the dataset. A `1' denotes that the instance is a member of the class corresponding to that entry in the vector, and the rest of the numbers are 0, showing that the instance is not in those classes. A file is created listing all of the filenames to be tested during the run of the algorithm. An example file with ten entries and two classes would look as follows:\\
+
+\begin{center}
+	\begin{tabular}{c}
+		HB03333.003.tiff 1 0 \\
+		HB03334.003.tiff 1 0 \\
+		HB03335.003.tiff 1 0 \\
+		HB03337.003.tiff 1 0 \\
+		HB03338.003.tiff 1 0 \\
+		HB14931.025.tiff 0 1 \\
+		HB14932.025.tiff 0 1 \\
+		HB14933.025.tiff 0 1 \\
+		HB14934.025.tiff 0 1 \\
+		HB14935.025.tiff 0 1 \\
+	\end{tabular}
+\end{center}
+
+This information is used to form the target set that corresponds to every set of instances.
+
+\subsection{K-Nearest Neighbours}
+The KNN is provided with the training, validation and testing datasets. Because KNN undergoes no validation phase, the validation set is concatenated to the training set to provide extra training data. The best value of K is obtained as detailed in Section~\ref{sec:best_k}. This value of K is then used to run every instance in the test set against all the images in the training set. This procedure is timed, and represents the training time metric of the classifier. The number of correct predictions is tallied and is used to calculate the classification accuracy. The time taken to classify a single instance against the dataset is taken as the classification time.
+
+\subsection{Multilayer Perceptron}
+Training a Multilayer Perceptron is more complex than training the KNN. Training the MLP revolves around minimising the loss function of the classifier, defined by the negative log likelihood $loss$ of the predicted output to the target output and the L1 and L2 norms of the network's weights, adjusted by the L1 and L2 regularisation factors $a$ and $b$. These factors sum to form the cost of the classifier, as shown below:
+
+\[cost = loss + a*L1 + b*L2\]
+
+This cost is minimised through training. It is important to note that the regularisation of the inter-neuron weights is thought to improve the classification accuracy, with smaller weights providing more general predictive capabilities. Minimising the cost function entails balancing loss and weight minimisation to prevent over-fitting of the training dataset.
+
+Using the Theano module, the symbolic gradient of the cost with respect to each parameter that contributes to it is calculated, as shown in Listing~\ref{list:grad_desc}. \\
+
+Before training can commence, the parameters of the training session need to be chosen. The number of epochs specifies how many iterations over the dataset are to be done before returning. The batch size determines the number of batches and how many instances are in each batch when implementing stochastic gradient descent. Early stopping parameters are chosen, such as the option to stop training once testing error is zero, and the `patience' of the training. The patience defines the number of instances to train on without improvement before stopping early. If the results obtained within this patience interval demonstrate improvement, the patience interval is extended. Improvement is measured by seeing if a new value falls under a threshold deemed significant (taken as 99.9\% as default in this implementation).
+
+During training, the error of the classifier is averaged over each training batch and the parameters of the system are adjusted in proportion to the learning rate. After training on every training batch once, the classifier is trained on the validation batches, averaging the errors returned for each batch. Note that the error is not the same as the cost - error is the zero-one loss between the predicted output and the target output, and is shown in Listing~\ref{list:error}.
+
+\begin{lstlisting}[language=Python, caption=Calculating Zero-one Error, captionpos=b, label={list:error}]
+    import theano.Tensor as T
+    def errors(self,target):
+		"""
+		Returns the average error between the predicted class and the target class
+		target --- correct output
+		T.neq is the logical inequality function
+		"""
+		return T.mean(T.neq(self.predicted_class,target))        
+\end{lstlisting}
+
+If the improvement seen in the validation batches is significant, the patience value is increased. During validation the model parameters are also updated via stochastic gradient descent.
+
+After validation, the test error or `test score' is calculated by testing the model on data not in the training or validation sets. The error is the average of the zero-one errors over all test cases. If the test score has improved, the state of the model is saved by storing the inter-neuron weights on disk. If previously specified, if the training error is equal to zero, the training can stop, otherwise the classifier continues to train. There is a benefit to continuing in that the classifier cost can be reduced further, at the risk of over-fitting.
+
+Once training is complete, the performance metrics of the classifier are stored. The training procedure is timed, a single instance is tested and timed to find the single-class classification time, and the classification accuracy of the classifier on the test set is noted.
+
+Other metrics specific to the MLP are also stored; the shape of the classifier (how many hidden layers and their sizes), the best test score, final validation error, and final training error, as well as the final cost of the classifier.
 
 \begin{figure}[!h]
 	
@@ -234,35 +352,13 @@ While implementing the software for this report, I ran into some early issues th
 \end{figure}
 
 
-\subsubsection{Algorithm Testing}
-For each classifier, their effectiveness on the MSTAR dataset must be tested and catalogued, beginning with the Nearest Neighbour implementation. Doing the Nearest Neighbour classification first establishes a benchmark against which further methods can be tested. The na{\"i}ve nature of the Nearest Neighbour classifier means that it is not optimised for any particular dataset. It shows the efficacy of a generic algorithm applied to the MSTAR dataset.
-
-For the effectiveness of any algorithm to be tested, correct and incorrect outputs must be defined. The MSTAR dataset includes target labels in a header section of each file, but since the operations are conducted on files with their header and phase data stripped away it merely adds computational complexity to find the corresponding header for each file and then parse it to extract data about each target. 
-To simplify classification, a variant of a one-hot vector denoting the classes is attached to each target. The vector consists of a series of numbers, equal in length to the number of classes in the dataset. A `1' denotes that the instance is a member of the class corresponding to that entry in the vector, and the rest of the numbers are 0, showing that the instance is not in those classes. A file is created listing all of the filenames to be tested during the run of the algorithm. An example file with ten entries and two classes would look as follows:\\
-
-\begin{center}
-\begin{tabular}{c}
-HB03333.003.tiff 1 0 \\
-HB03334.003.tiff 1 0 \\
-HB03335.003.tiff 1 0 \\
-HB03337.003.tiff 1 0 \\
-HB03338.003.tiff 1 0 \\
-HB14931.025.tiff 0 1 \\
-HB14932.025.tiff 0 1 \\
-HB14933.025.tiff 0 1 \\
-HB14934.025.tiff 0 1 \\
-HB14935.025.tiff 0 1 \\
-
-
-\end{tabular}
-\end{center}
-
 \subsubsection{Testing During Development}
 The simplest way to find a classifier's efficacy is to test it on a wide variety of classes and on as many test instances as possible. To provide interim results, during the iterative phase of classifier development, only a subset of the dataset's images are used. This compromises the final accuracy of the classifier (it may perform differently on the full dataset), but brings with it the ability to test and train classifiers more quickly, due to the lower computational overheads. During the development this testing method allows for simple decisions regarding the direction of classifier implementation or optimisation to be made. In process of verifying the classifiers, the full dataset must be used to give an accurate picture of the classifier's performance and real-world implementation. 
 
+\section{Integration and Recomposition}
+
 \subsection{Subsystem Verification}
 The chosen method for verifying a classifier's efficacy once it is considered to be sufficiently optimised is simple; The classifier is tested on the dataset with a number of test instances as in Section~\ref{lit:loocv}. For the KNN, fully testing it entails removing one instance from the dataset, training the classifier on the remaining points, and using the removed instance as a test case. Once this has been done, the instance is replaced, another is taken, and the process is repeated until every instance in the dataset has been tested. The system's performance is based on the number of correct classifications made during the process. This is known as Leave-One-Out Cross Validation (LOOCV).
-
 
 \subsection{System Verification and Deployment}
 To confirm the results of each classifier, it is important to have a set of training instances on which the system can be trained. The system is then tested on another set of points whose classes are known. Once this has been tested and confirmed to have a desirable level of classification accuracy, the system will be ready for testing on previously unseen, real-world cases. 
@@ -284,17 +380,12 @@ The documentation must detail:
 	\item Comprehensive troubleshooting (outside the scope of this report)
 \end{itemize}
 
-
-
-%TODO: I'm pretty sure this should detail the real-world implementation of the system
 \subsection{Changes and Upgrades}
 
 If the system is required to be maintained and expand its scope (by incorporating more, larger, and more complex images into its dataset), the input data will have to undergo pre-processing that is not currently implemented into the system, such as intelligent dimensionality reduction. The system may have to restructure some of its key classification methods and re-optimise hyper-parameters. 
 
 A classification method to consider for real-world use is a Convolutional Neural Network, as it can classify targets without the need for the target to be centered (as in the MSTAR dataset). This would be more suited to real-world applications, although the classification time is longer. This is not trivial, and lies outside the scope of this report.
 
-\subsection{Retirement / Replacement}
-% Another optional section.
 
 
 

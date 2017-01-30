@@ -14,18 +14,19 @@
 \pagenumbering{roman}
 \input{frontmatter/Cover}
 \input{frontmatter/Declaration}
-\input{frontmatter/Acknowledgments}
 \input{frontmatter/Abstract}
+\input{frontmatter/Acknowledgments}
+
 \tableofcontents                 \addcontentsline{toc}{chapter}{\contentsname}
 \listoffigures                   \addcontentsline{toc}{chapter}{\listfigurename}
 \listoftables                    \addcontentsline{toc}{chapter}{\listtablename}
+\lstlistoflistings				 \addcontentsline{toc}{chapter}{}
 \input{frontmatter/Nomenclature} \addcontentsline{toc}{chapter}{\nomname}
 
 \newpage\pagestyle{fancy}\pagenumbering{arabic}
 \input{body/1--Introduction}
 \input{body/2--LiteratureReview}
 \input{body/3--Design}
-\input{body/4--Methodology}
 \input{body/5--Results}
 \input{body/6--Conclusion}
 \renewcommand{\bibname}{References}

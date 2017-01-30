@@ -2,13 +2,28 @@ import numpy as np
 import timeit
 import utilities as u
 class KNN():
+    """
+    A K-Nearest Neighbours classifier
+    """
     def __init__(self,input,targets):
-        # note that inputs and targets are of type numpy.ndarray
+        """ 
+        Initialisation method
+        
+        input   --- the dataset to be compared to
+        targets --- the correct classes corresponding to each instance in the dataset
+        """
         self.data = input
         self.targets = targets
-     
-    
+
     def initD2(self,filename=None,size=None,indices=None):
+        """
+        Method to initialise the squared distance array of the classifer
+        This array stores the distances between every instance and every other instance
+        
+        filename --- a file from which the squared distance array can be imported (default: None)
+        size     --- a size to which the squared distance array is to be cropped  (default: None)
+        indices  --- indices of the dataset to be considered when creating the squared distance array (default: None)
+        """
         if(filename==None):
             D2 = np.zeros((len(self.data),len(self.data)))
             for i in range(len(self.data)):
@@ -37,12 +52,16 @@ class KNN():
         self.D2 = D2
         
     def test(self,k_arr):
+        """
+        A method to test different values of K on the dataset
+        returns an array of the results
+        
+        k_arr --- an array of K values to be tested
+        """
         results = []
         correct = np.zeros((len(k_arr))) 
              
         for img in range(len(self.data)):
-            # the 0th item in the list is the image to itself, so it is removed
-            # put K in HERE you knob, instead of recalculating and sorting each time
             costs = sorted(list(zip(self.D2[img],self.targets.argmax(axis=1))))
             
             pred_lst = np.zeros((len(k_arr)))
@@ -50,10 +69,7 @@ class KNN():
             accuracy = np.zeros((len(k_arr)))
             ind = 0
             for k in k_arr:
-                
-                
-                pred = list(zip(*costs[:k]))[1][1:]
-            
+                pred = list(zip(*costs[:k+1]))[1][1:]
                 predicted_class = 0
                 max = 0 
                 for i in pred: 
@@ -82,7 +98,16 @@ class KNN():
         
         return np.array(results)
     
-    def run(self,x,y,k):
+    def run(self,x,k,y=None):
+        """
+        A method to test a single instance against the dataset
+        returns the predicted class, whether or not it is correct, 
+                the correct class, and a measure of confidence in the prediction
+        
+        x --- the input instance
+        k --- the value of k determining how many neighbours to consider
+        y --- the correct output if it is known (default: None)
+        """
         temp = []
         
         for img in range(len(self.data)):
@@ -93,15 +118,12 @@ class KNN():
                 
                 cost2 += pow(self.data[img][px] - x[px],2)
             temp.append((cost2,self.targets[img].argmax()))
-        
-        temp = sorted(temp)[:]
-        
-        
+        temp = sorted(temp)
         cost = list(zip(*temp[:k]))[0]
-        pred = list(zip(*temp[:k]))[1]
-        
+        pred = list(zip(*temp[:k]))[1] 
         max = 0
         predicted_class = []
+
         for i in pred:
             cnt = 0
             for l in pred:
@@ -111,27 +133,38 @@ class KNN():
             if(cnt > max):
                 max = cnt
                 predicted_class = i
-
         confidence = max/k * 100
+        if(y.any()):
+        
+            return  predicted_class, (y.argmax() == predicted_class), y.argmax(), confidence
+        else:
+            return predicted_class, confidence
         
         
         
-        return  predicted_class, (y.argmax() == predicted_class), y.argmax(),confidence
         
-        
-        
-        
-def load_KNN(data,targets,indices=None,filename=None):
+def load_KNN(data,targets,indices=np.array(False),filename=None):
+    """
+    Helper method to initialise the KNN
+    returns an initialised KNN classifier
+    
+    data --- the dataset to be considered
+    targets --- the targets corresponding to the dataset
+    indices --- an array containing the indices of the dataset from which to build a squared distance array (default: False)
+    filename --- a filename from which a squared distance array can be loaded (default: None)
+    """
     k = KNN(data,targets)
-    if(filename):
-        k.D2 =np.load(filename)
+    if(indices.any()):
+        k.initD2(filename=filename,indices=indices)
+    elif(filename):
+        k.D2 = np.load(filename=filename)
     else:
-        k.initD2(filename=None,indices=indices)
+        k.initD2()
     
     print("Square distance matrix initialised")
     k_arr = np.arange(1,int(len(data)/4),2,dtype="int32")
-    # k_values = k.test(k_arr)
-    k_values = np.load("k_values.npy")
+    k_values = k.test(k_arr)
+    # k_values = np.load("k_values_old.npy")
     k_sorted = sorted(k_values,key=lambda x:x[1])[::-1]
     best_k = k_sorted[0][0]
     print("Best value of K obtained")
@@ -143,6 +176,20 @@ def load_KNN(data,targets,indices=None,filename=None):
 
 
 def testKNN(training_set,validation_set,test_set,indices,k=None,filename=None):
+    """
+    Helper method to test the KNN
+    returns the KNN classifier and the results of multiple runs
+    
+    training_set   --- Data to train the classifier
+    validation_set --- Data to train the classifier
+    test_set       --- Data to test the classifier
+    indices        --- A tuple of indices corresponding to each set
+    k              --- A specific value of K to be tested (default: None)
+    filename       --- A filename from which to load a squared distance array (default: None)
+    
+    The KNN has no validation stage, so its training and validation sets are immediately concatenated into one.
+    
+    """
     #  KNN has no validation step, so the training and validation sets are combined
     kdata = np.concatenate((training_set[0],validation_set[0]))
     
@@ -170,7 +217,7 @@ def testKNN(training_set,validation_set,test_set,indices,k=None,filename=None):
     correct = 0
     results = []
     for i in range(len(test_set[0])):
-        temp = classifier.run(test_set[0][i],test_set[1][i],k)
+        temp = classifier.run(test_set[0][i],k, y=test_set[1][i])
         results.append(temp)
         pred[i] = int(temp[0])
         if(temp[1]):

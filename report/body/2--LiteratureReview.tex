@@ -42,7 +42,7 @@
 
 \section{Synthetic Aperture Radar}
 \subsection{Description}
-SAR is used to create images of objects, such as vehicles (as in this report), or landscapes. The images are constructed by sending a radar signal from a moving platform, and the time taken for the signal to return to the antenna denotes the size of the aperture. The aperture can be physical, with a large antenna, or synthetic in the case of a moving aperture. Larger apertures allow for higher image resolution. SAR images consist of magnitude and phase data, from which elevation data can be calculated. \cite{curlander1991synthetic} The classification of 2D SAR images, the type dealt with in this report, requires only the magnitude data to be preserved.
+SAR is used to create images of objects, such as vehicles (as in this report), or landscapes. The images are constructed by sending a radar signal from a moving platform, and the time taken for the signal to return to the antenna denotes the size of the aperture. The aperture can be physical, with a large antenna, or synthetic in the case of a moving aperture. Larger apertures allow for higher image resolution. SAR images consist of magnitude and phase data, from which elevation data can be calculated\cite{curlander1991synthetic} . The classification of 2D SAR images, the type dealt with in this report, requires only the magnitude data to be preserved.
 \subsection{Relevance}
 The dataset chosen for this report is comprised of SAR imagery. Understanding the nature of this format allows the decision to strip the data of phase information and keep only magnitude data to be made. 
 
@@ -82,7 +82,7 @@ The MSTAR dataset was suggested for this study by A. Mishra. It provides a gener
 \subsection{Nearest Neighbour Classification}\label{lit:nn}
 \subsubsection{Description}
 The nearest neighbour classifier operates as follows:
-When given an input, the classifier compares this input to the training data set, and finds the one that is closest to the input. For example, if men and women were to be classified by their heights, a given input would be classified as either male or female based on the data point in the training data with the height closest to that of the input. This can be expanded to multiple features/dimensions by taking the Euclidean distance between the input and each instance in the training data set. For images, this amounts to comparing, pixel by pixel, each pixel value, and finding the L2 distance between them. Note that there is no need to apply the square root to the distance; it is a monotonic operation, so it will not affect the ordering of the values, and will introduce additional computational complexity. The equation for calculating the L2 distance is:
+When given an input, the classifier compares this input to the training data set, and finds the one that is closest to the input. For example, if men and women were to be classified by their heights, a given input would be classified as either male or female based on the data point in the training data with the height closest to that of the input. This can be expanded to multiple features/dimensions by taking the Euclidean distance between the input and each instance in the training data set. For images, this amounts to comparing, pixel by pixel, each pixel value, and finding the L2 distance between them\cite{keller1985fuzzy}. Note that there is no need to apply the square root to the distance; it is a monotonic operation, so it will not affect the ordering of the values, and will introduce additional computational complexity. The equation for calculating the L2 distance is:
 \[ d_2(a,b) = (a - b)^2  \]
  Each pixel usually has some relation to the pixels near to it, so there is the possibility for a better definition of 'distance' between images to be made\cite{IMED, Michie94machinelearning}.
  
@@ -93,7 +93,7 @@ The nearest neighbour classifier is used in this study as an example of a na{\"i
 
 \subsection{K-Nearest Neighbour Classification}\label{lit:knn}
 \subsubsection{Description}
-The K-Nearest Neighbour (KNN) classifier is an extension of the Nearest Neighbour classifier where, instead of selecting the single closest neighbour from the dataset to the input case, the `K' nearest neighbours are selected, and the class most prevalent amongst the neighbours is taken as the predicted class. K is always an odd-valued integer, to prevent ties from occurring. 
+The K-Nearest Neighbour (KNN) classifier is an extension of the Nearest Neighbour classifier where, instead of selecting the single closest neighbour from the dataset to the input case, the `K' nearest neighbours are selected, and the class most prevalent amongst the neighbours is taken as the predicted class. K is always an odd-valued integer, to prevent ties from occurring\cite{keller1985fuzzy}. 
 
 \subsubsection{Relevance}
 KNN is a more robust form of Nearest Neighbour classification because larger values of K ignore outliers in the data. This regularisation effect can be optimised by choosing the best-performing value of K for a specific dataset.
@@ -106,23 +106,13 @@ The objective of this study is to test the performance of deep learning-based cl
 \subsubsection{Description}
 A neural network is a system inspired by the perceived workings of the human brain; a system of neurons combine to perform tasks that exceed their individual capabilities. An input is passed through a series of neuron layers, each of which is tuned to identify characteristic features of the input between each layer, allowing for feature extraction and identification. 
 
-(From the hartford.edu site)
-A neural network consists of four main parts\cite{neural_def_russel}:
-\begin{enumerate}
-	\item Processing units\{uj\}, where each uj has a certain activation level aj(t) at any point in time.
-	\item Weighted interconnections between the various processing units which determine how the activation of one unit leads to input for another unit.
-	\item An activation rule which acts on the set of input signals at a unit to produce a new output signal, or activation.
-	\item Optionally, a learning rule that specifies how to adjust the weights for a given input/output pair.
-\end{enumerate}
-
-% must paraphrase or otherwise not plagiarise
 
 \subsubsection{Relevance}
 The motivation behind using neural networks is simple; instead of specifying basic characteristics for a system to detect, the system is given an input and a matching output and is left to develop its own perceptions of what important feature link the two. Through optimisation and iteration this can become a very successful form of classification.
 
 \subsection{Multilayer Perceptron}
 \subsubsection{Description}
-A multilayer perceptron is a neural network consisting of an input layer, one or more hidden layers, and an output layer. The input layer is mapped directly from an input instance; one feature per link. In the case of images, each pixel is a feature. The hidden layer neurons have non-linear activation function applied to their inputs, forming their outputs. Typically sigmoid (output range: 0 to 1) or hyperbolic tangent (output range: -1 to 1) are used. The output layer has neurons representing each class and is typically a logistic regression layer; a softmax function is applied to its outputs, making the sum of the layer's neurons' outputs equal to 1. The neuron with the highest output value denotes the predicted class.
+A multilayer perceptron is a neural network consisting of an input layer, one or more hidden layers, and an output layer. The input layer is mapped directly from an input instance; one feature per link. In the case of images, each pixel is a feature. The hidden layer neurons have non-linear activation function applied to their inputs, forming their outputs. Typically sigmoid (output range: 0 to 1) or hyperbolic tangent (output range: -1 to 1) are used. The output layer has neurons representing each class and is typically a logistic regression layer; a softmax function is applied to its outputs, making the sum of the layer's neurons' outputs equal to 1. The neuron with the highest output value denotes the predicted class\cite{ruck1990multilayer}.
 
 Each neuron in every layer is linked to every neuron in the layer that follows it. Each neuron has a randomly chosen weight applied to its output when the classifier is initialised. These weights are subsequently optimised through back-propagation as the classifier is trained. This allows the network to develop relationships between neurons, eventually mapping an input to the output of the classifier with as little error as possible.
 
@@ -132,14 +122,22 @@ A single hidden layer is often sufficient for classification tasks, but more lay
 Implementing a multilayer perceptron is the main focus of this report, as it provides an example of a deep neural network with a fairly simple implementation. Training time becomes a significant factor when using a deep neural network due to the time taken to complete back-propagation optimisation, so using a multilayer perceptron will likely force the development of more efficient methods of data pre-processing to speed up the training as much as possible.
 
 \section{Optimization and Training}
-A classifier is only operating efficiently when it is tuned to the data it is attempting to classify. Deep neural networks are initialised with random weights between their neurons, and at first use will perform worse on average than na{\"ive} classification methods. Through optimisation of these inter-neuron weights, however, the potential of deep neural networks can be reached, and classification results are expected to significantly improve. Tuning the classifier to the dataset is crucial, but optimising too heavily may result in \textit{overfitting} of the data, leaving the classifier with no predictive power on unseen data.
+A classifier is only operating efficiently when it is tuned to the data it is attempting to classify. Deep neural networks are initialised with random weights between their neurons, and at first use will perform worse on average than na{\"ive} classification methods. Through optimisation of these inter-neuron weights, however, the potential of deep neural networks can be reached, and classification results are expected to significantly improve\cite{ruck1990multilayer}. Tuning the classifier to the dataset is crucial, but optimising too heavily may result in \textit{overfitting} of the data, leaving the classifier with no predictive power on unseen data.
+
+\subsection{Theano}\label{lit:theano}
+\subsubsection{Description}
+Theano is a Python module geared towards machine learning applications. It can be used to create generic functions acting on `TensorVariables' that act as placeholders for future parameters. C code of these functions is dynamically generated and compiled, resulting in much faster computation times than the Python interpreter can achieve. An additional benefit to using Theano is that it computes computational graphs for each compiled function, allowing easy calculation of derivatives with respect to parameters involved in its computation\cite{theano}.
+
+\subsubsection{Relevance}
+The calculation of derivatives is essential for implementing the back-propagation algorithm used to train a Multilayer Perceptron.
 
 % backprop is low-level optimisation, core to the operation
-\subsection{Back-propagation}
+\subsection{Back-propagation}\label{lit:back_prop}
 \subsubsection{Description}
 Back-propagation is a system by which the effects of weights between neurons is adjusted through an iterative process. The base case is that of a single input, single output system. 
 %I need to put some diagrams in here
-Varying the weight on the input directly effects the output. This change can be easily recognised, and the weight can be changed to more suitably link the input to the desired output. This involves developing a method of changing weights in a sensible manner. The most common form of this is through \textit{gradient descent}, whereby the weights are adjusted corresponding to their perceived effect on the output state, and their rate of change. Back-propagation is not guaranteed to find a global minimum, and can settle on a local minimum instead, which can be somewhat alleviated through the use of random weights and multiple training rounds, before choosing the best version of the classifier that has been discovered. 
+Varying the weight on the input directly effects the output. This change can be easily recognised, and the weight can be changed to more suitably link the input to the desired output. This involves developing a method of changing weights in a sensible manner. The most common form of this is through \textit{gradient descent}, covered in Section~\ref{lit:grad_desc}, whereby the weights are adjusted corresponding to their perceived effect on the output state, and their rate of change. Back-propagation is not guaranteed to find a global minimum, and can settle on a local minimum instead, which can be somewhat alleviated through the use of random weights and multiple training rounds, before choosing the best version of the classifier that has been discovered. 
+
 
 One of the key issues with back-propagation is its computational complexity. With deep neural networks, the sheer number of weights and their possible combinations make discerning their impact on the output very difficult, and computationally infeasible to perfectly optimise.
 %should probably stick a formula in here, but I might save that for the methodology.
@@ -147,7 +145,18 @@ One of the key issues with back-propagation is its computational complexity. Wit
 \subsubsection{Relevance}
 Back-propagation is a popular and successful technique, well-suited to neural networks with only a few layers. With enough time, it can help to optimise much larger networks, and potentially improve classification accuracy by a large margin. It alleviates the concern of trying to find the perfect network from the offset; it allows any network to be tuned to be better than it currently is.
 
-% THERE SHOULD BE SOMETHING ABOUT ACTUAL OPTIMIZATION
+\subsection{Gradient Descent}\label{lit:grad_desc}
+\subsubsection{Description}
+If the computational graph of a classifier's cost can be calculated, each parameter that contributes to the cost to be adjusted according to its contribution, with the aim of reducing the overall cost. The degree to which each parameter is adjusted is scaled by the \textit{learning rate}. High learning rates lead to rapid change of parameter values, which can result in faster convergence to the optimal values, but can also end up in oscillation around these values if the adjustment is too large. Smaller learning rates can take longer to converge more safely, but can also result in local optimums being converged to, instead of the best possible set of values.
+
+Given a weight $w$,a learning rate $a$, and the gradient of the cost with respect to the weight, $\Delta w$:
+
+\[w = w - a*\Delta w\]
+
+Given a large enough dataset, it may be infeasible to calculate the impact of every weight of every instance on the output, and so the gradient is approximated by taking a batch of instances and averaging the gradient of each, approximating a `global gradient'. This is known as \textit{stochastic gradient descent}\cite{bottou2010large}.
+
+\subsubsection{Relevance}
+Stochastic gradient descent is used in this report in the Multilayer Perceptron to optimise the inter-neuron weight values. 
 
 \subsection{Hyper-parameters}
 \subsubsection{Description}
@@ -191,17 +200,18 @@ Successful classification of a dataset is divided into three distinct steps:
 \end{enumerate}
 % http://www-stat.stanford.edu/~tibs/ElemStatLearn/
 
-Training is the process of fitting a classifier - it involves running multiple iterations on a given set of inputs, comparing the output of the classifier to a known target dataset, and adjusting the parameters of the classifier (typically inter-layer weights and bias) through back-propagation. To find the best iteration of the classifier model, it is periodically tested on a different set of known data; the validation dataset. Testing on this intermediate dataset is used to provide performance metrics such as the mean error and the accuracy of classification, which is useful in selecting a model that is optimised to the desired set of parameters. The data from periodically testing on this validation set is used to tune the model, or implement early-stopping procedures. For example, if the desired level of classification accuracy has been achieved or if the mean error hasn't changed significantly after a number of epochs, the training can be stopped early. On the contrary, if the training is approaching its stated limit yet still improving classification accuracy, the number of epochs or 'patience' can be increased to allow for further iterations and tuning.
+Training is the process of fitting a classifier - it involves running multiple iterations on a given set of inputs, comparing the output of the classifier to a known target dataset, and adjusting the parameters of the classifier (typically inter-layer weights and bias) through back-propagation. To find the best iteration of the classifier model, it is periodically tested on a different set of known data; the validation dataset. Testing on this intermediate dataset is used to provide performance metrics such as the mean error and the accuracy of classification, which is useful in selecting a model that is optimised to the desired set of parameters. The data from periodically testing on this validation set is used to tune the model, or implement early-stopping procedures. For example, if the desired level of classification accuracy has been achieved or if the mean error hasn't changed significantly after a number of epochs, the training can be stopped early. On the contrary, if the training is approaching its stated limit yet still improving classification accuracy, the number of epochs or `patience' can be increased to allow for further iterations and tuning.
 
 Once the training is complete, having achieved the desired level of classification accuracy, the chosen model can be tested on another dataset (typically a  set of real-world instances) to see how it performs, providing the testing accuracy. The classifier is no longer tuned, and can be presented with a variety of inputs to simulate its real-world performance.
 
 A dataset is typically split into three sections. 50\% training, 25\% validation, and 25\% testing is a reasonable starting point, and the proportions can be seen as a hyper-parameter to be optimised. If the training set is too small, there is a risk that the model will not be able to successfully extract the features required for classification, and its testing accuracy will be low. If the validation or test sets are too small, the model validation and testing might not be representative of the classifier's performance on a larger test set.
 
-\section{Performance Metrics}
 \subsection{The Confusion Matrix}
 %http://www.dataschool.io/simple-guide-to-confusion-matrix-terminology/
-% CHECK OUT ROC ANALYSIS AND COHEN's KAPPA
+
 Confusion matrices are useful tools for evaluating classifier performance. They can show the accuracy, misclassification rate, true/false positive rates, specificity, precision, and prevalence. They clearly show the number of correctly classified classes along the matrix's diagonal, and also shows how many of the incorrect classifications were attributed to which classes. The numbers can be changed to show the percent values of each; i.e. the classification accuracy of each class and how what percent of mis-classifications went to each class.
+
+An example of a confusion matrix is shown in Table~\ref{tab:prelim_conf}
 
 
 
